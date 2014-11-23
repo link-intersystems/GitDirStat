@@ -7,7 +7,7 @@ public class GitDirStat {
 
 	public static void main(String[] args) {
 		try {
-			GitDirStatArguments gitDirStatArguments = null;
+			GitDirStatArguments gitDirStatArguments = CommandLineGitDirStatArguments.parse(args);
 			GitDirStatApplication gitDirStatApplication = createGitDirStatApplication(gitDirStatArguments);
 			gitDirStatApplication.run(gitDirStatArguments);
 		} catch (GitDirStatArgumentsParseException e) {
