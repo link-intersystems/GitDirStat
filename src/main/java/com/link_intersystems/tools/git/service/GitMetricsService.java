@@ -30,27 +30,30 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.link_intersystems.tools.git.CommitRange;
 import com.link_intersystems.tools.git.StopAtRevFilter;
+import com.link_intersystems.tools.git.domain.GitRepository;
 
 public class GitMetricsService {
 	public static enum SortOrder {
 		ASC, DESC;
 	}
 
-	private Repository repository;
+	private GitRepository gitRepo;
 
-	public GitMetricsService(Repository repository) {
-		this.repository = repository;
+	public GitMetricsService(GitRepository gitRepo) {
+		this.gitRepo = gitRepo;
 	}
 
-	public SizeMetrics getSizeMetrics(CommitRange commitRange)
-			throws GitMetricsException {
-		return getSizeMetrics(commitRange, SortOrder.ASC);
+	public SizeMetrics getSizeMetrics(CommitRange commitRange,
+			ProgressListener progressListener) throws GitMetricsException {
+		return getSizeMetrics(commitRange, SortOrder.ASC, progressListener);
 
 	}
 
 	public SizeMetrics getSizeMetrics(CommitRange commitRange,
-			SortOrder sortOrder) throws GitMetricsException {
+			SortOrder sortOrder, ProgressListener progressListener)
+			throws GitMetricsException {
 		try {
+			Repository repository = gitRepo.getRepository();
 			ObjectWalk objectWalk = createObjectWalk(commitRange);
 
 			ObjectDatabase objectDatabase = repository.getObjectDatabase();
@@ -59,7 +62,7 @@ public class GitMetricsService {
 			List<ObjectId> treeIds = getTreeIds(objectWalk);
 
 			Map<String, BigInteger> pathSizes = getPathSizes(repository,
-					objectReader, treeIds);
+					objectReader, treeIds, progressListener);
 
 			Map<String, BigInteger> sorted = sortByValue(pathSizes, sortOrder);
 
@@ -72,7 +75,7 @@ public class GitMetricsService {
 	private ObjectWalk createObjectWalk(CommitRange commitRange)
 			throws AmbiguousObjectException, IncorrectObjectTypeException,
 			IOException, MissingObjectException {
-		ObjectWalk objectWalk = new ObjectWalk(repository);
+		ObjectWalk objectWalk = new ObjectWalk(gitRepo.getRepository());
 		RevCommit revCommit = objectWalk.parseCommit(commitRange
 				.getToInclusive());
 		objectWalk.markStart(revCommit);
@@ -83,9 +86,12 @@ public class GitMetricsService {
 	}
 
 	private Map<String, BigInteger> getPathSizes(Repository repository,
-			ObjectReader objectReader, List<ObjectId> treeIds)
+			ObjectReader objectReader, List<ObjectId> treeIds,
+			ProgressListener progressListener)
 			throws MissingObjectException, IncorrectObjectTypeException,
 			CorruptObjectException, IOException {
+		progressListener.start(treeIds.size());
+
 		Map<String, BigInteger> path2Size = new HashMap<String, BigInteger>();
 		TreeWalk treeWalk = new TreeWalk(repository);
 		treeWalk.setRecursive(true);
@@ -107,7 +113,9 @@ public class GitMetricsService {
 			}
 			bigInteger = bigInteger.add(BigInteger.valueOf(size));
 			path2Size.put(pathString, bigInteger);
+			progressListener.update(1);
 		}
+		progressListener.end();
 		return path2Size;
 	}
 
