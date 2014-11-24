@@ -11,26 +11,36 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import com.link_intersystems.tools.git.CommitRange;
-import com.link_intersystems.tools.git.GitDirStatArguments;
 
 public class GitRepository {
 
-	private GitDirStatArguments arguments;
 	private Repository repository;
 
-	public GitRepository(GitDirStatArguments arguments) {
-		this.arguments = arguments;
+	public GitRepository(Repository repository) {
+		this.repository = repository;
 	}
 
-	public Repository getRepository() throws IOException {
-		if (this.repository == null) {
-
-			File gitRepositoryDir = arguments.getGitRepositoryDir();
-			FileRepositoryBuilder builder = new FileRepositoryBuilder();
-			Repository repository = builder.readEnvironment()
-					.findGitDir(gitRepositoryDir).build();
-			this.repository = repository;
+	static String createId(File repositoryDirectory) {
+		FileRepositoryBuilder builder = new FileRepositoryBuilder();
+		builder.readEnvironment();
+		builder.findGitDir(repositoryDirectory);
+		File gitDir = builder.getGitDir();
+		try {
+			return gitDir.getCanonicalPath();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
 		}
+	}
+
+	public String getId() {
+		try {
+			return getRepository().getDirectory().getCanonicalPath();
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	public Repository getRepository() {
 		return repository;
 	}
 
@@ -52,4 +62,5 @@ public class GitRepository {
 		c = rw.next();
 		return c;
 	}
+
 }

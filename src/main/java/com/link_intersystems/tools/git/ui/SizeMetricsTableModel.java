@@ -68,10 +68,24 @@ public class SizeMetricsTableModel extends AbstractTableModel {
 			columnName = "Path";
 			break;
 		case COL_SIZE_INDEX:
-			columnName = "Size";
+			columnName = "Total size";
 			break;
 		}
 		return columnName;
+	}
+
+	@Override
+	public Class<?> getColumnClass(int columnIndex) {
+		Class<?> columnClass = null;
+		switch (columnIndex) {
+		case COL_PATH_INDEX:
+			columnClass = String.class;
+			break;
+		case COL_SIZE_INDEX:
+			columnClass = BigInteger.class;
+			break;
+		}
+		return columnClass;
 	}
 
 }

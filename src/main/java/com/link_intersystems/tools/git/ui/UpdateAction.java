@@ -1,17 +1,18 @@
 package com.link_intersystems.tools.git.ui;
 
 import java.awt.event.ActionEvent;
+import java.io.File;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import org.eclipse.jgit.lib.Constants;
 
-import com.link_intersystems.tools.git.CommitRange;
-import com.link_intersystems.tools.git.domain.GitRepository;
-import com.link_intersystems.tools.git.service.GitMetricsService;
+import com.link_intersystems.tools.git.service.GetSizeMetricsRequest;
+import com.link_intersystems.tools.git.service.GitRepositoryService;
 import com.link_intersystems.tools.git.service.ProgressListener;
 import com.link_intersystems.tools.git.service.SizeMetrics;
 
@@ -22,17 +23,18 @@ public class UpdateAction extends AbstractAction {
 	 */
 	private static final long serialVersionUID = 6082672924263782869L;
 	private SizeMetricsTableModel sizeMetricsTableModel;
-	private GitMetricsService gitMetricsService;
-	private GitRepository gitRepository;
+	private GitRepositoryService gitRepositoryService;
+	private GitRepositoryModel gitRepositoryModel;
 	private SizeMetricsSwingWorker sizeMetricsSwingWorker;
 	private ProgressListener progressListener;
 
 	public UpdateAction(SizeMetricsTableModel sizeMetricsTableModel,
-			GitMetricsService gitMetricsService, GitRepository gitRepository,
+			GitRepositoryService gitRepositoryService,
+			GitRepositoryModel gitRepositoryModel,
 			ProgressListener progressListener) {
 		this.sizeMetricsTableModel = sizeMetricsTableModel;
-		this.gitMetricsService = gitMetricsService;
-		this.gitRepository = gitRepository;
+		this.gitRepositoryService = gitRepositoryService;
+		this.gitRepositoryModel = gitRepositoryModel;
 		this.progressListener = progressListener;
 		putValue(Action.NAME, "Update");
 	}
@@ -40,35 +42,42 @@ public class UpdateAction extends AbstractAction {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
-		sizeMetricsSwingWorker = new SizeMetricsSwingWorker(gitMetricsService,
-				gitRepository, sizeMetricsTableModel, progressListener);
+		sizeMetricsSwingWorker = new SizeMetricsSwingWorker(
+				gitRepositoryService, gitRepositoryModel,
+				sizeMetricsTableModel, progressListener);
 		sizeMetricsSwingWorker.execute();
 
 	}
 
 	private class SizeMetricsSwingWorker extends SwingWorker<SizeMetrics, Void> {
 
-		private GitMetricsService gitMetricsService;
-		private GitRepository gitRepository;
+		private GitRepositoryService gitRepositoryService;
 		private SizeMetricsTableModel sizeMetricsTableModel;
 		private ProgressListener progressListener;
+		private GitRepositoryModel gitRepositoryModel;
 
-		public SizeMetricsSwingWorker(GitMetricsService gitMetricsService,
-				GitRepository gitRepository,
+		public SizeMetricsSwingWorker(
+				GitRepositoryService gitRepositoryService,
+				GitRepositoryModel gitRepositoryModel,
 				SizeMetricsTableModel sizeMetricsTableModel,
 				ProgressListener progressListener) {
-			this.gitMetricsService = gitMetricsService;
-			this.gitRepository = gitRepository;
+			this.gitRepositoryService = gitRepositoryService;
+			this.gitRepositoryModel = gitRepositoryModel;
 			this.sizeMetricsTableModel = sizeMetricsTableModel;
 			this.progressListener = progressListener;
 		}
 
 		@Override
 		protected SizeMetrics doInBackground() throws Exception {
-			CommitRange commitRange = gitRepository
-					.getCommitRange(Constants.HEAD);
-			SizeMetrics sizeMetrics = gitMetricsService.getSizeMetrics(
-					commitRange, progressListener);
+			String repositoryId = gitRepositoryModel.getRepositoryId();
+			if (repositoryId == null) {
+				File gitDir = gitRepositoryModel.getGitDir();
+				repositoryId = gitRepositoryService.newRepository(gitDir);
+			}
+			GetSizeMetricsRequest getSizeMetricsRequest = new GetSizeMetricsRequest(
+					repositoryId, Constants.HEAD, progressListener);
+			SizeMetrics sizeMetrics = gitRepositoryService
+					.getSizeMetrics(getSizeMetricsRequest);
 			return sizeMetrics;
 		}
 
@@ -78,7 +87,12 @@ public class UpdateAction extends AbstractAction {
 				SizeMetrics sizeMetrics = get();
 				sizeMetricsTableModel.setSizeMetrics(sizeMetrics);
 			} catch (InterruptedException ignore) {
-			} catch (ExecutionException ignore) {
+			} catch (ExecutionException executionException) {
+				Throwable cause = executionException.getCause();
+				String msg = String.format("Unexpected problem: %s",
+						cause.toString());
+				JOptionPane.showMessageDialog(null, msg, "Error",
+						JOptionPane.ERROR_MESSAGE);
 			}
 		}
 
