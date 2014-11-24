@@ -1,6 +1,11 @@
 package com.link_intersystems.tools.git;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.text.MessageFormat;
 
 import org.apache.commons.cli.CommandLine;
@@ -21,16 +26,23 @@ public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 
 	static Options OPTIONS;
 
-	private static Option GIT_DIR_OPTION;
+	private static Option OPTION_GITDIR;
+	private static Option OPTION_OUTFILE;
 
 	static {
 		OPTIONS = new Options();
 
-		GIT_DIR_OPTION = new Option("git_dir", true,
+		OPTION_GITDIR = new Option("gitdir", true,
 				"The git repository directory. " + "If not specified the "
 						+ "current work dir is considered the git repository.");
 
-		OPTIONS.addOption(GIT_DIR_OPTION);
+		OPTION_OUTFILE = new Option(
+				"outfile",
+				true,
+				"The file where the output should be written to. "
+						+ "If not specified or - is specified the stdout will be used.");
+
+		OPTIONS.addOption(OPTION_GITDIR);
 	}
 
 	public static GitDirStatArguments parse(String[] args)
@@ -43,7 +55,8 @@ public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 			return gitDirStatArguments;
 		} catch (ParseException e) {
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("java " + GitDirStatCLI.class.getName(), OPTIONS);
+			formatter.printHelp("java " + GitDirStatCLI.class.getName(),
+					OPTIONS);
 			throw new GitDirStatArgumentsParseException(e,
 					SerializationUtils.clone(OPTIONS));
 		}
@@ -54,7 +67,7 @@ public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 	}
 
 	public File getGitRepositoryDir() {
-		String gitDirPathname = commandLine.getOptionValue(GIT_DIR_OPTION
+		String gitDirPathname = commandLine.getOptionValue(OPTION_GITDIR
 				.getOpt());
 
 		if (StringUtils.isBlank(gitDirPathname)) {
@@ -70,9 +83,26 @@ public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 		return gitDir;
 	}
 
-	public boolean isUIEnabled() {
-		// TODO GUI is implemented in a later version
-		return false;
+	@Override
+	public OutputStream getOutputStream() {
+		OutputStream outputStream = null;
+
+		String outputOpt = OPTION_OUTFILE.getOpt();
+		String outPathname = commandLine.getOptionValue(outputOpt);
+		boolean useStdout = isBlank(outPathname) || "-".equals(outPathname);
+		if (useStdout) {
+			outputStream = System.out;
+		} else {
+			try {
+				outputStream = new FileOutputStream(outPathname);
+			} catch (FileNotFoundException e) {
+				String message = MessageFormat.format(
+						"{0} does not seem to be a a valid output file",
+						outPathname);
+				throw new IllegalArgumentException(message, e);
+			}
+		}
+		return outputStream;
 	}
 
 }
