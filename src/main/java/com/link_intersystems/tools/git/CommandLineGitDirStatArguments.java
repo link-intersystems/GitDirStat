@@ -43,7 +43,7 @@ public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 			return gitDirStatArguments;
 		} catch (ParseException e) {
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("java " + GitDirStat.class.getName(), OPTIONS);
+			formatter.printHelp("java " + GitDirStatCLI.class.getName(), OPTIONS);
 			throw new GitDirStatArgumentsParseException(e,
 					SerializationUtils.clone(OPTIONS));
 		}
