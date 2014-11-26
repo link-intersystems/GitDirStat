@@ -11,6 +11,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.JTree;
 import javax.swing.WindowConstants;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
@@ -41,12 +42,18 @@ public class GUIApplication implements GitDirStatApplication {
 
 		contentPane.setLayout(new BorderLayout());
 
-		SizeMetricsTableModel dm = new SizeMetricsTableModel();
-		JTable resultTable = new JTable(dm);
-		resultTable.setRowSorter(new TableRowSorter<TableModel>(dm));
-		resultTable.setDefaultRenderer(BigInteger.class, new HumanReadableFileSizeTableCellRenderer());
+		SizeMetricsTableModel sizeMetricsTableModel = new SizeMetricsTableModel();
+		JTable resultTable = new JTable(sizeMetricsTableModel);
+		resultTable.setRowSorter(new TableRowSorter<TableModel>(
+				sizeMetricsTableModel));
+		resultTable.setDefaultRenderer(BigInteger.class,
+				new HumanReadableFileSizeTableCellRenderer());
 
-		JScrollPane resultTableScrollPane = new JScrollPane(resultTable);
+		SizeMetricsTreeModel sizeMetricsTreeModel = new SizeMetricsTreeModel();
+		JTree jTree = new JTree(sizeMetricsTreeModel);
+		jTree.setCellRenderer(new HumanReadableFileSizeTreeCellRenderer());
+
+		JScrollPane resultTableScrollPane = new JScrollPane(jTree);
 		contentPane.add(resultTableScrollPane, BorderLayout.CENTER);
 
 		JProgressBar jProgressBar = new JProgressBar();
@@ -62,8 +69,9 @@ public class GUIApplication implements GitDirStatApplication {
 		GitRepositoryService gitRepositoryService = new GitRepositoryService(
 				gitRepositoryAccess);
 
-		UpdateAction updateAction = new UpdateAction(dm, gitRepositoryService,
-				gitRepositoryModel, componentVisibleOnProgress);
+		UpdateAction updateAction = new UpdateAction(sizeMetricsTableModel,
+				gitRepositoryService, gitRepositoryModel,
+				componentVisibleOnProgress, sizeMetricsTreeModel);
 
 		OpenAction openAction = new OpenAction(gitRepositoryModel, updateAction);
 

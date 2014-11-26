@@ -27,15 +27,17 @@ public class UpdateAction extends AbstractAction {
 	private GitRepositoryModel gitRepositoryModel;
 	private SizeMetricsSwingWorker sizeMetricsSwingWorker;
 	private ProgressListener progressListener;
+	private SizeMetricsTreeModel sizeMetricsTreeModel;
 
 	public UpdateAction(SizeMetricsTableModel sizeMetricsTableModel,
 			GitRepositoryService gitRepositoryService,
 			GitRepositoryModel gitRepositoryModel,
-			ProgressListener progressListener) {
+			ProgressListener progressListener, SizeMetricsTreeModel sizeMetricsTreeModel) {
 		this.sizeMetricsTableModel = sizeMetricsTableModel;
 		this.gitRepositoryService = gitRepositoryService;
 		this.gitRepositoryModel = gitRepositoryModel;
 		this.progressListener = progressListener;
+		this.sizeMetricsTreeModel = sizeMetricsTreeModel;
 		putValue(Action.NAME, "Update");
 	}
 
@@ -86,6 +88,7 @@ public class UpdateAction extends AbstractAction {
 			try {
 				SizeMetrics sizeMetrics = get();
 				sizeMetricsTableModel.setSizeMetrics(sizeMetrics);
+				sizeMetricsTreeModel.setSizeMetrics(sizeMetrics);
 			} catch (InterruptedException ignore) {
 			} catch (ExecutionException executionException) {
 				Throwable cause = executionException.getCause();
