@@ -20,7 +20,7 @@ public class OpenAction extends AbstractAction {
 			UpdateAction updateAction) {
 		this.gitRepositoryModel = gitRepositoryModel;
 		this.updateAction = updateAction;
-		putValue(Action.NAME, "Open");
+		putValue(Action.NAME, "Open Git Repository");
 	}
 
 	@Override

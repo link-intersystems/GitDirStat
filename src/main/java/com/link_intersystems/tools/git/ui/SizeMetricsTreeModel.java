@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -24,6 +23,10 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 	}
 
 	public void setSizeMetrics(SizeMetrics sizeMetrics) {
+		setRoot(new WorkdirTreeNode());
+		if (sizeMetrics == null) {
+			return;
+		}
 		WorkdirTreeNode workdirTreeNode = (WorkdirTreeNode) getRoot();
 
 		for (Entry<String, BigInteger> entry : sizeMetrics.getPathSizes()

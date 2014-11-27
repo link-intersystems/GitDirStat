@@ -87,7 +87,7 @@ public class GitRepositoryService {
 
 	private Map<String, BigInteger> getPathSizes(Repository repository,
 			ObjectReader objectReader, List<ObjectId> treeIds,
-			ProgressListener progressListener) throws MissingObjectException,
+			ProgressMonitor progressListener) throws MissingObjectException,
 			IncorrectObjectTypeException, CorruptObjectException, IOException {
 		progressListener.start(treeIds.size());
 

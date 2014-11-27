@@ -25,8 +25,10 @@ public class SizeMetricsTableModel extends AbstractTableModel {
 
 	public void setSizeMetrics(SizeMetrics sizeMetrics) {
 		this.sizeMetrics = sizeMetrics;
-		Set<String> parhKeySet = sizeMetrics.getPathSizes().keySet();
-		pathList = new ArrayList<String>(parhKeySet);
+		if (sizeMetrics != null) {
+			Set<String> parhKeySet = sizeMetrics.getPathSizes().keySet();
+			pathList = new ArrayList<String>(parhKeySet);
+		}
 		fireTableDataChanged();
 	}
 

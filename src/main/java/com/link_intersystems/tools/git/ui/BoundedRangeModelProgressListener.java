@@ -2,10 +2,10 @@ package com.link_intersystems.tools.git.ui;
 
 import javax.swing.BoundedRangeModel;
 
-import com.link_intersystems.tools.git.service.ProgressListener;
+import com.link_intersystems.tools.git.service.ProgressMonitor;
 
 public class BoundedRangeModelProgressListener implements
-		ProgressListener {
+		ProgressMonitor {
 	private BoundedRangeModel progressModel;
 
 	public BoundedRangeModelProgressListener(BoundedRangeModel progressModel) {

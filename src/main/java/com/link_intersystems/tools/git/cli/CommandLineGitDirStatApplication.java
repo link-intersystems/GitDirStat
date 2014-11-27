@@ -10,7 +10,7 @@ import com.link_intersystems.tools.git.GitDirStatArguments;
 import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
 import com.link_intersystems.tools.git.service.GetSizeMetricsRequest;
 import com.link_intersystems.tools.git.service.GitRepositoryService;
-import com.link_intersystems.tools.git.service.NullProgressListener;
+import com.link_intersystems.tools.git.service.NullProgressMonitor;
 import com.link_intersystems.tools.git.service.SizeMetrics;
 
 public class CommandLineGitDirStatApplication implements GitDirStatApplication {
@@ -24,7 +24,7 @@ public class CommandLineGitDirStatApplication implements GitDirStatApplication {
 		String repositoryId = gitMetricsService.newRepository(gitRepositoryDir);
 
 		GetSizeMetricsRequest getSizeMetricsRequest = new GetSizeMetricsRequest(
-				repositoryId, Constants.HEAD, NullProgressListener.INSTANCE);
+				repositoryId, Constants.HEAD, NullProgressMonitor.INSTANCE);
 		SizeMetrics sizeMetrics = gitMetricsService
 				.getSizeMetrics(getSizeMetricsRequest);
 

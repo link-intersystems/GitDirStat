@@ -13,7 +13,7 @@ import org.eclipse.jgit.lib.Constants;
 
 import com.link_intersystems.tools.git.service.GetSizeMetricsRequest;
 import com.link_intersystems.tools.git.service.GitRepositoryService;
-import com.link_intersystems.tools.git.service.ProgressListener;
+import com.link_intersystems.tools.git.service.ProgressMonitor;
 import com.link_intersystems.tools.git.service.SizeMetrics;
 
 public class UpdateAction extends AbstractAction {
@@ -22,22 +22,17 @@ public class UpdateAction extends AbstractAction {
 	 *
 	 */
 	private static final long serialVersionUID = 6082672924263782869L;
-	private SizeMetricsTableModel sizeMetricsTableModel;
 	private GitRepositoryService gitRepositoryService;
 	private GitRepositoryModel gitRepositoryModel;
 	private SizeMetricsSwingWorker sizeMetricsSwingWorker;
-	private ProgressListener progressListener;
-	private SizeMetricsTreeModel sizeMetricsTreeModel;
+	private ProgressMonitor progressListener;
 
-	public UpdateAction(SizeMetricsTableModel sizeMetricsTableModel,
-			GitRepositoryService gitRepositoryService,
+	public UpdateAction(GitRepositoryService gitRepositoryService,
 			GitRepositoryModel gitRepositoryModel,
-			ProgressListener progressListener, SizeMetricsTreeModel sizeMetricsTreeModel) {
-		this.sizeMetricsTableModel = sizeMetricsTableModel;
+			ProgressMonitor progressListener) {
 		this.gitRepositoryService = gitRepositoryService;
 		this.gitRepositoryModel = gitRepositoryModel;
 		this.progressListener = progressListener;
-		this.sizeMetricsTreeModel = sizeMetricsTreeModel;
 		putValue(Action.NAME, "Update");
 	}
 
@@ -45,8 +40,7 @@ public class UpdateAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 
 		sizeMetricsSwingWorker = new SizeMetricsSwingWorker(
-				gitRepositoryService, gitRepositoryModel,
-				sizeMetricsTableModel, progressListener);
+				gitRepositoryService, gitRepositoryModel, progressListener);
 		sizeMetricsSwingWorker.execute();
 
 	}
@@ -54,18 +48,15 @@ public class UpdateAction extends AbstractAction {
 	private class SizeMetricsSwingWorker extends SwingWorker<SizeMetrics, Void> {
 
 		private GitRepositoryService gitRepositoryService;
-		private SizeMetricsTableModel sizeMetricsTableModel;
-		private ProgressListener progressListener;
+		private ProgressMonitor progressListener;
 		private GitRepositoryModel gitRepositoryModel;
 
 		public SizeMetricsSwingWorker(
 				GitRepositoryService gitRepositoryService,
 				GitRepositoryModel gitRepositoryModel,
-				SizeMetricsTableModel sizeMetricsTableModel,
-				ProgressListener progressListener) {
+				ProgressMonitor progressListener) {
 			this.gitRepositoryService = gitRepositoryService;
 			this.gitRepositoryModel = gitRepositoryModel;
-			this.sizeMetricsTableModel = sizeMetricsTableModel;
 			this.progressListener = progressListener;
 		}
 
@@ -87,8 +78,7 @@ public class UpdateAction extends AbstractAction {
 		protected void done() {
 			try {
 				SizeMetrics sizeMetrics = get();
-				sizeMetricsTableModel.setSizeMetrics(sizeMetrics);
-				sizeMetricsTreeModel.setSizeMetrics(sizeMetrics);
+				gitRepositoryModel.setSizeMetrics(sizeMetrics);
 			} catch (InterruptedException ignore) {
 			} catch (ExecutionException executionException) {
 				Throwable cause = executionException.getCause();

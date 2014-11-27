@@ -9,7 +9,6 @@ public class TreeObject {
 
 	private String name;
 	private BigInteger size = BigInteger.ZERO;
-	private BigInteger totalSize;
 	private TreeObjectTreeNode treeObjectTreeNode;
 
 	public TreeObject(String name, TreeObjectTreeNode treeObjectTreeNode) {
@@ -31,21 +30,14 @@ public class TreeObject {
 
 	@SuppressWarnings("unchecked")
 	public BigInteger getTotalSize() {
-		if (totalSize == null) {
-			totalSize = getSize();
-			Enumeration<TreeObjectTreeNode> breadthFirstEnumeration = treeObjectTreeNode
-					.breadthFirstEnumeration();
-			while (breadthFirstEnumeration.hasMoreElements()) {
-				TreeObjectTreeNode treeNode = breadthFirstEnumeration
-						.nextElement();
-				TreeObject treeObject = (TreeObject) treeNode.getUserObject();
-				if(treeObject == this){
-					continue;
-				}
-				totalSize = totalSize.add(treeObject.getTotalSize());
-			}
+		BigInteger totalSize = getSize();
+		Enumeration<TreeObjectTreeNode> nodeEnumeration = treeObjectTreeNode
+				.children();
+		while (nodeEnumeration.hasMoreElements()) {
+			TreeObjectTreeNode treeNode = nodeEnumeration.nextElement();
+			TreeObject treeObject = (TreeObject) treeNode.getUserObject();
+			totalSize = totalSize.add(treeObject.getTotalSize());
 		}
 		return totalSize;
 	}
-
 }
