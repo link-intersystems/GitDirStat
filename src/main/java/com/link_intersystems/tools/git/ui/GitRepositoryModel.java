@@ -2,18 +2,18 @@ package com.link_intersystems.tools.git.ui;
 
 import java.io.File;
 
-import com.link_intersystems.tools.git.service.SizeMetrics;
+import com.link_intersystems.tools.git.domain.TreeObject;
 
 public class GitRepositoryModel extends AbstractPropertyChangeSupport {
 
 	public static final String PROP_REPOSITORY_ID = "repositoryId";
 	public static final String PROP_GIT_DIR = "gitDir";
-	public static final String PROP_SIZE_METRICS = "sizeMetrics";
+	public static final String PROP_COMMIT_RANGE_TREE = "commitRangeTree";
 
 	private File gitDir;
 	private String repositoryId;
 
-	private SizeMetrics sizeMetrics;
+	private TreeObject commitRangeTree;
 
 	public GitRepositoryModel() {
 		gitDir = new File(System.getProperty("user.dir"));
@@ -37,13 +37,13 @@ public class GitRepositoryModel extends AbstractPropertyChangeSupport {
 				this.repositoryId = repositoryId);
 	}
 
-	public SizeMetrics getSizeMetrics() {
-		return sizeMetrics;
+	public TreeObject getCommitRangeTree() {
+		return commitRangeTree;
 	}
 
-	public void setSizeMetrics(SizeMetrics sizeMetrics) {
-		firePropertyChange(PROP_SIZE_METRICS, this.sizeMetrics,
-				this.sizeMetrics = sizeMetrics);
+	public void setCommitRangeTree(TreeObject commitRangeTree) {
+		firePropertyChange(PROP_COMMIT_RANGE_TREE, this.commitRangeTree,
+				this.commitRangeTree = commitRangeTree);
 	}
 
 }

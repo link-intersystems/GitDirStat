@@ -2,13 +2,17 @@ package com.link_intersystems.tools.git.ui;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
 
-import com.link_intersystems.tools.git.service.SizeMetrics;
+import com.link_intersystems.tools.git.common.SortedMap;
+import com.link_intersystems.tools.git.common.SortedMap.SortBy;
+import com.link_intersystems.tools.git.common.SortedMap.SortOrder;
+import com.link_intersystems.tools.git.domain.TreeObject;
 
 public class SizeMetricsTableModel extends AbstractTableModel {
 
@@ -20,16 +24,12 @@ public class SizeMetricsTableModel extends AbstractTableModel {
 	private static final int COL_PATH_INDEX = 0;
 	private static final int COL_SIZE_INDEX = 1;
 
-	private SizeMetrics sizeMetrics;
 	private List<String> pathList = new ArrayList<String>();
+	private Map<String, TreeObject> pathMap = new HashMap<String, TreeObject>();
+	private boolean sortAsc;
 
-	public void setSizeMetrics(SizeMetrics sizeMetrics) {
-		this.sizeMetrics = sizeMetrics;
-		if (sizeMetrics != null) {
-			Set<String> parhKeySet = sizeMetrics.getPathSizes().keySet();
-			pathList = new ArrayList<String>(parhKeySet);
-		}
-		fireTableDataChanged();
+	public void setSortOrder(boolean sortAsc) {
+		this.sortAsc = sortAsc;
 	}
 
 	@Override
@@ -53,10 +53,7 @@ public class SizeMetricsTableModel extends AbstractTableModel {
 			break;
 
 		case COL_SIZE_INDEX:
-			if (sizeMetrics != null) {
-				Map<String, BigInteger> pathSizes = sizeMetrics.getPathSizes();
-				value = pathSizes.get(path);
-			}
+			value = pathMap.get(path);
 			break;
 		}
 		return value;
@@ -88,6 +85,29 @@ public class SizeMetricsTableModel extends AbstractTableModel {
 			break;
 		}
 		return columnClass;
+	}
+
+	public void setCommitRangeTree(TreeObject commitRangeTree) {
+		if (commitRangeTree != null) {
+			pathMap = commitRangeTree.asPathMap();
+
+			pathMap = applySorting(pathMap);
+
+			Set<String> parhKeySet = pathMap.keySet();
+			pathList = new ArrayList<String>(parhKeySet);
+		}
+		fireTableDataChanged();
+	}
+
+	private Map<String, TreeObject> applySorting(Map<String, TreeObject> pathMap) {
+		if (sortAsc) {
+			pathMap = new SortedMap<String, TreeObject>(pathMap, SortBy.VALUE,
+					SortOrder.ASC);
+		} else {
+			pathMap = new SortedMap<String, TreeObject>(pathMap, SortBy.VALUE,
+					SortOrder.DESC);
+		}
+		return pathMap;
 	}
 
 }

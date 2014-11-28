@@ -11,10 +11,11 @@ import javax.swing.SwingWorker;
 
 import org.eclipse.jgit.lib.Constants;
 
-import com.link_intersystems.tools.git.service.GetSizeMetricsRequest;
-import com.link_intersystems.tools.git.service.GitRepositoryService;
-import com.link_intersystems.tools.git.service.ProgressMonitor;
-import com.link_intersystems.tools.git.service.SizeMetrics;
+import com.link_intersystems.tools.git.CommitRange;
+import com.link_intersystems.tools.git.common.ProgressMonitor;
+import com.link_intersystems.tools.git.domain.GitRepository;
+import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
+import com.link_intersystems.tools.git.domain.TreeObject;
 
 public class UpdateAction extends AbstractAction {
 
@@ -22,15 +23,15 @@ public class UpdateAction extends AbstractAction {
 	 *
 	 */
 	private static final long serialVersionUID = 6082672924263782869L;
-	private GitRepositoryService gitRepositoryService;
+	private GitRepositoryAccess gitRepositoryAccess;
 	private GitRepositoryModel gitRepositoryModel;
 	private SizeMetricsSwingWorker sizeMetricsSwingWorker;
 	private ProgressMonitor progressListener;
 
-	public UpdateAction(GitRepositoryService gitRepositoryService,
+	public UpdateAction(GitRepositoryAccess gitRepositoryAccess,
 			GitRepositoryModel gitRepositoryModel,
 			ProgressMonitor progressListener) {
-		this.gitRepositoryService = gitRepositoryService;
+		this.gitRepositoryAccess = gitRepositoryAccess;
 		this.gitRepositoryModel = gitRepositoryModel;
 		this.progressListener = progressListener;
 		putValue(Action.NAME, "Update");
@@ -40,45 +41,51 @@ public class UpdateAction extends AbstractAction {
 	public void actionPerformed(ActionEvent e) {
 
 		sizeMetricsSwingWorker = new SizeMetricsSwingWorker(
-				gitRepositoryService, gitRepositoryModel, progressListener);
+				gitRepositoryAccess, gitRepositoryModel, progressListener);
 		sizeMetricsSwingWorker.execute();
 
 	}
 
-	private class SizeMetricsSwingWorker extends SwingWorker<SizeMetrics, Void> {
+	private class SizeMetricsSwingWorker extends SwingWorker<TreeObject, Void> {
 
-		private GitRepositoryService gitRepositoryService;
+		private GitRepositoryAccess gitRepositoryAccess;
 		private ProgressMonitor progressListener;
 		private GitRepositoryModel gitRepositoryModel;
 
-		public SizeMetricsSwingWorker(
-				GitRepositoryService gitRepositoryService,
+		public SizeMetricsSwingWorker(GitRepositoryAccess gitRepositoryAccess,
 				GitRepositoryModel gitRepositoryModel,
 				ProgressMonitor progressListener) {
-			this.gitRepositoryService = gitRepositoryService;
+			this.gitRepositoryAccess = gitRepositoryAccess;
 			this.gitRepositoryModel = gitRepositoryModel;
 			this.progressListener = progressListener;
 		}
 
 		@Override
-		protected SizeMetrics doInBackground() throws Exception {
+		protected TreeObject doInBackground() throws Exception {
+			GitRepository gitRepository = null;
+
 			String repositoryId = gitRepositoryModel.getRepositoryId();
 			if (repositoryId == null) {
 				File gitDir = gitRepositoryModel.getGitDir();
-				repositoryId = gitRepositoryService.newRepository(gitDir);
+				gitRepository = gitRepositoryAccess.getGitRepository(gitDir);
+			} else {
+				gitRepository = gitRepositoryAccess
+						.getGitRepository(repositoryId);
 			}
-			GetSizeMetricsRequest getSizeMetricsRequest = new GetSizeMetricsRequest(
-					repositoryId, Constants.HEAD, progressListener);
-			SizeMetrics sizeMetrics = gitRepositoryService
-					.getSizeMetrics(getSizeMetricsRequest);
-			return sizeMetrics;
+
+			CommitRange commitRange = gitRepository
+					.getCommitRange(Constants.HEAD);
+			TreeObject commitRangeTree = gitRepository.getCommitRangeTree(
+					commitRange, progressListener);
+			commitRangeTree.asPathMap();
+			return commitRangeTree;
 		}
 
 		@Override
 		protected void done() {
 			try {
-				SizeMetrics sizeMetrics = get();
-				gitRepositoryModel.setSizeMetrics(sizeMetrics);
+				TreeObject treeObject = get();
+				gitRepositoryModel.setCommitRangeTree(treeObject);
 			} catch (InterruptedException ignore) {
 			} catch (ExecutionException executionException) {
 				Throwable cause = executionException.getCause();

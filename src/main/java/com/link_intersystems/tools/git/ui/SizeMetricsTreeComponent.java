@@ -8,10 +8,9 @@ import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 
-import com.link_intersystems.tools.git.service.SizeMetrics;
+import com.link_intersystems.tools.git.domain.TreeObject;
 
-public class SizeMetricsTreeComponent extends JComponent implements
-		SizeMetricsView {
+public class SizeMetricsTreeComponent extends JComponent {
 
 	private static final long serialVersionUID = 8588810751988085851L;
 
@@ -25,7 +24,8 @@ public class SizeMetricsTreeComponent extends JComponent implements
 
 	public SizeMetricsTreeComponent() {
 		setLayout(new BorderLayout());
-		sizeMetricsTree.setCellRenderer(new HumanReadableFileSizeTreeCellRenderer());
+		sizeMetricsTree
+				.setCellRenderer(new HumanReadableFileSizeTreeCellRenderer());
 		sizeMetricsTree.setRootVisible(false);
 		add(sizeMetricsScrollPane, BorderLayout.CENTER);
 	}
@@ -33,15 +33,15 @@ public class SizeMetricsTreeComponent extends JComponent implements
 	public void setModel(GitRepositoryModel gitRepositoryModel) {
 		if (this.gitRepositoryModel != null) {
 			gitRepositoryModel.removePropertyChangeListener(
-					GitRepositoryModel.PROP_SIZE_METRICS,
+					GitRepositoryModel.PROP_COMMIT_RANGE_TREE,
 					sizeMetricsChangeListener);
 		}
 		this.gitRepositoryModel = gitRepositoryModel;
 		if (this.gitRepositoryModel != null) {
 			this.gitRepositoryModel.addPropertyChangeListener(
-					GitRepositoryModel.PROP_SIZE_METRICS,
+					GitRepositoryModel.PROP_COMMIT_RANGE_TREE,
 					sizeMetricsChangeListener);
-			updateSizeMetrics();
+			updateCommitRangeTree();
 		}
 	}
 
@@ -49,10 +49,11 @@ public class SizeMetricsTreeComponent extends JComponent implements
 		return gitRepositoryModel;
 	}
 
-	private void updateSizeMetrics() {
+	private void updateCommitRangeTree() {
 		if (gitRepositoryModel != null) {
-			SizeMetrics sizeMetrics = gitRepositoryModel.getSizeMetrics();
-			sizeMetricsTreeModel.setSizeMetrics(sizeMetrics);
+			TreeObject commitRangeTree = gitRepositoryModel
+					.getCommitRangeTree();
+			sizeMetricsTreeModel.setCommitRangeTree(commitRangeTree);
 		}
 	}
 
@@ -61,7 +62,7 @@ public class SizeMetricsTreeComponent extends JComponent implements
 
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			updateSizeMetrics();
+			updateCommitRangeTree();
 		}
 
 	}

@@ -25,7 +25,8 @@ public class HumanReadableFileSizeTreeCellRenderer extends
 				row, hasFocus);
 		if (value instanceof TreeObjectTreeNode) {
 			TreeObjectTreeNode treeObjectTreeNode = (TreeObjectTreeNode) value;
-			TreeObject treeObject = treeObjectTreeNode.getTreeObject();
+			TreeObjectModel treeObject = treeObjectTreeNode
+					.getTreeObjectModel();
 			String displaySize = FileUtils.byteCountToDisplaySize(treeObject
 					.getTotalSize());
 			String name = treeObject.getName();

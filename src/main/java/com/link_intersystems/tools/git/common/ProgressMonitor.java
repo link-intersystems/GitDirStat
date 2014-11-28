@@ -1,4 +1,4 @@
-package com.link_intersystems.tools.git.service;
+package com.link_intersystems.tools.git.common;
 
 public interface ProgressMonitor {
 

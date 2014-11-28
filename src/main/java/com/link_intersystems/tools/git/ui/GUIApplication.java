@@ -6,13 +6,10 @@ import javax.swing.Action;
 
 import com.link_intersystems.tools.git.GitDirStatApplication;
 import com.link_intersystems.tools.git.GitDirStatArguments;
+import com.link_intersystems.tools.git.common.ProgressMonitor;
 import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
-import com.link_intersystems.tools.git.service.GitRepositoryService;
-import com.link_intersystems.tools.git.service.ProgressMonitor;
 
 public class GUIApplication implements GitDirStatApplication {
-
-	private GitRepositoryService gitRepositoryService;
 
 	@Override
 	public void run(GitDirStatArguments gitDirStatArguments) throws Exception {
@@ -22,6 +19,7 @@ public class GUIApplication implements GitDirStatApplication {
 		if (gitRepositoryDir != null) {
 			repoModel.setGitDir(gitRepositoryDir);
 		}
+		GitRepositoryAccess repoAccess = new GitRepositoryAccess();
 
 		MainFrame mainFrame = new MainFrame();
 
@@ -34,9 +32,8 @@ public class GUIApplication implements GitDirStatApplication {
 		mainFrame.setMainComponent(sizeMetricsTableComponent);
 
 		ProgressMonitor progressMonitor = mainFrame.getProgressMonitor();
-		GitRepositoryService repoService = getGitRepositoryService();
 
-		UpdateAction updateAction = new UpdateAction(repoService, repoModel,
+		UpdateAction updateAction = new UpdateAction(repoAccess, repoModel,
 				progressMonitor);
 		OpenAction openAction = new OpenAction(repoModel, updateAction);
 
@@ -56,14 +53,6 @@ public class GUIApplication implements GitDirStatApplication {
 		if (gitRepositoryDir != null) {
 			updateAction.actionPerformed(null);
 		}
-	}
-
-	private GitRepositoryService getGitRepositoryService() {
-		if (gitRepositoryService == null) {
-			GitRepositoryAccess gitRepositoryAccess = new GitRepositoryAccess();
-			gitRepositoryService = new GitRepositoryService(gitRepositoryAccess);
-		}
-		return gitRepositoryService;
 	}
 
 }

@@ -4,7 +4,7 @@ import java.awt.Component;
 
 import javax.swing.SwingUtilities;
 
-import com.link_intersystems.tools.git.service.ProgressMonitor;
+import com.link_intersystems.tools.git.common.ProgressMonitor;
 
 public class ProgressMonitorComponentVisibilityAdapter implements
 		ProgressMonitor {

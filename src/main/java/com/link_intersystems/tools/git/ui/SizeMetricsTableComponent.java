@@ -11,10 +11,9 @@ import javax.swing.JTable;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
-import com.link_intersystems.tools.git.service.SizeMetrics;
+import com.link_intersystems.tools.git.domain.TreeObject;
 
-public class SizeMetricsTableComponent extends JComponent implements
-		SizeMetricsView {
+public class SizeMetricsTableComponent extends JComponent {
 
 	private static final long serialVersionUID = 8588810751988085851L;
 
@@ -38,15 +37,15 @@ public class SizeMetricsTableComponent extends JComponent implements
 	public void setModel(GitRepositoryModel gitRepositoryModel) {
 		if (this.gitRepositoryModel != null) {
 			gitRepositoryModel.removePropertyChangeListener(
-					GitRepositoryModel.PROP_SIZE_METRICS,
+					GitRepositoryModel.PROP_COMMIT_RANGE_TREE,
 					sizeMetricsChangeListener);
 		}
 		this.gitRepositoryModel = gitRepositoryModel;
 		if (this.gitRepositoryModel != null) {
 			this.gitRepositoryModel.addPropertyChangeListener(
-					GitRepositoryModel.PROP_SIZE_METRICS,
+					GitRepositoryModel.PROP_COMMIT_RANGE_TREE,
 					sizeMetricsChangeListener);
-			updateSizeMetrics();
+			updateCommitRangeTree();
 		}
 	}
 
@@ -54,10 +53,11 @@ public class SizeMetricsTableComponent extends JComponent implements
 		return gitRepositoryModel;
 	}
 
-	private void updateSizeMetrics() {
+	private void updateCommitRangeTree() {
 		if (gitRepositoryModel != null) {
-			SizeMetrics sizeMetrics = gitRepositoryModel.getSizeMetrics();
-			sizeMetricsTableModel.setSizeMetrics(sizeMetrics);
+			TreeObject commitRangeTree = gitRepositoryModel
+					.getCommitRangeTree();
+			sizeMetricsTableModel.setCommitRangeTree(commitRangeTree);
 		}
 	}
 
@@ -66,7 +66,7 @@ public class SizeMetricsTableComponent extends JComponent implements
 
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			updateSizeMetrics();
+			updateCommitRangeTree();
 		}
 
 	}

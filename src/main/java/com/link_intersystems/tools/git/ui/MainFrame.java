@@ -20,7 +20,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.WindowConstants;
 
-import com.link_intersystems.tools.git.service.ProgressMonitor;
+import com.link_intersystems.tools.git.common.ProgressMonitor;
 
 public class MainFrame implements Serializable {
 
@@ -83,6 +83,7 @@ public class MainFrame implements Serializable {
 		contentPane.add(component, BorderLayout.CENTER);
 		mainComponent = component;
 		contentPane.invalidate();
+		contentPane.validate();
 		contentPane.repaint();
 	}
 

@@ -2,6 +2,7 @@ package com.link_intersystems.tools.git.ui;
 
 import java.math.BigInteger;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -9,7 +10,10 @@ import javax.swing.tree.DefaultTreeModel;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.link_intersystems.tools.git.service.SizeMetrics;
+import com.link_intersystems.tools.git.common.SortedMap;
+import com.link_intersystems.tools.git.common.SortedMap.SortBy;
+import com.link_intersystems.tools.git.common.SortedMap.SortOrder;
+import com.link_intersystems.tools.git.domain.TreeObject;
 
 public class SizeMetricsTreeModel extends DefaultTreeModel {
 
@@ -18,28 +22,14 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	private boolean sortAsc;
+
 	public SizeMetricsTreeModel() {
 		super(new WorkdirTreeNode());
 	}
 
-	public void setSizeMetrics(SizeMetrics sizeMetrics) {
-		setRoot(new WorkdirTreeNode());
-		if (sizeMetrics == null) {
-			return;
-		}
-		WorkdirTreeNode workdirTreeNode = (WorkdirTreeNode) getRoot();
-
-		for (Entry<String, BigInteger> entry : sizeMetrics.getPathSizes()
-				.entrySet()) {
-			String path = entry.getKey();
-			TreeObjectTreeNode treeObject = workdirTreeNode.makePath(path);
-			BigInteger size = entry.getValue();
-			treeObject.setSize(size);
-
-		}
-		fireTreeStructureChanged(this, new Object[] { workdirTreeNode },
-				new int[0], new Object[0]);
-
+	public void setSortOrder(boolean sortAsc) {
+		this.sortAsc = sortAsc;
 	}
 
 	public static class TreeObjectTreeNode extends DefaultMutableTreeNode {
@@ -51,17 +41,17 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 
 		public TreeObjectTreeNode(String name) {
 			super(null);
-			TreeObject treeObject = new TreeObject(name, this);
+			TreeObjectModel treeObject = new TreeObjectModel(name, this);
 			setUserObject(treeObject);
 		}
 
 		public void setSize(BigInteger size) {
-			TreeObject treeObject = getTreeObject();
+			TreeObjectModel treeObject = getTreeObjectModel();
 			treeObject.setSize(size);
 		}
 
-		TreeObject getTreeObject() {
-			TreeObject treeObject = (TreeObject) getUserObject();
+		TreeObjectModel getTreeObjectModel() {
+			TreeObjectModel treeObject = (TreeObjectModel) getUserObject();
 			return treeObject;
 		}
 
@@ -97,7 +87,8 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 
 				while (treeNodes.hasMoreElements()) {
 					treeObjectTreeNode = treeNodes.nextElement();
-					TreeObject treeObject = treeObjectTreeNode.getTreeObject();
+					TreeObjectModel treeObject = treeObjectTreeNode
+							.getTreeObjectModel();
 					if (pathSegment.equals(treeObject.getName())) {
 						lastTreeObjectTreeNode = treeObjectTreeNode;
 						parentTreeNode = treeObjectTreeNode;
@@ -116,6 +107,37 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 			return lastTreeObjectTreeNode;
 
 		}
+	}
+
+	public void setCommitRangeTree(TreeObject commitRangeTree) {
+		setRoot(new WorkdirTreeNode());
+		if (commitRangeTree == null) {
+			return;
+		}
+		WorkdirTreeNode workdirTreeNode = (WorkdirTreeNode) getRoot();
+
+		Map<String, TreeObject> pathMap = commitRangeTree.asPathMap();
+		pathMap = applySorting(pathMap);
+		for (Entry<String, TreeObject> pathEntry : pathMap.entrySet()) {
+			String path = pathEntry.getKey();
+			TreeObjectTreeNode treeObject = workdirTreeNode.makePath(path);
+			BigInteger size = pathEntry.getValue().getSize();
+			treeObject.setSize(size);
+
+		}
+		fireTreeStructureChanged(this, new Object[] { workdirTreeNode },
+				new int[0], new Object[0]);
+	}
+
+	private Map<String, TreeObject> applySorting(Map<String, TreeObject> pathMap) {
+		if (sortAsc) {
+			pathMap = new SortedMap<String, TreeObject>(pathMap, SortBy.VALUE,
+					SortOrder.ASC);
+		} else {
+			pathMap = new SortedMap<String, TreeObject>(pathMap, SortBy.VALUE,
+					SortOrder.DESC);
+		}
+		return pathMap;
 	}
 
 }

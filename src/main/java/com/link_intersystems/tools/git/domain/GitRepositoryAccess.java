@@ -18,7 +18,6 @@ public class GitRepositoryAccess {
 	}
 
 	public GitRepository getGitRepository(File repositoryDirectory) {
-
 		String repositoryId = GitRepository.createId(repositoryDirectory);
 		GitRepository gitRepository = repositoryData.get(repositoryId);
 
@@ -26,6 +25,7 @@ public class GitRepositoryAccess {
 			FileRepositoryBuilder builder = new FileRepositoryBuilder();
 			builder.readEnvironment();
 			builder.findGitDir(repositoryDirectory);
+
 			try {
 				Repository repository = builder.build();
 				gitRepository = new GitRepository(repository);
