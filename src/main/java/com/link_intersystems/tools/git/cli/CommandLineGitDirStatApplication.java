@@ -9,13 +9,13 @@ import org.eclipse.jgit.lib.Constants;
 import com.link_intersystems.tools.git.CommitRange;
 import com.link_intersystems.tools.git.GitDirStatApplication;
 import com.link_intersystems.tools.git.GitDirStatArguments;
+import com.link_intersystems.tools.git.common.SortOrder;
 import com.link_intersystems.tools.git.common.SortedMap;
 import com.link_intersystems.tools.git.common.SortedMap.SortBy;
-import com.link_intersystems.tools.git.common.SortedMap.SortOrder;
 import com.link_intersystems.tools.git.domain.GitRepository;
 import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
 import com.link_intersystems.tools.git.domain.TreeObject;
-import com.link_intersystems.tools.git.domain.TreeObjectSortOrder;
+import com.link_intersystems.tools.git.domain.TreeObjectSortBy;
 
 public class CommandLineGitDirStatApplication implements GitDirStatApplication {
 
@@ -43,7 +43,7 @@ public class CommandLineGitDirStatApplication implements GitDirStatApplication {
 	}
 
 	private SortBy getPathMapSortOrder(GitDirStatArguments arguments) {
-		TreeObjectSortOrder sortBy = arguments.getSortBy();
+		TreeObjectSortBy sortBy = arguments.getSortBy();
 		SortBy pathMapSortBy = null;
 		switch (sortBy) {
 		case SIZE:

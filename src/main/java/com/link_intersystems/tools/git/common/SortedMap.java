@@ -21,10 +21,6 @@ public class SortedMap<K, V> extends LinkedHashMap<K, V> {
 		KEY, VALUE;
 	}
 
-	public static enum SortOrder {
-		ASC, DESC;
-	}
-
 	public SortedMap(Map<K, V> map) {
 		this(map, SortBy.KEY, SortOrder.DESC);
 	}

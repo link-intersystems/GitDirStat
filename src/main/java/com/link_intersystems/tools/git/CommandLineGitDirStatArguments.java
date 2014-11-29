@@ -18,8 +18,8 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.link_intersystems.tools.git.common.SortedMap.SortOrder;
-import com.link_intersystems.tools.git.domain.TreeObjectSortOrder;
+import com.link_intersystems.tools.git.common.SortOrder;
+import com.link_intersystems.tools.git.domain.TreeObjectSortBy;
 
 public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 
@@ -138,16 +138,16 @@ public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 	}
 
 	@Override
-	public TreeObjectSortOrder getSortBy() {
+	public TreeObjectSortBy getSortBy() {
 		String sortByOption = commandLine.getOptionValue(OPTION_SORT_BY
 				.getOpt());
 
-		TreeObjectSortOrder sortOrder = null;
+		TreeObjectSortBy sortOrder = null;
 
 		if (StringUtils.isBlank(sortByOption)) {
-			sortOrder = TreeObjectSortOrder.SIZE;
+			sortOrder = TreeObjectSortBy.SIZE;
 		} else {
-			sortOrder = TreeObjectSortOrder.valueOf(sortByOption.toUpperCase());
+			sortOrder = TreeObjectSortBy.valueOf(sortByOption.toUpperCase());
 		}
 
 		return sortOrder;

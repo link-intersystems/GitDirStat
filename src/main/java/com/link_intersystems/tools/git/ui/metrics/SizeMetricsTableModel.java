@@ -9,9 +9,9 @@ import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
 
+import com.link_intersystems.tools.git.common.SortOrder;
 import com.link_intersystems.tools.git.common.SortedMap;
 import com.link_intersystems.tools.git.common.SortedMap.SortBy;
-import com.link_intersystems.tools.git.common.SortedMap.SortOrder;
 import com.link_intersystems.tools.git.domain.TreeObject;
 
 public class SizeMetricsTableModel extends AbstractTableModel {

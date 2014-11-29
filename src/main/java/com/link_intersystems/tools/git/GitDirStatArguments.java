@@ -3,8 +3,8 @@ package com.link_intersystems.tools.git;
 import java.io.File;
 import java.io.OutputStream;
 
-import com.link_intersystems.tools.git.common.SortedMap.SortOrder;
-import com.link_intersystems.tools.git.domain.TreeObjectSortOrder;
+import com.link_intersystems.tools.git.common.SortOrder;
+import com.link_intersystems.tools.git.domain.TreeObjectSortBy;
 
 public interface GitDirStatArguments {
 
@@ -14,6 +14,6 @@ public interface GitDirStatArguments {
 
 	public SortOrder getSortOrder();
 
-	public TreeObjectSortOrder getSortBy();
+	public TreeObjectSortBy getSortBy();
 
 }
