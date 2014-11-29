@@ -18,6 +18,9 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.link_intersystems.tools.git.common.SortedMap.SortOrder;
+import com.link_intersystems.tools.git.domain.TreeObjectSortOrder;
+
 public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 
 	private static final String WORKING_DIR_SYS_PROP = "user.dir";
@@ -28,6 +31,8 @@ public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 
 	private static Option OPTION_GITDIR;
 	private static Option OPTION_OUTFILE;
+	private static Option OPTION_SORT_ORDER;
+	private static Option OPTION_SORT_BY;
 
 	static {
 		OPTIONS = new Options();
@@ -42,7 +47,18 @@ public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 				"The file where the output should be written to. "
 						+ "If not specified or - is specified the stdout will be used.");
 
+		OPTION_SORT_ORDER = new Option("so", "sort_order", true,
+				"The output's sort order. Either asc or desc. "
+						+ " Output will be sorted by object sizes");
+
+		OPTION_SORT_BY = new Option("sb", "sort_by", true,
+				"The property by which the output should be sorted. Either size or name. "
+						+ "Default is size.");
+
 		OPTIONS.addOption(OPTION_GITDIR);
+		OPTIONS.addOption(OPTION_OUTFILE);
+		OPTIONS.addOption(OPTION_SORT_ORDER);
+		OPTIONS.addOption(OPTION_SORT_BY);
 	}
 
 	public static GitDirStatArguments parse(String[] args)
@@ -103,6 +119,38 @@ public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 			}
 		}
 		return outputStream;
+	}
+
+	@Override
+	public SortOrder getSortOrder() {
+		String sortOrderOption = commandLine.getOptionValue(OPTION_SORT_ORDER
+				.getOpt());
+
+		SortOrder sortOrder = null;
+
+		if (StringUtils.isBlank(sortOrderOption)) {
+			sortOrder = SortOrder.DESC;
+		} else {
+			sortOrder = SortOrder.valueOf(sortOrderOption.toUpperCase());
+		}
+
+		return sortOrder;
+	}
+
+	@Override
+	public TreeObjectSortOrder getSortBy() {
+		String sortByOption = commandLine.getOptionValue(OPTION_SORT_BY
+				.getOpt());
+
+		TreeObjectSortOrder sortOrder = null;
+
+		if (StringUtils.isBlank(sortByOption)) {
+			sortOrder = TreeObjectSortOrder.SIZE;
+		} else {
+			sortOrder = TreeObjectSortOrder.valueOf(sortByOption.toUpperCase());
+		}
+
+		return sortOrder;
 	}
 
 }

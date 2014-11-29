@@ -15,6 +15,7 @@ import com.link_intersystems.tools.git.common.SortedMap.SortOrder;
 import com.link_intersystems.tools.git.domain.GitRepository;
 import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
 import com.link_intersystems.tools.git.domain.TreeObject;
+import com.link_intersystems.tools.git.domain.TreeObjectSortOrder;
 
 public class CommandLineGitDirStatApplication implements GitDirStatApplication {
 
@@ -29,11 +30,31 @@ public class CommandLineGitDirStatApplication implements GitDirStatApplication {
 				.getCommitRangeTree(commitRange);
 
 		Map<String, TreeObject> pathMap = commitRangeTree.asPathMap();
+
+		SortOrder sortOrder = arguments.getSortOrder();
+		SortBy sortBy = getPathMapSortOrder(arguments);
+
 		SortedMap<String, TreeObject> sortedPathMap = new SortedMap<String, TreeObject>(
-				pathMap, SortBy.VALUE, SortOrder.DESC);
+				pathMap, sortBy, sortOrder);
 		PathMapFormatter pathMapFormatter = new PathMapFormatter(sortedPathMap);
 
 		OutputStream outputStream = arguments.getOutputStream();
 		pathMapFormatter.format(outputStream);
+	}
+
+	private SortBy getPathMapSortOrder(GitDirStatArguments arguments) {
+		TreeObjectSortOrder sortBy = arguments.getSortBy();
+		SortBy pathMapSortBy = null;
+		switch (sortBy) {
+		case SIZE:
+			pathMapSortBy = SortBy.KEY;
+			break;
+		case NAME:
+			pathMapSortBy = SortBy.KEY;
+			break;
+		default:
+			break;
+		}
+		return pathMapSortBy;
 	}
 }
