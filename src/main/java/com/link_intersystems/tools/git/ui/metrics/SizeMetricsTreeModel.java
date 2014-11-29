@@ -151,7 +151,15 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 			SortOrder sortOrder) {
 		this.treeObjectSortBy = treeObjectSortBy;
 		this.sortOrder = sortOrder;
+		WorkdirTreeNode workdirTreeNode = (WorkdirTreeNode) getRoot();
+		workdirTreeNode.deepSort(treeObjectSortBy, sortOrder);
+		fireTreeStructureChanged();
+	}
 
+	private void fireTreeStructureChanged() {
+		WorkdirTreeNode workdirTreeNode = (WorkdirTreeNode) getRoot();
+		fireTreeStructureChanged(this, new Object[] { workdirTreeNode },
+				new int[0], new Object[0]);
 	}
 
 	public void setCommitRangeTree(TreeObject commitRangeTree) {
@@ -167,8 +175,7 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 			workdirTreeNode.makePath(pathEntry.getValue());
 		}
 		workdirTreeNode.deepSort(treeObjectSortBy, sortOrder);
-		fireTreeStructureChanged(this, new Object[] { workdirTreeNode },
-				new int[0], new Object[0]);
+		fireTreeStructureChanged();
 	}
 
 	private Map<String, TreeObject> applySorting(Map<String, TreeObject> pathMap) {
