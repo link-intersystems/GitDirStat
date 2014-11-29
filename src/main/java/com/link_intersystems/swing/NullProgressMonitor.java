@@ -1,4 +1,5 @@
-package com.link_intersystems.tools.git.common;
+package com.link_intersystems.swing;
+
 
 public class NullProgressMonitor implements ProgressMonitor {
 
@@ -14,6 +15,11 @@ public class NullProgressMonitor implements ProgressMonitor {
 
 	@Override
 	public void end() {
+	}
+
+	@Override
+	public boolean isCanceled() {
+		return false;
 	}
 
 }

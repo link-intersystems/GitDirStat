@@ -4,7 +4,7 @@ import java.awt.Component;
 
 import javax.swing.SwingUtilities;
 
-import com.link_intersystems.tools.git.common.ProgressMonitor;
+import com.link_intersystems.swing.ProgressMonitor;
 
 public class ComponentVisibilityOnProgress implements ProgressMonitor {
 
@@ -49,6 +49,11 @@ public class ComponentVisibilityOnProgress implements ProgressMonitor {
 			}
 		});
 		progressMonitor.end();
+	}
+
+	@Override
+	public boolean isCanceled() {
+		return progressMonitor.isCanceled();
 	}
 
 }

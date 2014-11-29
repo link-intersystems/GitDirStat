@@ -2,6 +2,7 @@ package com.link_intersystems.tools.git.ui;
 
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.text.MessageFormat;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.AbstractAction;
@@ -11,8 +12,9 @@ import javax.swing.SwingWorker;
 
 import org.eclipse.jgit.lib.Constants;
 
+import com.link_intersystems.io.FileUtils;
+import com.link_intersystems.swing.ProgressMonitor;
 import com.link_intersystems.tools.git.CommitRange;
-import com.link_intersystems.tools.git.common.ProgressMonitor;
 import com.link_intersystems.tools.git.domain.GitRepository;
 import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
 import com.link_intersystems.tools.git.domain.TreeObject;
@@ -64,19 +66,16 @@ public class UpdateAction extends AbstractAction {
 		protected TreeObject doInBackground() throws Exception {
 			GitRepository gitRepository = null;
 
-			String repositoryId = gitRepositoryModel.getRepositoryId();
-			if (repositoryId == null) {
-				File gitDir = gitRepositoryModel.getGitDir();
-				gitRepository = gitRepositoryAccess.getGitRepository(gitDir);
-			} else {
-				gitRepository = gitRepositoryAccess
-						.getGitRepository(repositoryId);
-			}
+			File gitDir = gitRepositoryModel.getGitDir();
+			gitRepository = gitRepositoryAccess.getGitRepository(gitDir);
 
 			CommitRange commitRange = gitRepository
 					.getCommitRange(Constants.HEAD);
+			String progressMessage = MessageFormat.format(
+					"Loading repository: {0}",
+					FileUtils.abbreviatedPath(gitDir, 50));
 			ProgressListenerMonitorAdapter progressListenerMonitorAdapter = new ProgressListenerMonitorAdapter(
-					progressListener, "Loading GIT repository");
+					progressListener, progressMessage);
 			TreeObject commitRangeTree = gitRepository.getCommitRangeTree(
 					commitRange, progressListenerMonitorAdapter);
 			commitRangeTree.asPathMap();

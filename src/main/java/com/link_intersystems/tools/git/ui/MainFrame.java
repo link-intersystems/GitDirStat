@@ -20,7 +20,8 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.WindowConstants;
 
 import com.link_intersystems.swing.ProgressBarMonitor;
-import com.link_intersystems.tools.git.common.ProgressMonitor;
+import com.link_intersystems.swing.ProgressDialogMonitor;
+import com.link_intersystems.swing.ProgressMonitor;
 
 public class MainFrame implements Serializable {
 
@@ -34,11 +35,11 @@ public class MainFrame implements Serializable {
 
 	private JFrame mainFrame;
 	private Component mainComponent;
-	private JProgressBar jProgressBar;
-	private ComponentVisibilityOnProgress progressBarVisibilityAdapter;
 	private JMenuBar menuBar;
 	private JMenu fileMenu;
 	private JMenu viewMenu;
+
+	private ProgressMonitor progressMonitor;
 
 	public MainFrame() {
 		mainFrame = new JFrame("GitDirStat");
@@ -48,13 +49,7 @@ public class MainFrame implements Serializable {
 		Container contentPane = mainFrame.getContentPane();
 		contentPane.setLayout(new BorderLayout());
 
-		jProgressBar = new JProgressBar();
-		jProgressBar.setVisible(true);
-		jProgressBar.setStringPainted(true);
-		ProgressMonitor progressMonitor = new ProgressBarMonitor(jProgressBar);
-		progressBarVisibilityAdapter = new ComponentVisibilityOnProgress(
-				progressMonitor, jProgressBar);
-		contentPane.add(jProgressBar, BorderLayout.SOUTH);
+		progressMonitor = createProgressMonitor(mainFrame);
 
 		menuBar = new JMenuBar();
 
@@ -64,6 +59,28 @@ public class MainFrame implements Serializable {
 		menuBar.add(viewMenu);
 
 		mainFrame.add(menuBar, BorderLayout.NORTH);
+	}
+
+	private ProgressMonitor createProgressMonitor(JFrame mainFrame) {
+		ProgressMonitor progressMonitor = null;
+		boolean useProgressDialog = true;
+		if (useProgressDialog) {
+			ProgressDialogMonitor progressDialogMonitor = new ProgressDialogMonitor(mainFrame);
+			progressDialogMonitor.setMillisToDecideToPopup(100);
+			progressMonitor = progressDialogMonitor;
+		} else {
+			JProgressBar jProgressBar = new JProgressBar();
+			jProgressBar.setVisible(true);
+			jProgressBar.setStringPainted(true);
+
+			Container contentPane = mainFrame.getContentPane();
+			ProgressMonitor progressBarMonitor = new ProgressBarMonitor(
+					jProgressBar);
+			progressMonitor = new ComponentVisibilityOnProgress(
+					progressBarMonitor, jProgressBar);
+			contentPane.add(jProgressBar, BorderLayout.SOUTH);
+		}
+		return progressMonitor;
 	}
 
 	public void addMenuBarAction(String menubarPath, Action action) {
@@ -86,7 +103,7 @@ public class MainFrame implements Serializable {
 	}
 
 	public ProgressMonitor getProgressMonitor() {
-		return progressBarVisibilityAdapter;
+		return progressMonitor;
 	}
 
 	public void setVisible(boolean visible) {

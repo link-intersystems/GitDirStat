@@ -1,6 +1,6 @@
 package com.link_intersystems.tools.git.ui;
 
-import com.link_intersystems.tools.git.common.ProgressMonitor;
+import com.link_intersystems.swing.ProgressMonitor;
 import com.link_intersystems.tools.git.domain.ProgressListener;
 
 public class ProgressListenerMonitorAdapter implements ProgressListener {

@@ -6,9 +6,9 @@ import javax.swing.Action;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import com.link_intersystems.swing.ProgressMonitor;
 import com.link_intersystems.tools.git.GitDirStatApplication;
 import com.link_intersystems.tools.git.GitDirStatArguments;
-import com.link_intersystems.tools.git.common.ProgressMonitor;
 import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
 import com.link_intersystems.tools.git.ui.metrics.SizeMetricsTableComponent;
 import com.link_intersystems.tools.git.ui.metrics.SizeMetricsTreeComponent;

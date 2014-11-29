@@ -12,15 +12,9 @@ public class GitRepositoryAccess {
 
 	private Map<String, GitRepository> repositoryData = new HashMap<String, GitRepository>();
 
-	public GitRepository getGitRepository(String repositoryId) {
-		GitRepository gitRepository = repositoryData.get(repositoryId);
-		return gitRepository;
-	}
-
 	public GitRepository getGitRepository(File repositoryDirectory) {
 		String repositoryId = GitRepository.createId(repositoryDirectory);
 		GitRepository gitRepository = repositoryData.get(repositoryId);
-
 		if (gitRepository == null) {
 			FileRepositoryBuilder builder = new FileRepositoryBuilder();
 			builder.readEnvironment();

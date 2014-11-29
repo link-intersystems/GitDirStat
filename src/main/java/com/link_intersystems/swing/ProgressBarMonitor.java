@@ -3,8 +3,6 @@ package com.link_intersystems.swing;
 import javax.swing.BoundedRangeModel;
 import javax.swing.JProgressBar;
 
-import com.link_intersystems.tools.git.common.ProgressMonitor;
-
 public class ProgressBarMonitor implements ProgressMonitor {
 
 	private JProgressBar progressBar;
@@ -40,6 +38,11 @@ public class ProgressBarMonitor implements ProgressMonitor {
 	public void end() {
 		BoundedRangeModel progressModel = progressBar.getModel();
 		progressModel.setValue(progressModel.getMaximum());
+	}
+
+	@Override
+	public boolean isCanceled() {
+		return false;
 	}
 
 }
