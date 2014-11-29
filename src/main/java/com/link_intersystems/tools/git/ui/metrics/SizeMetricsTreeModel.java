@@ -10,7 +10,8 @@ import java.util.Map.Entry;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import org.apache.commons.beanutils.BeanComparator;
+import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
+import org.apache.commons.collections.comparators.TransformingComparator;
 import org.apache.commons.collections4.EnumerationUtils;
 import org.apache.commons.collections4.comparators.ReverseComparator;
 
@@ -30,6 +31,9 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 
 	private boolean sortAsc;
 
+	private TreeObjectSortBy treeObjectSortBy = TreeObjectSortBy.SIZE;
+	private SortOrder sortOrder = SortOrder.DESC;
+
 	public SizeMetricsTreeModel() {
 		super(new WorkdirTreeNode());
 	}
@@ -45,9 +49,12 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 		private static final long serialVersionUID = -5276518794046807282L;
 
 		public void deepSort(TreeObjectSortBy treeObjectSortOrder) {
-
 			deepSort(this, treeObjectSortOrder, SortOrder.DESC);
+		}
 
+		public void deepSort(TreeObjectSortBy treeObjectSortOrder,
+				SortOrder sortOrder) {
+			deepSort(this, treeObjectSortOrder, sortOrder);
 		}
 
 		@SuppressWarnings("unchecked")
@@ -58,8 +65,11 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 			List<DefaultMutableTreeNode> treeNodes = EnumerationUtils
 					.toList(treeObjectNodes);
 
-			Comparator<DefaultMutableTreeNode> comparator = new BeanComparator<DefaultMutableTreeNode>(
-					"userObject");
+			BeanToPropertyValueTransformer sortProperty = getSortByTransformer(sortBy);
+
+			Comparator<DefaultMutableTreeNode> comparator = new TransformingComparator(
+					sortProperty);
+
 			if (SortOrder.DESC.equals(order)) {
 				comparator = new ReverseComparator<DefaultMutableTreeNode>(
 						comparator);
@@ -73,6 +83,26 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 				deepSort(childNode, sortBy, order);
 			}
 
+		}
+
+		private BeanToPropertyValueTransformer getSortByTransformer(
+				TreeObjectSortBy sortBy) {
+			String sortProperty = null;
+			switch (sortBy) {
+			case NAME:
+				sortProperty = "userObject.path.pathname";
+				break;
+			case SIZE:
+				sortProperty = "userObject.size";
+				break;
+
+			default:
+				sortProperty = "userObject";
+				break;
+			}
+			BeanToPropertyValueTransformer beanValueTransformer = new BeanToPropertyValueTransformer(
+					sortProperty);
+			return beanValueTransformer;
 		}
 
 		@SuppressWarnings("unchecked")
@@ -117,6 +147,13 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 		}
 	}
 
+	public void setSorting(TreeObjectSortBy treeObjectSortBy,
+			SortOrder sortOrder) {
+		this.treeObjectSortBy = treeObjectSortBy;
+		this.sortOrder = sortOrder;
+
+	}
+
 	public void setCommitRangeTree(TreeObject commitRangeTree) {
 		setRoot(new WorkdirTreeNode());
 		if (commitRangeTree == null) {
@@ -129,7 +166,7 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 		for (Entry<String, TreeObject> pathEntry : pathMap.entrySet()) {
 			workdirTreeNode.makePath(pathEntry.getValue());
 		}
-		workdirTreeNode.deepSort(TreeObjectSortBy.SIZE);
+		workdirTreeNode.deepSort(treeObjectSortBy, sortOrder);
 		fireTreeStructureChanged(this, new Object[] { workdirTreeNode },
 				new int[0], new Object[0]);
 	}
