@@ -6,8 +6,8 @@ public class CommitRangeTree extends TreeObject {
 
 	private CommitRange commitRange;
 
-	public CommitRangeTree(CommitRange commitRange) {
-		super("");
+	public CommitRangeTree(String repositoryId, CommitRange commitRange) {
+		super(repositoryId);
 		this.commitRange = commitRange;
 	}
 

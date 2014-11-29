@@ -37,7 +37,6 @@ public class SizeMetricsTreeComponent extends JComponent {
 		setLayout(new BorderLayout());
 		sizeMetricsTree
 				.setCellRenderer(new HumanReadableFileSizeTreeCellRenderer());
-		sizeMetricsTree.setRootVisible(false);
 		add(sizeMetricsScrollPane, BorderLayout.CENTER);
 
 		createPopupMenu();

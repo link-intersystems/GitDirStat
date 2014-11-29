@@ -86,7 +86,7 @@ public class GitRepository {
 
 			List<ObjectId> treeIds = getTreeIds(objectWalk);
 
-			CommitRangeTree root = new CommitRangeTree(commitRange);
+			CommitRangeTree root = new CommitRangeTree(getId(), commitRange);
 
 			TreeWalk treeWalk = new TreeWalk(repository);
 			treeWalk.setRecursive(true);
