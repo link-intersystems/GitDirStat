@@ -1,4 +1,4 @@
-package com.link_intersystems.tools.git.ui;
+package com.link_intersystems.tools.git.ui.metrics;
 
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
@@ -17,6 +17,7 @@ import com.link_intersystems.swing.ComponentResize;
 import com.link_intersystems.swing.RelativeWidthResizer;
 import com.link_intersystems.swing.TableColumnResize;
 import com.link_intersystems.tools.git.domain.TreeObject;
+import com.link_intersystems.tools.git.ui.GitRepositoryModel;
 
 public class SizeMetricsTableComponent extends JComponent {
 

@@ -1,4 +1,4 @@
-package com.link_intersystems.tools.git.ui;
+package com.link_intersystems.tools.git.ui.metrics;
 
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
@@ -9,6 +9,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 
 import com.link_intersystems.tools.git.domain.TreeObject;
+import com.link_intersystems.tools.git.ui.GitRepositoryModel;
 
 public class SizeMetricsTreeComponent extends JComponent {
 
