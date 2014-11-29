@@ -3,6 +3,8 @@ package com.link_intersystems.tools.git.ui;
 import java.io.File;
 
 import javax.swing.Action;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import com.link_intersystems.tools.git.GitDirStatApplication;
 import com.link_intersystems.tools.git.GitDirStatArguments;
@@ -15,7 +17,7 @@ public class GUIApplication implements GitDirStatApplication {
 
 	@Override
 	public void run(GitDirStatArguments gitDirStatArguments) throws Exception {
-
+		setLookAndFeel();
 		GitRepositoryModel repoModel = new GitRepositoryModel();
 		File gitRepositoryDir = gitDirStatArguments.getGitRepositoryDir();
 		if (gitRepositoryDir != null) {
@@ -54,6 +56,16 @@ public class GUIApplication implements GitDirStatApplication {
 
 		if (gitRepositoryDir != null) {
 			updateAction.actionPerformed(null);
+		}
+	}
+
+	private void setLookAndFeel() {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (UnsupportedLookAndFeelException e) {
+		} catch (ClassNotFoundException e) {
+		} catch (InstantiationException e) {
+		} catch (IllegalAccessException e) {
 		}
 	}
 
