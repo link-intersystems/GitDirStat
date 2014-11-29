@@ -1,8 +1,11 @@
 package com.link_intersystems.tools.git.domain;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.commons.collections4.iterators.IteratorEnumeration;
 
 public class TreeObjectPath {
 
@@ -33,5 +36,9 @@ public class TreeObjectPath {
 			}
 		}
 		return pathname.toString();
+	}
+
+	public Enumeration<TreeObject> enumerate() {
+		return new IteratorEnumeration<TreeObject>(path.iterator());
 	}
 }

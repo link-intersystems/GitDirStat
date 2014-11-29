@@ -37,7 +37,15 @@ public class TreeObject implements Comparable<TreeObject> {
 		if (size == null) {
 			size = BigInteger.ZERO;
 			for (ObjectSize objectSize : objectSizes) {
-				size = size.add(objectSize.getSize());
+				BigInteger thisSize = objectSize.getSize();
+				size = size.add(thisSize);
+			}
+
+			Enumeration<TreeObject> childEnumerations = children();
+			while (childEnumerations.hasMoreElements()) {
+				TreeObject childTreeObject = childEnumerations.nextElement();
+				BigInteger childSize = childTreeObject.getSize();
+				size = size.add(childSize);
 			}
 		}
 		return size;

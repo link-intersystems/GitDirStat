@@ -3,11 +3,12 @@ package com.link_intersystems.tools.git.ui;
 import java.awt.Component;
 
 import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.apache.commons.io.FileUtils;
 
-import com.link_intersystems.tools.git.ui.SizeMetricsTreeModel.TreeObjectTreeNode;
+import com.link_intersystems.tools.git.domain.TreeObject;
 
 public class HumanReadableFileSizeTreeCellRenderer extends
 		DefaultTreeCellRenderer {
@@ -23,14 +24,17 @@ public class HumanReadableFileSizeTreeCellRenderer extends
 			boolean hasFocus) {
 		super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,
 				row, hasFocus);
-		if (value instanceof TreeObjectTreeNode) {
-			TreeObjectTreeNode treeObjectTreeNode = (TreeObjectTreeNode) value;
-			TreeObjectModel treeObject = treeObjectTreeNode
-					.getTreeObjectModel();
-			String displaySize = FileUtils.byteCountToDisplaySize(treeObject
-					.getTotalSize());
-			String name = treeObject.getName();
-			setText(name + " [" + displaySize + "]");
+		if (value instanceof DefaultMutableTreeNode) {
+			DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) value;
+			TreeObject treeObject = (TreeObject) treeNode.getUserObject();
+			if (treeObject != null) {
+				String displaySize = FileUtils
+						.byteCountToDisplaySize(treeObject.getSize());
+				String name = treeObject.getName();
+				setText(name + " [" + displaySize + "]");
+			} else {
+				setText("");
+			}
 		}
 		return this;
 	}

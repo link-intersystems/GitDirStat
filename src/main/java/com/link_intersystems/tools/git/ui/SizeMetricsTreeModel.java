@@ -1,6 +1,5 @@
 package com.link_intersystems.tools.git.ui;
 
-import java.math.BigInteger;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -8,12 +7,11 @@ import java.util.Map.Entry;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.link_intersystems.tools.git.common.SortedMap;
 import com.link_intersystems.tools.git.common.SortedMap.SortBy;
 import com.link_intersystems.tools.git.common.SortedMap.SortOrder;
 import com.link_intersystems.tools.git.domain.TreeObject;
+import com.link_intersystems.tools.git.domain.TreeObjectPath;
 
 public class SizeMetricsTreeModel extends DefaultTreeModel {
 
@@ -32,79 +30,50 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 		this.sortAsc = sortAsc;
 	}
 
-	public static class TreeObjectTreeNode extends DefaultMutableTreeNode {
-
-		/**
-		 *
-		 */
-		private static final long serialVersionUID = -4859433328865139220L;
-
-		public TreeObjectTreeNode(String name) {
-			super(null);
-			TreeObjectModel treeObject = new TreeObjectModel(name, this);
-			setUserObject(treeObject);
-		}
-
-		public void setSize(BigInteger size) {
-			TreeObjectModel treeObject = getTreeObjectModel();
-			treeObject.setSize(size);
-		}
-
-		TreeObjectModel getTreeObjectModel() {
-			TreeObjectModel treeObject = (TreeObjectModel) getUserObject();
-			return treeObject;
-		}
-
-		@Override
-		public String toString() {
-			return super.toString();
-		}
-	}
-
 	public static class WorkdirTreeNode extends DefaultMutableTreeNode {
 		/**
 		 *
 		 */
 		private static final long serialVersionUID = -5276518794046807282L;
 
-		private String[] splitPath(String path) {
-			return StringUtils.split(path, '/');
-		}
-
 		@SuppressWarnings("unchecked")
-		public TreeObjectTreeNode makePath(String path) {
-			String[] splitPath = splitPath(path);
-
+		public DefaultMutableTreeNode makePath(TreeObject newTreeObject) {
 			DefaultMutableTreeNode parentTreeNode = this;
-			TreeObjectTreeNode treeObjectTreeNode = null;
-			TreeObjectTreeNode lastTreeObjectTreeNode = null;
+			DefaultMutableTreeNode newTreeNode = null;
+			DefaultMutableTreeNode latestNode = null;
 
-			Enumeration<TreeObjectTreeNode> treeNodes = parentTreeNode
+			Enumeration<DefaultMutableTreeNode> treeNodes = parentTreeNode
 					.children();
 
-			pathSegments: for (int i = 0; i < splitPath.length; i++) {
-				String pathSegment = splitPath[i];
+			TreeObjectPath treeObjectPath = newTreeObject.getPath();
+
+			Enumeration<TreeObject> treePathEnumeration = treeObjectPath
+					.enumerate();
+			treePathEnumeration.nextElement(); // pop root
+
+			pathTreeObjects: while (treePathEnumeration.hasMoreElements()) {
+				TreeObject pathTreeObject = treePathEnumeration.nextElement();
 
 				while (treeNodes.hasMoreElements()) {
-					treeObjectTreeNode = treeNodes.nextElement();
-					TreeObjectModel treeObject = treeObjectTreeNode
-							.getTreeObjectModel();
-					if (pathSegment.equals(treeObject.getName())) {
-						lastTreeObjectTreeNode = treeObjectTreeNode;
-						parentTreeNode = treeObjectTreeNode;
+					newTreeNode = treeNodes.nextElement();
+					TreeObject treeObject = (TreeObject) newTreeNode
+							.getUserObject();
+					if (pathTreeObject.getName().equals(treeObject.getName())) {
+						latestNode = newTreeNode;
+						parentTreeNode = newTreeNode;
 						treeNodes = parentTreeNode.children();
-						continue pathSegments;
+						continue pathTreeObjects;
 					}
 				}
 
-				treeObjectTreeNode = new TreeObjectTreeNode(pathSegment);
-				lastTreeObjectTreeNode = treeObjectTreeNode;
-				parentTreeNode.add(treeObjectTreeNode);
-				parentTreeNode = treeObjectTreeNode;
+				newTreeNode = new DefaultMutableTreeNode(pathTreeObject);
+				latestNode = newTreeNode;
+				parentTreeNode.add(newTreeNode);
+				parentTreeNode = newTreeNode;
 				treeNodes = parentTreeNode.children();
 			}
 
-			return lastTreeObjectTreeNode;
+			return latestNode;
 
 		}
 	}
@@ -119,11 +88,7 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 		Map<String, TreeObject> pathMap = commitRangeTree.asPathMap();
 		pathMap = applySorting(pathMap);
 		for (Entry<String, TreeObject> pathEntry : pathMap.entrySet()) {
-			String path = pathEntry.getKey();
-			TreeObjectTreeNode treeObject = workdirTreeNode.makePath(path);
-			BigInteger size = pathEntry.getValue().getSize();
-			treeObject.setSize(size);
-
+			workdirTreeNode.makePath(pathEntry.getValue());
 		}
 		fireTreeStructureChanged(this, new Object[] { workdirTreeNode },
 				new int[0], new Object[0]);
