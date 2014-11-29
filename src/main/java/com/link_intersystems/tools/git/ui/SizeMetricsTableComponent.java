@@ -8,9 +8,14 @@ import java.math.BigInteger;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
+import com.link_intersystems.swing.ComponentResize;
+import com.link_intersystems.swing.RelativeWidthResizer;
+import com.link_intersystems.swing.TableColumnResize;
 import com.link_intersystems.tools.git.domain.TreeObject;
 
 public class SizeMetricsTableComponent extends JComponent {
@@ -32,6 +37,22 @@ public class SizeMetricsTableComponent extends JComponent {
 				sizeMetricsTableModel));
 		sizeMetricsTable.setDefaultRenderer(BigInteger.class,
 				new HumanReadableFileSizeTableCellRenderer());
+
+		sizeMetricsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+		TableColumnModel columnModel = sizeMetricsTable.getColumnModel();
+		TableColumn firstColumn = columnModel.getColumn(0);
+		TableColumn secondColumn = columnModel.getColumn(1);
+
+		ComponentResize<TableColumn> columnResize = new TableColumnResize();
+		RelativeWidthResizer<TableColumn> relativeWidthResizer = new RelativeWidthResizer<TableColumn>(
+				columnResize);
+		relativeWidthResizer.setRelativeWidth(firstColumn, 0.9);
+		relativeWidthResizer.setRelativeWidth(secondColumn, 0.1);
+		secondColumn.setMinWidth(50);
+
+		relativeWidthResizer.apply(sizeMetricsTable);
+		sizeMetricsTable.addComponentListener(relativeWidthResizer);
 	}
 
 	public void setModel(GitRepositoryModel gitRepositoryModel) {

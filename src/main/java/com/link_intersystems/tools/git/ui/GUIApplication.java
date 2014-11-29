@@ -41,9 +41,9 @@ public class GUIApplication implements GitDirStatApplication {
 		mainFrame.addMenuBarAction(MainFrame.MB_PATH_FILE, updateAction);
 
 		Action showTableAction = mainFrame.createMainComponentSetterAction(
-				"Show Table", sizeMetricsTableComponent);
+				"Table view", sizeMetricsTableComponent);
 		Action showTreeAction = mainFrame.createMainComponentSetterAction(
-				"Show Tree", sizeMetricsTreeComponent);
+				"Tree view", sizeMetricsTreeComponent);
 
 		mainFrame.addMenuBarActionGroup(MainFrame.MB_PATH_VIEW,
 				showTableAction, showTreeAction);
