@@ -4,8 +4,7 @@ import javax.swing.BoundedRangeModel;
 
 import com.link_intersystems.tools.git.common.ProgressMonitor;
 
-public class BoundedRangeModelProgressListener implements
-		ProgressMonitor {
+public class BoundedRangeModelProgressListener implements ProgressMonitor {
 	private BoundedRangeModel progressModel;
 
 	public BoundedRangeModelProgressListener(BoundedRangeModel progressModel) {
@@ -19,7 +18,7 @@ public class BoundedRangeModelProgressListener implements
 	}
 
 	@Override
-	public void start(int totalWork) {
+	public void start(String taskName, int totalWork) {
 		clear();
 		progressModel.setMaximum(totalWork);
 	}

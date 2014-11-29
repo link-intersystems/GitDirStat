@@ -5,7 +5,7 @@ public class NullProgressMonitor implements ProgressMonitor {
 	public static final ProgressMonitor INSTANCE = new NullProgressMonitor();
 
 	@Override
-	public void start(int totalWork) {
+	public void start(String taskName, int totalWork) {
 	}
 
 	@Override

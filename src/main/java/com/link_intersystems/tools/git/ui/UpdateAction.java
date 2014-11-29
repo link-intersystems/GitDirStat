@@ -75,8 +75,10 @@ public class UpdateAction extends AbstractAction {
 
 			CommitRange commitRange = gitRepository
 					.getCommitRange(Constants.HEAD);
+			ProgressListenerMonitorAdapter progressListenerMonitorAdapter = new ProgressListenerMonitorAdapter(
+					progressListener, "Loading GIT repository");
 			TreeObject commitRangeTree = gitRepository.getCommitRangeTree(
-					commitRange, progressListener);
+					commitRange, progressListenerMonitorAdapter);
 			commitRangeTree.asPathMap();
 			return commitRangeTree;
 		}

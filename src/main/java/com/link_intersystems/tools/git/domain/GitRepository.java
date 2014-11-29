@@ -24,8 +24,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.link_intersystems.tools.git.CommitRange;
 import com.link_intersystems.tools.git.StopAtRevFilter;
-import com.link_intersystems.tools.git.common.NullProgressMonitor;
-import com.link_intersystems.tools.git.common.ProgressMonitor;
 
 public class GitRepository {
 
@@ -79,7 +77,7 @@ public class GitRepository {
 	}
 
 	public TreeObject getCommitRangeTree(CommitRange commitRange,
-			ProgressMonitor progressMonitor) {
+			ProgressListener progressListener) {
 		try {
 			ObjectWalk objectWalk = createObjectWalk(repository, commitRange);
 
@@ -96,7 +94,7 @@ public class GitRepository {
 				treeWalk.addTree(treeId);
 			}
 
-			progressMonitor.start(treeIds.size());
+			progressListener.start(treeIds.size());
 
 			while (treeWalk.next()) {
 				String pathString = treeWalk.getPathString();
@@ -110,14 +108,14 @@ public class GitRepository {
 				TreeObject treeObject = root.makePath(pathString);
 				ObjectSize objectSize = new ObjectSize(objectId, size);
 				treeObject.addObjectSize(objectSize);
-				progressMonitor.update(1);
+				progressListener.update(1);
 			}
 
 			return root;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		} finally {
-			progressMonitor.end();
+			progressListener.end();
 		}
 	}
 
@@ -151,7 +149,7 @@ public class GitRepository {
 	}
 
 	public TreeObject getCommitRangeTree(CommitRange commitRange) {
-		return getCommitRangeTree(commitRange, NullProgressMonitor.INSTANCE);
+		return getCommitRangeTree(commitRange, NullProgressListener.INSTANCE);
 	}
 
 }

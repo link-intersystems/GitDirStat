@@ -6,20 +6,19 @@ import javax.swing.SwingUtilities;
 
 import com.link_intersystems.tools.git.common.ProgressMonitor;
 
-public class ProgressMonitorComponentVisibilityAdapter implements
-		ProgressMonitor {
+public class ComponentVisibilityOnProgress implements ProgressMonitor {
 
 	private Component[] visibleOnProgress;
 	private ProgressMonitor progressMonitor;
 
-	public ProgressMonitorComponentVisibilityAdapter(
-			ProgressMonitor progressMonitor, Component... visibleOnProgress) {
+	public ComponentVisibilityOnProgress(ProgressMonitor progressMonitor,
+			Component... visibleOnProgress) {
 		this.progressMonitor = progressMonitor;
 		this.visibleOnProgress = visibleOnProgress;
 	}
 
 	@Override
-	public void start(int totalWork) {
+	public void start(String taskName, int totalWork) {
 		SwingUtilities.invokeLater(new Runnable() {
 
 			@Override
@@ -29,7 +28,7 @@ public class ProgressMonitorComponentVisibilityAdapter implements
 				}
 			}
 		});
-		progressMonitor.start(totalWork);
+		progressMonitor.start(taskName, totalWork);
 
 	}
 

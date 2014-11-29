@@ -8,7 +8,6 @@ import java.io.Serializable;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BoundedRangeModel;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
 import javax.swing.JComponent;
@@ -20,6 +19,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.WindowConstants;
 
+import com.link_intersystems.swing.ProgressBarMonitor;
 import com.link_intersystems.tools.git.common.ProgressMonitor;
 
 public class MainFrame implements Serializable {
@@ -35,7 +35,7 @@ public class MainFrame implements Serializable {
 	private JFrame mainFrame;
 	private Component mainComponent;
 	private JProgressBar jProgressBar;
-	private ProgressMonitorComponentVisibilityAdapter progressBarVisibilityAdapter;
+	private ComponentVisibilityOnProgress progressBarVisibilityAdapter;
 	private JMenuBar menuBar;
 	private JMenu fileMenu;
 	private JMenu viewMenu;
@@ -51,10 +51,8 @@ public class MainFrame implements Serializable {
 		jProgressBar = new JProgressBar();
 		jProgressBar.setVisible(true);
 		jProgressBar.setStringPainted(true);
-		BoundedRangeModel progressModel = jProgressBar.getModel();
-		ProgressMonitor progressMonitor = new BoundedRangeModelProgressListener(
-				progressModel);
-		progressBarVisibilityAdapter = new ProgressMonitorComponentVisibilityAdapter(
+		ProgressMonitor progressMonitor = new ProgressBarMonitor(jProgressBar);
+		progressBarVisibilityAdapter = new ComponentVisibilityOnProgress(
 				progressMonitor, jProgressBar);
 		contentPane.add(jProgressBar, BorderLayout.SOUTH);
 
