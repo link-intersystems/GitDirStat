@@ -14,12 +14,12 @@ public class OpenAction extends AbstractAction {
 	 */
 	private static final long serialVersionUID = 6082672924263782869L;
 	private GitRepositoryModel gitRepositoryModel;
-	private UpdateAction updateAction;
+	private AbstractAction loadRepoAction;
 
 	public OpenAction(GitRepositoryModel gitRepositoryModel,
-			UpdateAction updateAction) {
+			AbstractAction loadRepoAction) {
 		this.gitRepositoryModel = gitRepositoryModel;
-		this.updateAction = updateAction;
+		this.loadRepoAction = loadRepoAction;
 		putValue(Action.NAME, "Open Git Repository");
 	}
 
@@ -37,7 +37,7 @@ public class OpenAction extends AbstractAction {
 		if (JFileChooser.APPROVE_OPTION == result) {
 			File selectedFile = jFileChooser.getSelectedFile();
 			gitRepositoryModel.setGitDir(selectedFile);
-			updateAction.actionPerformed(e);
+			loadRepoAction.actionPerformed(e);
 		}
 	}
 

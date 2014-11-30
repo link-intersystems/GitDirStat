@@ -3,6 +3,7 @@ package com.link_intersystems.tools.git.ui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.Serializable;
 
@@ -15,6 +16,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.WindowConstants;
@@ -22,6 +24,8 @@ import javax.swing.WindowConstants;
 import com.link_intersystems.swing.ProgressBarMonitor;
 import com.link_intersystems.swing.ProgressDialogMonitor;
 import com.link_intersystems.swing.ProgressMonitor;
+import com.link_intersystems.tools.git.ui.config.RepositoryConfigComponent;
+import com.link_intersystems.tools.git.ui.config.RepositoryConfigParams;
 
 public class MainFrame implements Serializable {
 
@@ -41,7 +45,7 @@ public class MainFrame implements Serializable {
 
 	private ProgressMonitor progressMonitor;
 
-	public MainFrame() {
+	public MainFrame(GitRepositoryModel gitRepositoryModel) {
 		mainFrame = new JFrame("GitDirStat");
 		mainFrame.setSize(800, 600);
 		mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -58,14 +62,23 @@ public class MainFrame implements Serializable {
 		viewMenu = new JMenu("View");
 		menuBar.add(viewMenu);
 
-		mainFrame.add(menuBar, BorderLayout.NORTH);
+		JPanel northPanel = new JPanel();
+		northPanel.setLayout(new BorderLayout());
+		northPanel.add(menuBar, BorderLayout.NORTH);
+
+		RepositoryConfigComponent repositoryConfig = new RepositoryConfigComponent(new RepositoryConfigParamsImpl());
+		repositoryConfig.setModel(gitRepositoryModel);
+		northPanel.add(repositoryConfig, BorderLayout.SOUTH);
+
+		mainFrame.add(northPanel, BorderLayout.NORTH);
 	}
 
 	private ProgressMonitor createProgressMonitor(JFrame mainFrame) {
 		ProgressMonitor progressMonitor = null;
 		boolean useProgressDialog = true;
 		if (useProgressDialog) {
-			ProgressDialogMonitor progressDialogMonitor = new ProgressDialogMonitor(mainFrame);
+			ProgressDialogMonitor progressDialogMonitor = new ProgressDialogMonitor(
+					mainFrame);
 			progressDialogMonitor.setMillisToDecideToPopup(100);
 			progressMonitor = progressDialogMonitor;
 		} else {
@@ -152,5 +165,14 @@ public class MainFrame implements Serializable {
 			}
 		}
 		return new MainComponentSetterAction(actionName, component);
+	}
+
+	private class RepositoryConfigParamsImpl implements RepositoryConfigParams {
+
+		@Override
+		public Window getMainFrame() {
+			return mainFrame;
+		}
+
 	}
 }

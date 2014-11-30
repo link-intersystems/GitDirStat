@@ -25,7 +25,7 @@ public class GUIApplication implements GitDirStatApplication {
 		}
 		GitRepositoryAccess repoAccess = new GitRepositoryAccess();
 
-		MainFrame mainFrame = new MainFrame();
+		MainFrame mainFrame = new MainFrame(repoModel);
 
 		SizeMetricsTableComponent sizeMetricsTableComponent = new SizeMetricsTableComponent();
 		sizeMetricsTableComponent.setModel(repoModel);
@@ -37,12 +37,18 @@ public class GUIApplication implements GitDirStatApplication {
 
 		ProgressMonitor progressMonitor = mainFrame.getProgressMonitor();
 
-		UpdateAction updateAction = new UpdateAction(repoAccess, repoModel,
-				progressMonitor);
-		OpenAction openAction = new OpenAction(repoModel, updateAction);
+		UpdateRefsAction updateRefsAction = new UpdateRefsAction(repoAccess,
+				repoModel);
+		UpdateTreeObjectAction updateAction = new UpdateTreeObjectAction(
+				repoAccess, repoModel, progressMonitor);
+		LoadRepositoryAction loadRepositoryAction = new LoadRepositoryAction(
+				"Update Repository", updateRefsAction, updateAction);
+
+		OpenAction openAction = new OpenAction(repoModel, loadRepositoryAction);
 
 		mainFrame.addMenuBarAction(MainFrame.MB_PATH_FILE, openAction);
-		mainFrame.addMenuBarAction(MainFrame.MB_PATH_FILE, updateAction);
+		mainFrame
+				.addMenuBarAction(MainFrame.MB_PATH_FILE, loadRepositoryAction);
 
 		Action showTableAction = mainFrame.createMainComponentSetterAction(
 				"Table view", sizeMetricsTableComponent);
@@ -55,7 +61,7 @@ public class GUIApplication implements GitDirStatApplication {
 		mainFrame.setVisible(true);
 
 		if (gitRepositoryDir != null) {
-			updateAction.actionPerformed(null);
+			loadRepositoryAction.actionPerformed(null);
 		}
 	}
 

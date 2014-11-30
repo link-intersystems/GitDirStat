@@ -1,18 +1,20 @@
 package com.link_intersystems.tools.git.domain;
 
+import java.util.Collection;
+
 import com.link_intersystems.tools.git.CommitRange;
 
 public class CommitRangeTree extends TreeObject {
 
-	private CommitRange commitRange;
+	private Collection<CommitRange> commitRanges;
 
-	public CommitRangeTree(String repositoryId, CommitRange commitRange) {
+	public CommitRangeTree(String repositoryId, Collection<CommitRange> commitRanges) {
 		super(repositoryId);
-		this.commitRange = commitRange;
+		this.commitRanges = commitRanges;
 	}
 
-	public CommitRange getCommitRange() {
-		return commitRange;
+	public Collection<CommitRange> getCommitRange() {
+		return commitRanges;
 	}
 
 }
