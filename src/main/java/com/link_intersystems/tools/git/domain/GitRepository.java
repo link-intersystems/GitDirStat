@@ -47,8 +47,9 @@ public class GitRepository {
 		builder.readEnvironment();
 		builder.findGitDir(repositoryDirectory);
 		File gitDir = builder.getGitDir();
-		if(gitDir == null){
-			String message = MessageFormat.format("No git repository found at {0}", repositoryDirectory);
+		if (gitDir == null) {
+			String message = MessageFormat.format(
+					"No git repository found at {0}", repositoryDirectory);
 			throw new GitRepositoryException(message);
 		}
 		try {
@@ -82,7 +83,8 @@ public class GitRepository {
 			try {
 				Map<String, org.eclipse.jgit.lib.Ref> refs = refDatabase
 						.getRefs(prefix);
-				for (Entry<String, org.eclipse.jgit.lib.Ref> refEntry: refs.entrySet()) {
+				for (Entry<String, org.eclipse.jgit.lib.Ref> refEntry : refs
+						.entrySet()) {
 					org.eclipse.jgit.lib.Ref ref = refEntry.getValue();
 					String name = ref.getName();
 					allRefs.put(name, ref);
@@ -114,17 +116,34 @@ public class GitRepository {
 		return revRange;
 	}
 
+	public Collection<CommitRange> getCommitRanges(List<? extends Ref> refs,
+			ProgressListener progressListener) throws IOException {
+		progressListener.start(refs.size());
+		try {
+			Collection<CommitRange> commitRanges = new ArrayList<CommitRange>();
+			for (Ref ref : refs) {
+				if (progressListener.isCanceled()) {
+					commitRanges = Collections.emptyList();
+					break;
+				}
+				org.eclipse.jgit.lib.Ref jgitRef = ref.getJgitRef();
+				AnyObjectId toInclusive = jgitRef.getObjectId();
+				AnyObjectId fromInclusive = getInitialCommit(toInclusive);
+				CommitRange revRange = new CommitRange(fromInclusive,
+						toInclusive);
+				commitRanges.add(revRange);
+				progressListener.update(1);
+			}
+			return commitRanges;
+		} finally {
+			progressListener.end();
+		}
+
+	}
+
 	public Collection<CommitRange> getCommitRanges(List<? extends Ref> refs)
 			throws IOException {
-		Collection<CommitRange> commitRanges = new ArrayList<CommitRange>();
-		for (Ref ref : refs) {
-			org.eclipse.jgit.lib.Ref jgitRef = ref.getJgitRef();
-			AnyObjectId toInclusive = jgitRef.getObjectId();
-			AnyObjectId fromInclusive = getInitialCommit(toInclusive);
-			CommitRange revRange = new CommitRange(fromInclusive, toInclusive);
-			commitRanges.add(revRange);
-		}
-		return commitRanges;
+		return getCommitRanges(refs, new NullProgressListener());
 	}
 
 	private RevCommit getInitialCommit(AnyObjectId headId) throws IOException {
@@ -149,7 +168,7 @@ public class GitRepository {
 			ProgressListener progressListener) {
 		try {
 			CommitRangeTree root = new CommitRangeTree(getId(), commitRanges);
-			if(commitRanges.isEmpty()){
+			if (commitRanges.isEmpty()) {
 				return root;
 			}
 
@@ -160,7 +179,6 @@ public class GitRepository {
 
 			List<ObjectId> treeIds = getTreeIds(objectWalk);
 
-
 			TreeWalk treeWalk = new TreeWalk(repository);
 			treeWalk.setRecursive(true);
 			for (ObjectId treeId : treeIds) {
@@ -170,6 +188,10 @@ public class GitRepository {
 			progressListener.start(treeIds.size());
 
 			while (treeWalk.next()) {
+				if (progressListener.isCanceled()) {
+					root = new CommitRangeTree(getId(), commitRanges);
+					break;
+				}
 				ObjectId objectId = treeWalk.getObjectId(0);
 				if (ObjectId.zeroId().equals(objectId)) {
 					continue;
@@ -194,8 +216,9 @@ public class GitRepository {
 	}
 
 	private ObjectWalk createObjectWalk(Repository repository,
-			Collection<CommitRange> commitRanges) throws AmbiguousObjectException,
-			IncorrectObjectTypeException, IOException, MissingObjectException {
+			Collection<CommitRange> commitRanges)
+			throws AmbiguousObjectException, IncorrectObjectTypeException,
+			IOException, MissingObjectException {
 		ObjectWalk objectWalk = new ObjectWalk(repository);
 
 		Collection<RevCommit> startRevCommits = new HashSet<RevCommit>();
@@ -226,6 +249,20 @@ public class GitRepository {
 
 	public TreeObject getCommitRangeTree(CommitRange commitRange) {
 		return getCommitRangeTree(commitRange, NullProgressListener.INSTANCE);
+	}
+
+	public TreeObject getCommitRangeTree(List<? extends Ref> selectedRefs,
+			ProgressListener progressListener) throws IOException {
+		progressListener.start(1000);
+		try {
+			Collection<CommitRange> commitRanges = getCommitRanges(
+					selectedRefs,
+					new SubProgressListener(progressListener, 200));
+			return getCommitRangeTree(commitRanges, new SubProgressListener(
+					progressListener, 800));
+		} finally {
+			progressListener.end();
+		}
 	}
 
 }

@@ -29,4 +29,9 @@ public class ProgressListenerMonitorAdapter implements ProgressListener {
 		progressMonitor.end();
 	}
 
+	@Override
+	public boolean isCanceled() {
+		return progressMonitor.isCanceled();
+	}
+
 }

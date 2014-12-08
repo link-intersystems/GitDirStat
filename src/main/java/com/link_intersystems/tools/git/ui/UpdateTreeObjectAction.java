@@ -3,7 +3,6 @@ package com.link_intersystems.tools.git.ui;
 import java.io.File;
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.Collection;
 import java.util.List;
 
 import javax.swing.Action;
@@ -11,13 +10,13 @@ import javax.swing.Action;
 import com.link_intersystems.io.FileUtils;
 import com.link_intersystems.swing.AsyncProgressAction;
 import com.link_intersystems.swing.ProgressMonitor;
-import com.link_intersystems.tools.git.CommitRange;
 import com.link_intersystems.tools.git.domain.GitRepository;
 import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
 import com.link_intersystems.tools.git.domain.Ref;
 import com.link_intersystems.tools.git.domain.TreeObject;
 
-public class UpdateTreeObjectAction extends AsyncProgressAction<TreeObject, Void> {
+public class UpdateTreeObjectAction extends
+		AsyncProgressAction<TreeObject, Void> {
 
 	/**
 	 *
@@ -45,15 +44,13 @@ public class UpdateTreeObjectAction extends AsyncProgressAction<TreeObject, Void
 
 		List<? extends Ref> selectedRefs = gitRepositoryModel.getSelectedRefs();
 
-		Collection<CommitRange> commitRanges = gitRepository
-				.getCommitRanges(selectedRefs);
 		String progressMessage = MessageFormat.format(
 				"Loading repository: {0}",
 				FileUtils.abbreviatedPath(gitDir, 50));
 		ProgressListenerMonitorAdapter progressListenerMonitorAdapter = new ProgressListenerMonitorAdapter(
 				progressListener, progressMessage);
 		TreeObject commitRangeTree = gitRepository.getCommitRangeTree(
-				commitRanges, progressListenerMonitorAdapter);
+				selectedRefs, progressListenerMonitorAdapter);
 		return commitRangeTree;
 	}
 

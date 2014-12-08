@@ -16,4 +16,9 @@ public class NullProgressListener implements ProgressListener {
 	public void end() {
 	}
 
+	@Override
+	public boolean isCanceled() {
+		return false;
+	}
+
 }
