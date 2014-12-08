@@ -170,11 +170,12 @@ public class GitRepository {
 			progressListener.start(treeIds.size());
 
 			while (treeWalk.next()) {
-				String pathString = treeWalk.getPathString();
 				ObjectId objectId = treeWalk.getObjectId(0);
 				if (ObjectId.zeroId().equals(objectId)) {
 					continue;
 				}
+				String pathString = treeWalk.getPathString();
+
 				long size = objectReader.getObjectSize(objectId,
 						ObjectReader.OBJ_ANY);
 
@@ -204,9 +205,6 @@ public class GitRepository {
 			startRevCommits.add(revCommit);
 		}
 		objectWalk.markStart(startRevCommits);
-//		AnyObjectId fromInclusive = commitRanges.getFromInclusive();
-//		StopAtRevFilter stopAtRevFilter = new StopAtRevFilter(fromInclusive);
-//		objectWalk.setRevFilter(stopAtRevFilter);
 		return objectWalk;
 	}
 

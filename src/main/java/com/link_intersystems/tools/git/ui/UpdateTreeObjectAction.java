@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.Action;
 
 import com.link_intersystems.io.FileUtils;
+import com.link_intersystems.swing.AsyncProgressAction;
 import com.link_intersystems.swing.ProgressMonitor;
 import com.link_intersystems.tools.git.CommitRange;
 import com.link_intersystems.tools.git.domain.GitRepository;
@@ -16,7 +17,7 @@ import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
 import com.link_intersystems.tools.git.domain.Ref;
 import com.link_intersystems.tools.git.domain.TreeObject;
 
-public class UpdateTreeObjectAction extends AsyncAction<TreeObject, Void> {
+public class UpdateTreeObjectAction extends AsyncProgressAction<TreeObject, Void> {
 
 	/**
 	 *

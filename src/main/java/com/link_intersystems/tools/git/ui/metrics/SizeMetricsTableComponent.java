@@ -1,11 +1,8 @@
 package com.link_intersystems.tools.git.ui.metrics;
 
 import java.awt.BorderLayout;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.math.BigInteger;
 
-import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
@@ -19,17 +16,15 @@ import com.link_intersystems.swing.TableColumnResize;
 import com.link_intersystems.tools.git.domain.TreeObject;
 import com.link_intersystems.tools.git.ui.GitRepositoryModel;
 
-public class SizeMetricsTableComponent extends JComponent {
+public class SizeMetricsTableComponent extends GitRepositoryComponent {
 
 	private static final long serialVersionUID = 8588810751988085851L;
 
-	private SizeMetricsPropertyChangeListener sizeMetricsChangeListener = new SizeMetricsPropertyChangeListener();
 	private SizeMetricsTableModel sizeMetricsTableModel = new SizeMetricsTableModel();
 	private JTable sizeMetricsTable = new JTable(sizeMetricsTableModel);
 	private JScrollPane sizeMetricsScrollPane = new JScrollPane(
 			sizeMetricsTable);
 
-	private GitRepositoryModel gitRepositoryModel;
 
 	public SizeMetricsTableComponent() {
 		setLayout(new BorderLayout());
@@ -56,26 +51,8 @@ public class SizeMetricsTableComponent extends JComponent {
 		sizeMetricsTable.addComponentListener(relativeWidthResizer);
 	}
 
-	public void setModel(GitRepositoryModel gitRepositoryModel) {
-		if (this.gitRepositoryModel != null) {
-			gitRepositoryModel.removePropertyChangeListener(
-					GitRepositoryModel.PROP_COMMIT_RANGE_TREE,
-					sizeMetricsChangeListener);
-		}
-		this.gitRepositoryModel = gitRepositoryModel;
-		if (this.gitRepositoryModel != null) {
-			this.gitRepositoryModel.addPropertyChangeListener(
-					GitRepositoryModel.PROP_COMMIT_RANGE_TREE,
-					sizeMetricsChangeListener);
-			updateCommitRangeTree();
-		}
-	}
-
-	public GitRepositoryModel getModel() {
-		return gitRepositoryModel;
-	}
-
-	private void updateCommitRangeTree() {
+	protected void updateCommitRangeTree() {
+		GitRepositoryModel gitRepositoryModel = getModel();
 		if (gitRepositoryModel != null) {
 			TreeObject commitRangeTree = gitRepositoryModel
 					.getCommitRangeTree();
@@ -83,13 +60,4 @@ public class SizeMetricsTableComponent extends JComponent {
 		}
 	}
 
-	private class SizeMetricsPropertyChangeListener implements
-			PropertyChangeListener {
-
-		@Override
-		public void propertyChange(PropertyChangeEvent evt) {
-			updateCommitRangeTree();
-		}
-
-	}
 }

@@ -1,14 +1,13 @@
-package com.link_intersystems.tools.git.ui;
+package com.link_intersystems.swing;
 
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
-public abstract class AsyncAction<T, V> extends AbstractAction {
+public abstract class AsyncProgressAction<T, V> extends ProgressAction {
 
 	private static final long serialVersionUID = 7131523498822927047L;
 
@@ -44,17 +43,19 @@ public abstract class AsyncAction<T, V> extends AbstractAction {
 
 		@Override
 		protected T doInBackground() throws Exception {
-			return AsyncAction.this.doInBackground();
+			setRunning(true);
+			return AsyncProgressAction.this.doInBackground();
 		}
 
 		@Override
 		protected void process(List<V> chunks) {
-			AsyncAction.this.process(chunks);
+			AsyncProgressAction.this.process(chunks);
 		}
 
 		@Override
 		protected void done() {
-			AsyncAction.this.processResult(new ResultRef<T>() {
+			setRunning(false);
+			AsyncProgressAction.this.processResult(new ResultRef<T>() {
 
 				@Override
 				public T get() throws InterruptedException, ExecutionException {

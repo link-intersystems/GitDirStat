@@ -3,11 +3,16 @@ package com.link_intersystems.tools.git.ui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.ButtonModel;
@@ -19,13 +24,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
 
 import com.link_intersystems.swing.ProgressBarMonitor;
 import com.link_intersystems.swing.ProgressDialogMonitor;
 import com.link_intersystems.swing.ProgressMonitor;
-import com.link_intersystems.tools.git.ui.config.RepositoryConfigComponent;
-import com.link_intersystems.tools.git.ui.config.RepositoryConfigParams;
+import com.link_intersystems.swing.SingleActionSelectionMediator;
 
 public class MainFrame implements Serializable {
 
@@ -35,64 +40,74 @@ public class MainFrame implements Serializable {
 	private static final long serialVersionUID = 3532566379033471650L;
 
 	public static final String MB_PATH_FILE = "file";
-	public static final String MB_PATH_VIEW = "view";
+	public static final String MENU_PATH_VIEW = "view";
 
-	private JFrame mainFrame;
+	private static class ButtonGroupActionSelectionSync implements
+			PropertyChangeListener {
+
+		private ButtonGroup buttonGroup;
+
+		public ButtonGroupActionSelectionSync(ButtonGroup buttonGroup) {
+			this.buttonGroup = buttonGroup;
+		}
+
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+			Action selectedAction = (Action) evt.getNewValue();
+			Enumeration<AbstractButton> elements = buttonGroup.getElements();
+			while (elements.hasMoreElements()) {
+				AbstractButton abstractButton = elements.nextElement();
+				Action action = abstractButton.getAction();
+				buttonGroup.setSelected(abstractButton.getModel(),
+						selectedAction.equals(action));
+
+			}
+		}
+	};
+
+	private JFrame mainFrame = new JFrame("GitDirStat");
+
+	private JMenuBar menuBar = new JMenuBar();
+	private JMenu fileMenu = new JMenu("File");
+	private JMenu viewMenu = new JMenu("View");
+	private JPanel northPanel = new JPanel();
+
+	private Map<String, SingleActionSelectionMediator> actionGroupMediator = new HashMap<String, SingleActionSelectionMediator>();
+
 	private Component mainComponent;
-	private JMenuBar menuBar;
-	private JMenu fileMenu;
-	private JMenu viewMenu;
-
 	private ProgressMonitor progressMonitor;
+	private JToolBar jToolBar = new JToolBar();
 
 	public MainFrame(GitRepositoryModel gitRepositoryModel) {
-		mainFrame = new JFrame("GitDirStat");
 		mainFrame.setSize(800, 600);
 		mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		mainFrame.setLocationRelativeTo(null);
+
 		Container contentPane = mainFrame.getContentPane();
 		contentPane.setLayout(new BorderLayout());
 
 		progressMonitor = createProgressMonitor(mainFrame);
 
-		menuBar = new JMenuBar();
-
-		fileMenu = new JMenu("File");
 		menuBar.add(fileMenu);
-		viewMenu = new JMenu("View");
 		menuBar.add(viewMenu);
 
-		JPanel northPanel = new JPanel();
 		northPanel.setLayout(new BorderLayout());
 		northPanel.add(menuBar, BorderLayout.NORTH);
-
-		RepositoryConfigComponent repositoryConfig = new RepositoryConfigComponent(new RepositoryConfigParamsImpl());
-		repositoryConfig.setModel(gitRepositoryModel);
-		northPanel.add(repositoryConfig, BorderLayout.SOUTH);
+		northPanel.add(jToolBar, BorderLayout.SOUTH);
 
 		mainFrame.add(northPanel, BorderLayout.NORTH);
 	}
 
+	public void addToolbarAction(Action action) {
+		this.jToolBar.add(action);
+	}
+
 	private ProgressMonitor createProgressMonitor(JFrame mainFrame) {
 		ProgressMonitor progressMonitor = null;
-		boolean useProgressDialog = true;
-		if (useProgressDialog) {
-			ProgressDialogMonitor progressDialogMonitor = new ProgressDialogMonitor(
-					mainFrame);
-			progressDialogMonitor.setMillisToDecideToPopup(100);
-			progressMonitor = progressDialogMonitor;
-		} else {
-			JProgressBar jProgressBar = new JProgressBar();
-			jProgressBar.setVisible(true);
-			jProgressBar.setStringPainted(true);
-
-			Container contentPane = mainFrame.getContentPane();
-			ProgressMonitor progressBarMonitor = new ProgressBarMonitor(
-					jProgressBar);
-			progressMonitor = new ComponentVisibilityOnProgress(
-					progressBarMonitor, jProgressBar);
-			contentPane.add(jProgressBar, BorderLayout.SOUTH);
-		}
+		ProgressDialogMonitor progressDialogMonitor = new ProgressDialogMonitor(
+				mainFrame);
+		progressDialogMonitor.setMillisToDecideToPopup(100);
+		progressMonitor = progressDialogMonitor;
 		return progressMonitor;
 	}
 
@@ -123,25 +138,40 @@ public class MainFrame implements Serializable {
 		mainFrame.setVisible(visible);
 	}
 
-	public void addMenuBarActionGroup(String menubarPath, Action selected,
-			Action... additionalActions) {
-		if (menubarPath.startsWith(MB_PATH_VIEW)) {
-			ButtonGroup group = new ButtonGroup();
-			JRadioButtonMenuItem radioButton = new JRadioButtonMenuItem(
-					selected);
-			group.add(radioButton);
-			viewMenu.add(radioButton);
-			ButtonModel selectedButtonModel = radioButton.getModel();
+	public void addMenuBarActionGroup(String menubarPath, Action... actions) {
+		if (menubarPath.startsWith(MENU_PATH_VIEW)) {
+			final ButtonGroup group = new ButtonGroup();
+			SingleActionSelectionMediator actionGroupMediator = getActionGroupMediator(menubarPath);
+			actionGroupMediator.setActionGroup(actions);
+			ButtonGroupActionSelectionSync buttonGroupActionSelectionSync = new ButtonGroupActionSelectionSync(
+					group);
+			actionGroupMediator.addPropertyChangeListener(
+					SingleActionSelectionMediator.PROP_SELECTED_ACTION,
+					buttonGroupActionSelectionSync);
 
-			for (int i = 0; i < additionalActions.length; i++) {
-				Action action = additionalActions[i];
+			JRadioButtonMenuItem radioButton = null;
+			for (int i = 0; i < actions.length; i++) {
+				Action action = actions[i];
 				radioButton = new JRadioButtonMenuItem(action);
 				group.add(radioButton);
 				viewMenu.add(radioButton);
+				Boolean selected = (Boolean) action
+						.getValue(Action.SELECTED_KEY);
+				boolean isSelected = selected != null && selected;
+				group.setSelected(radioButton.getModel(), isSelected);
 			}
-
-			group.setSelected(selectedButtonModel, true);
 		}
+	}
+
+	private SingleActionSelectionMediator getActionGroupMediator(
+			String menubarPath) {
+		SingleActionSelectionMediator selectionMediator = actionGroupMediator
+				.get(menubarPath);
+		if (selectionMediator == null) {
+			selectionMediator = new SingleActionSelectionMediator();
+			actionGroupMediator.put(menubarPath, selectionMediator);
+		}
+		return selectionMediator;
 	}
 
 	public Action createMainComponentSetterAction(String actionName,
@@ -167,12 +197,4 @@ public class MainFrame implements Serializable {
 		return new MainComponentSetterAction(actionName, component);
 	}
 
-	private class RepositoryConfigParamsImpl implements RepositoryConfigParams {
-
-		@Override
-		public Window getMainFrame() {
-			return mainFrame;
-		}
-
-	}
 }

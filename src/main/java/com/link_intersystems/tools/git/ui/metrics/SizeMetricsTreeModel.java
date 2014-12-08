@@ -71,11 +71,12 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 		}
 	}
 
-	private static class TreeObjectLeafNodeTransformer implements
+	private class TreeObjectLeafNodeTransformer implements
 			Transformer<Object, Object> {
 
 		@Override
 		public Object transform(Object input) {
+			fireTreeStructureChanged();
 			if (input instanceof TreeObject) {
 				TreeObject treeObject = (TreeObject) input;
 				if (treeObject.isFile()) {

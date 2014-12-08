@@ -5,13 +5,12 @@ import java.util.List;
 
 import javax.swing.Action;
 
-import com.link_intersystems.tools.git.domain.Branch;
+import com.link_intersystems.swing.AsyncProgressAction;
 import com.link_intersystems.tools.git.domain.GitRepository;
 import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
 import com.link_intersystems.tools.git.domain.Ref;
-import com.link_intersystems.tools.git.domain.RemoteBranch;
 
-public class UpdateRefsAction extends AsyncAction<List<? extends Ref>, Void> {
+public class UpdateRefsAction extends AsyncProgressAction<List<? extends Ref>, Void> {
 
 	private static final long serialVersionUID = 6082672924263782869L;
 
@@ -32,7 +31,7 @@ public class UpdateRefsAction extends AsyncAction<List<? extends Ref>, Void> {
 		File gitDir = gitRepositoryModel.getGitDir();
 		gitRepository = gitRepositoryAccess.getGitRepository(gitDir);
 
-		List<Branch> refs = gitRepository.getRefs(Branch.class);
+		List<Ref> refs = gitRepository.getRefs(Ref.class);
 		return refs;
 	}
 
@@ -40,5 +39,4 @@ public class UpdateRefsAction extends AsyncAction<List<? extends Ref>, Void> {
 	protected void done(List<? extends Ref> result) {
 		gitRepositoryModel.setRefs(result);
 	}
-
 }

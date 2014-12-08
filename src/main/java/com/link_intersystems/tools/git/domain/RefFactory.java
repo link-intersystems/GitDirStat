@@ -12,6 +12,8 @@ public class RefFactory {
 
 	static final String PREFIX_LOCAL = "refs/heads/";
 	static final String PREFIX_REMOTE = "refs/remotes/";
+	static final String PREFIX_TAG = "refs/tags";
+
 	private GitRepository gitRepository;
 
 	public RefFactory(GitRepository gitRepository) {
@@ -55,6 +57,10 @@ public class RefFactory {
 			ref = new LocalBranch(jgitRef);
 		} else if (name.startsWith(PREFIX_REMOTE)) {
 			ref = new RemoteBranch(jgitRef);
+		} else if (name.startsWith(PREFIX_TAG)) {
+			ref = new Tag(jgitRef);
+		} else if (jgitRef.isSymbolic()) {
+			ref = new SymbolicRef(jgitRef);
 		} else {
 			throw new UnsupportedOperationException(jgitRef
 					+ " not implemented yet");
