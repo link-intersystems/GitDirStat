@@ -44,7 +44,7 @@ public class SizeMetricsView extends JPanel {
 	}
 
 	private GitRepositoryModel gitRepositoryModel = new GitRepositoryModel();
-	private BranchSelectionList branchSelectionList = new BranchSelectionList();
+	private BranchSelectionTable branchSelectionList = new BranchSelectionTable();
 
 	private SizeMetricsTableComponent sizeMetricsTableComponent = new SizeMetricsTableComponent();
 	private SizeMetricsTreeComponent sizeMetricsTreeComponent = new SizeMetricsTreeComponent();

@@ -18,7 +18,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
-import com.link_intersystems.swing.CheckboxListCellRenderer;
+import com.link_intersystems.swing.CheckboxRenderer;
 import com.link_intersystems.tools.git.domain.Ref;
 
 public class BranchSelectionList extends JPanel {
@@ -36,7 +36,7 @@ public class BranchSelectionList extends JPanel {
 		setLayout(new BorderLayout());
 
 		selectionList.setSelectionModel(selectionModel);
-		selectionList.setCellRenderer(new CheckboxListCellRenderer());
+		selectionList.setCellRenderer(new CheckboxRenderer());
 		add(new JScrollPane(selectionList), BorderLayout.CENTER);
 	}
 
