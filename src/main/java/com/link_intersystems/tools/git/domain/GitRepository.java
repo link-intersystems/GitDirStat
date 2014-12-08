@@ -8,11 +8,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.jgit.errors.AmbiguousObjectException;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ResetCommand;
+import org.eclipse.jgit.api.errors.CheckoutConflictException;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.AnyObjectId;
@@ -172,7 +177,7 @@ public class GitRepository {
 				return root;
 			}
 
-			ObjectWalk objectWalk = createObjectWalk(repository, commitRanges);
+			ObjectWalk objectWalk = createObjectWalk(commitRanges);
 
 			ObjectDatabase objectDatabase = repository.getObjectDatabase();
 			ObjectReader objectReader = objectDatabase.newReader();
@@ -215,20 +220,31 @@ public class GitRepository {
 		}
 	}
 
-	private ObjectWalk createObjectWalk(Repository repository,
-			Collection<CommitRange> commitRanges)
-			throws AmbiguousObjectException, IncorrectObjectTypeException,
-			IOException, MissingObjectException {
+	ObjectWalk createObjectWalk(Collection<CommitRange> commitRanges)
+			throws IOException {
 		ObjectWalk objectWalk = new ObjectWalk(repository);
+		applyCommitRanges(objectWalk, commitRanges);
+		return objectWalk;
+	}
 
+	private void applyCommitRanges(RevWalk revWalk,
+			Collection<CommitRange> commitRanges)
+			throws MissingObjectException, IncorrectObjectTypeException,
+			IOException {
 		Collection<RevCommit> startRevCommits = new HashSet<RevCommit>();
 		for (CommitRange commitRange : commitRanges) {
 			AnyObjectId toInclusive = commitRange.getToInclusive();
-			RevCommit revCommit = objectWalk.parseCommit(toInclusive);
+			RevCommit revCommit = revWalk.parseCommit(toInclusive);
 			startRevCommits.add(revCommit);
 		}
-		objectWalk.markStart(startRevCommits);
-		return objectWalk;
+		revWalk.markStart(startRevCommits);
+	}
+
+	RevWalk createRevWalk(Collection<CommitRange> commitRanges)
+			throws IOException {
+		RevWalk revWalk = new RevWalk(repository);
+		applyCommitRanges(revWalk, commitRanges);
+		return revWalk;
 	}
 
 	private List<ObjectId> getTreeIds(ObjectWalk objectWalk)
@@ -265,4 +281,45 @@ public class GitRepository {
 		}
 	}
 
+	public void applyFilter(Collection<CommitRange> commitRanges,
+			IndexFilter indexFilter) throws IOException,
+			CheckoutConflictException, GitAPIException {
+		RevWalk revWalk = createRevWalk(commitRanges);
+
+		revWalk.sort(RevSort.TOPO);
+		revWalk.sort(RevSort.REVERSE, true);
+
+		Iterator<RevCommit> revCommitIterator = revWalk.iterator();
+
+		Git git = getGit();
+
+		long start = System.currentTimeMillis();
+		int revCommits = 0;
+		List<IndexRewrite> indexRewrites = new ArrayList<IndexRewrite>();
+
+		while (revCommitIterator.hasNext()) {
+			RevCommit revCommit = revCommitIterator.next();
+
+			String ref = revCommit.getId().getName();
+			ResetCommand reset = git.reset();
+			reset.setRef(ref);
+			reset.call();
+			DirCache dirCache = getRepository().readDirCache();
+			Index index = new DirCacheIndex(dirCache);
+			indexFilter.filter(index);
+			IndexRewrite indexRewrite = index.getIndexRewrite();
+			if (indexRewrite != null) {
+				indexRewrites.add(indexRewrite);
+			}
+			revCommits++;
+		}
+		long end = System.currentTimeMillis();
+
+		System.out.println("Duration: " + (end - start));
+		System.out.println("RevCommits: " + revCommits);
+	}
+
+	public Git getGit() {
+		return new Git(getRepository());
+	}
 }
