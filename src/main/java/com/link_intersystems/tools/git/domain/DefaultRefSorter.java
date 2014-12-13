@@ -4,6 +4,8 @@ import java.util.Comparator;
 
 public class DefaultRefSorter implements Comparator<Ref> {
 
+	public static final DefaultRefSorter INSTANCE = new DefaultRefSorter();
+
 	@Override
 	public int compare(Ref o1, Ref o2) {
 		String name1 = o1.getName();

@@ -4,6 +4,6 @@ import java.io.IOException;
 
 public interface IndexFilter {
 
-	void filter(Index index) throws IOException;
+	void apply(CommitUpdate commitUpdate) throws IOException;
 
 }

@@ -54,13 +54,13 @@ public class RefFactory {
 		Ref ref = null;
 		String name = jgitRef.getName();
 		if (name.startsWith(PREFIX_LOCAL)) {
-			ref = new LocalBranch(jgitRef);
+			ref = new LocalBranch(gitRepository, jgitRef);
 		} else if (name.startsWith(PREFIX_REMOTE)) {
-			ref = new RemoteBranch(jgitRef);
+			ref = new RemoteBranch(gitRepository, jgitRef);
 		} else if (name.startsWith(PREFIX_TAG)) {
-			ref = new Tag(jgitRef);
+			ref = new Tag(gitRepository, jgitRef);
 		} else if (jgitRef.isSymbolic()) {
-			ref = new SymbolicRef(jgitRef);
+			ref = new SymbolicRef(gitRepository, jgitRef);
 		} else {
 			throw new UnsupportedOperationException(jgitRef
 					+ " not implemented yet");

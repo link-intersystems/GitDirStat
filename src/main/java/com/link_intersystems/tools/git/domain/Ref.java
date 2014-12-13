@@ -1,13 +1,19 @@
 package com.link_intersystems.tools.git.domain;
 
+import java.io.IOException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.RefUpdate;
+import org.eclipse.jgit.lib.Repository;
 
 public class Ref {
 
 	private org.eclipse.jgit.lib.Ref jgitRef;
+	private GitRepository gitRepository;
 
-	Ref(org.eclipse.jgit.lib.Ref jgitRef) {
+	Ref(GitRepository gitRepository, org.eclipse.jgit.lib.Ref jgitRef) {
+		this.gitRepository = gitRepository;
 		this.jgitRef = jgitRef;
 	}
 
@@ -57,6 +63,19 @@ public class Ref {
 				return false;
 		} else if (!getObjectId().equals(other.getObjectId()))
 			return false;
+		return true;
+	}
+
+	public void update(ObjectId newId) throws IOException {
+		String refName = getName();
+		Repository repository = gitRepository.getRepository();
+		RefUpdate ru = repository.updateRef(refName);
+		ru.setNewObjectId(newId);
+		ru.setForceUpdate(true);
+		ru.update();
+	}
+
+	public boolean isUpdateable() {
 		return true;
 	}
 

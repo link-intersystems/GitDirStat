@@ -8,16 +8,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.AnyObjectId;
@@ -42,9 +39,15 @@ public class GitRepository {
 	private Repository repository;
 	private RefFactory refFactory;
 
+	private CommitAccess commitAccess = new CommitAccess();
+
 	public GitRepository(Repository repository) {
 		this.repository = repository;
 		refFactory = new RefFactory(this);
+	}
+
+	public GitRepository(Git git) {
+		this(git.getRepository());
 	}
 
 	static String createId(File repositoryDirectory) {
@@ -108,7 +111,7 @@ public class GitRepository {
 			refs.add((T) ref);
 		}
 
-		Collections.sort(refs, new DefaultRefSorter());
+		Collections.sort(refs, DefaultRefSorter.INSTANCE);
 
 		return refs;
 	}
@@ -156,8 +159,8 @@ public class GitRepository {
 		RevWalk rw = new RevWalk(repository);
 		RevCommit c = null;
 		RevCommit root = rw.parseCommit(headId);
-		rw.sort(RevSort.REVERSE);
 		rw.markStart(root);
+		rw.sort(RevSort.REVERSE);
 		c = rw.next();
 		return c;
 	}
@@ -284,42 +287,71 @@ public class GitRepository {
 	public void applyFilter(Collection<CommitRange> commitRanges,
 			IndexFilter indexFilter) throws IOException,
 			CheckoutConflictException, GitAPIException {
-		RevWalk revWalk = createRevWalk(commitRanges);
-
-		revWalk.sort(RevSort.TOPO);
-		revWalk.sort(RevSort.REVERSE, true);
-
-		Iterator<RevCommit> revCommitIterator = revWalk.iterator();
-
 		Git git = getGit();
+		BranchMemento branchMemento = new BranchMemento(git);
+		branchMemento.save();
+
+		CommitWalk commitWalk = createCommitWalk(commitRanges);
+		RewriteIndexCommitWalkIterator rewriteIterator = new RewriteIndexCommitWalkIterator(
+				git, commitWalk);
+
+		int revCommits = 0;
+		HistoryUpdate historyUpdate = new HistoryUpdate(this);
 
 		long start = System.currentTimeMillis();
-		int revCommits = 0;
-		List<IndexRewrite> indexRewrites = new ArrayList<IndexRewrite>();
+		while (rewriteIterator.hasNext()) {
+			Commit commit = rewriteIterator.next();
 
-		while (revCommitIterator.hasNext()) {
-			RevCommit revCommit = revCommitIterator.next();
+			CommitUpdate commitUpdate = new CommitUpdate(this, commit,
+					historyUpdate);
+			indexFilter.apply(commitUpdate);
 
-			String ref = revCommit.getId().getName();
-			ResetCommand reset = git.reset();
-			reset.setRef(ref);
-			reset.call();
-			DirCache dirCache = getRepository().readDirCache();
-			Index index = new DirCacheIndex(dirCache);
-			indexFilter.filter(index);
-			IndexRewrite indexRewrite = index.getIndexRewrite();
-			if (indexRewrite != null) {
-				indexRewrites.add(indexRewrite);
-			}
+			commitUpdate.execute();
+
 			revCommits++;
 		}
+
+		historyUpdate.updateRefs();
+		historyUpdate.gc();
+		branchMemento.restore();
+
+		rewriteIterator.close();
+
 		long end = System.currentTimeMillis();
 
 		System.out.println("Duration: " + (end - start));
 		System.out.println("RevCommits: " + revCommits);
 	}
 
+	private CommitWalk createCommitWalk(Collection<CommitRange> commitRanges)
+			throws IOException {
+		RevWalk revWalk = createRevWalk(commitRanges);
+
+		revWalk.sort(RevSort.TOPO);
+		revWalk.sort(RevSort.REVERSE, true);
+
+		CommitWalk commitWalk = new CommitWalk(revWalk, commitAccess);
+		return commitWalk;
+	}
+
 	public Git getGit() {
 		return new Git(getRepository());
+	}
+
+	public void applyFilter(IndexFilter indexFilter) throws IOException,
+			GitAPIException {
+		List<LocalBranch> refs = getRefs(LocalBranch.class);
+		Collection<CommitRange> commitRanges = getCommitRanges(refs);
+		applyFilter(commitRanges, indexFilter);
+	}
+
+	public void applyFilter(List<Ref> refs, IndexFilter indexFilter)
+			throws IOException, GitAPIException {
+		Collection<CommitRange> commitRanges = getCommitRanges(refs);
+		applyFilter(commitRanges, indexFilter);
+	}
+
+	CommitAccess getCommitAccess() {
+		return commitAccess;
 	}
 }

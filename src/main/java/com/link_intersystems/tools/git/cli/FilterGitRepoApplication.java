@@ -1,8 +1,6 @@
 package com.link_intersystems.tools.git.cli;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
