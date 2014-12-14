@@ -22,8 +22,9 @@ import com.link_intersystems.tools.git.test.GitRepositoryTestRunner;
 public class GitRepositoryTest {
 
 	@Test
-	public void applyIndexFilterOnAuthor(GitRepository gitRepository)
+	public void applyIndexFilterOnAuthor_(GitRepository gitRepository)
 			throws IOException, GitAPIException {
+
 		List<Ref> refs = gitRepository.getRefs(Ref.class);
 
 		IndexFilter indexRewriter = new IndexFilter() {

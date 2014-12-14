@@ -44,7 +44,7 @@ public class RewriteIndexCommitWalkIterator implements Iterator<Commit> {
 			} else {
 				String resetObjectId = commit.getId().getName();
 				ResetCommand reset = git.reset();
-				reset.setMode(ResetType.HARD);
+				reset.setMode(ResetType.MIXED);
 				reset.setRef(resetObjectId);
 				reset.call();
 			}
@@ -60,7 +60,8 @@ public class RewriteIndexCommitWalkIterator implements Iterator<Commit> {
 
 	public void close() throws GitAPIException {
 		if (rewriteBranch != null) {
-			git.branchDelete().setBranchNames(rewriteBranchName).call();
+			git.branchDelete().setBranchNames(rewriteBranchName).setForce(true)
+					.call();
 			rewriteBranch = null;
 		}
 	}

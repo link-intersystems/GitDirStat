@@ -113,4 +113,7 @@ public abstract class Ref {
 
 	}
 
+	protected GitRepository getGitRepository() {
+		return gitRepository;
+	}
 }

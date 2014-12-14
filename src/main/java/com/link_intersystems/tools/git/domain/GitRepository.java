@@ -286,43 +286,51 @@ public class GitRepository {
 	}
 
 	public void applyFilter(Collection<CommitRange> commitRanges,
-			IndexFilter indexFilter) throws IOException,
-			CheckoutConflictException, GitAPIException {
+			IndexFilter indexFilter, ProgressListener progressListener)
+			throws IOException, CheckoutConflictException, GitAPIException {
 		Git git = getGit();
 		BranchMemento currentBranchMemento = new BranchMemento(git);
 		currentBranchMemento.save();
+		FilterCondition filterCondition = new FilterCondition(this);
+		filterCondition.assertPrecondition();
 
+		int totalWork = getTotalWork(commitRanges);
 		CommitWalk commitWalk = createCommitWalk(commitRanges);
 		RewriteIndexCommitWalkIterator rewriteIterator = new RewriteIndexCommitWalkIterator(
 				git, commitWalk);
 
-		int revCommits = 0;
 		HistoryUpdate historyUpdate = new HistoryUpdate(this);
 
-		long start = System.currentTimeMillis();
+		progressListener.start(totalWork);
 		while (rewriteIterator.hasNext()) {
 			Commit commit = rewriteIterator.next();
 
-			CommitUpdate commitUpdate = new CommitUpdate(this, commit,
-					historyUpdate);
-			indexFilter.apply(commitUpdate);
+			CacheCommitUpdate commitUpdate = new CacheCommitUpdate(this,
+					commit, historyUpdate);
+			commitUpdate.beginUpdate();
 
+			indexFilter.apply(commitUpdate);
 			commitUpdate.execute();
 
-			revCommits++;
+			commitUpdate.endUpdate();
+
+			progressListener.update(1);
+			if (progressListener.isCanceled()) {
+				break;
+			}
 		}
 
-		historyUpdate.updateRefs();
+		if(!progressListener.isCanceled()){
+			historyUpdate.updateRefs();
+			pruneObjectsNow();
+		}
 		currentBranchMemento.restore();
-		pruneObjectsNow();
 
 		rewriteIterator.close();
-
-		long end = System.currentTimeMillis();
-
-		System.out.println("Duration: " + (end - start));
-		System.out.println("RevCommits: " + revCommits);
+		progressListener.end();
 	}
+
+
 
 	private void pruneObjectsNow() throws GitAPIException {
 		ExpireReflogCommand expireReflogCommand = new ExpireReflogCommand(this);
@@ -332,6 +340,20 @@ public class GitRepository {
 		GarbageCollectCommand gc = git.gc();
 		gc.setExpire(null);
 		gc.call();
+	}
+
+	private int getTotalWork(Collection<CommitRange> commitRanges)
+			throws IOException {
+		RevWalk revWalk = createRevWalk(commitRanges);
+
+		revWalk.sort(RevSort.TOPO);
+		revWalk.sort(RevSort.REVERSE, true);
+
+		int total = 0;
+		while (revWalk.next() != null) {
+			total++;
+		}
+		return total;
 	}
 
 	private CommitWalk createCommitWalk(Collection<CommitRange> commitRanges)
@@ -349,20 +371,40 @@ public class GitRepository {
 		return new Git(getRepository());
 	}
 
+	public void applyFilter(Collection<CommitRange> commitRanges,
+			IndexFilter indexFilter) throws IOException,
+			CheckoutConflictException, GitAPIException {
+		applyFilter(commitRanges, indexFilter, NullProgressListener.INSTANCE);
+	}
+
 	public void applyFilter(IndexFilter indexFilter) throws IOException,
 			GitAPIException {
 		List<LocalBranch> refs = getRefs(LocalBranch.class);
-		Collection<CommitRange> commitRanges = getCommitRanges(refs);
-		applyFilter(commitRanges, indexFilter);
+		applyFilter(refs, indexFilter, NullProgressListener.INSTANCE);
 	}
 
-	public void applyFilter(List<Ref> refs, IndexFilter indexFilter)
+	public void applyFilter(IndexFilter indexFilter,
+			ProgressListener progressListener) throws IOException,
+			GitAPIException {
+		List<LocalBranch> refs = getRefs(LocalBranch.class);
+		applyFilter(refs, indexFilter, progressListener);
+	}
+
+	public void applyFilter(List<? extends Ref> refs, IndexFilter indexFilter)
 			throws IOException, GitAPIException {
 		Collection<CommitRange> commitRanges = getCommitRanges(refs);
-		applyFilter(commitRanges, indexFilter);
+		applyFilter(commitRanges, indexFilter, NullProgressListener.INSTANCE);
+	}
+
+	public void applyFilter(List<? extends Ref> refs, IndexFilter indexFilter,
+			ProgressListener progressListener) throws IOException,
+			GitAPIException {
+		Collection<CommitRange> commitRanges = getCommitRanges(refs);
+		applyFilter(commitRanges, indexFilter, progressListener);
 	}
 
 	CommitAccess getCommitAccess() {
 		return commitAccess;
 	}
+
 }

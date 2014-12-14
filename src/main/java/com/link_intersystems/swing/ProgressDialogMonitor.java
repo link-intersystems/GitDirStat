@@ -14,6 +14,7 @@ public class ProgressDialogMonitor implements ProgressMonitor {
 	private int worked = 0;
 	private int millisToDecideToPopup = 250;
 	private int millisToPopup = 250;
+	private boolean etaEnabled;
 
 	@Override
 	public void update(int completed) {
@@ -31,11 +32,19 @@ public class ProgressDialogMonitor implements ProgressMonitor {
 					dialogParent, taskName, "", 0, totalWork);
 			progressMonitor.setMillisToDecideToPopup(millisToDecideToPopup);
 			progressMonitor.setMillisToPopup(millisToPopup);
+			progressMonitor.setETAEnabled(etaEnabled);
 		} else {
 			this.progressMonitor.setMessage(taskName);
 			this.progressMonitor.setMaximum(totalWork);
 		}
 
+	}
+
+	public void setETAEnabled(boolean etaEnabled){
+		this.etaEnabled = etaEnabled;
+		if(progressMonitor != null){
+			progressMonitor.setETAEnabled(etaEnabled);
+		}
 	}
 
 	@Override

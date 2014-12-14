@@ -25,6 +25,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.UIManager;
 
+import org.apache.commons.lang3.time.DurationFormatUtils;
+
+import com.link_intersystems.lang.math.IncrementalAverage;
+
 public class ProgressMonitor {
 	private ProgressMonitor root;
 	private JDialog dialog;
@@ -40,6 +44,9 @@ public class ProgressMonitor {
 	private int millisToPopup = 2000;
 	private int min;
 	private int max;
+	private boolean etaEnabled;
+	private IncrementalAverage workAverage;
+	private long last;
 
 	/**
 	 * Constructs a graphic object that shows progress, typically by filling in
@@ -93,6 +100,8 @@ public class ProgressMonitor {
 		if (max < 0) {
 			showProgressDialog(max);
 		}
+		workAverage = new IncrementalAverage();
+		last = Long.MIN_VALUE;
 	}
 
 	static Window getWindowForComponent(Component parentComponent)
@@ -209,6 +218,9 @@ public class ProgressMonitor {
 
 	private void showProgressDialog(int nv) {
 		myBar = new JProgressBar();
+		if (etaEnabled) {
+			myBar.setStringPainted(true);
+		}
 		setProgressBarProgress(nv);
 		if (note != null)
 			noteLabel = new JLabel(note);
@@ -221,6 +233,14 @@ public class ProgressMonitor {
 
 	private void setProgressBarProgress(int nv) {
 		if (nv >= 0) {
+			int oldValue = myBar.getValue();
+			String paintedString = "";
+			if (etaEnabled) {
+				String eta = calculateETA(oldValue, nv);
+				paintedString = nv + " / " + getMaximum() + "   " + eta;
+
+			}
+			myBar.setString(paintedString);
 			myBar.setIndeterminate(false);
 			myBar.setMinimum(min);
 			myBar.setMaximum(max);
@@ -228,6 +248,32 @@ public class ProgressMonitor {
 		} else {
 			myBar.setIndeterminate(true);
 		}
+	}
+
+	private String calculateETA(int oldValue, int newValue) {
+		long actual = System.currentTimeMillis();
+		if (last == Long.MIN_VALUE) {
+			last = actual;
+		}
+		long diff = actual - last;
+
+		if (diff > 0) {
+			double averagePerWork = (double) diff
+					/ (double) (newValue - oldValue);
+			workAverage.addValue(averagePerWork);
+		}
+		last = actual;
+
+		Double value = workAverage.getValue();
+		String eta = "ETA: --:--:--";
+		if (value != 0.0) {
+			int maximum = getMaximum();
+			int remaining = maximum - newValue;
+
+			long etaTimeMs = (long) (value * remaining);
+			eta = DurationFormatUtils.formatDuration(etaTimeMs, "ETA: HH:mm:ss");
+		}
+		return eta;
 	}
 
 	/**
@@ -381,5 +427,12 @@ public class ProgressMonitor {
 	 */
 	public String getNote() {
 		return note;
+	}
+
+	public void setETAEnabled(boolean etaEnabled) {
+		this.etaEnabled = etaEnabled;
+		if (myBar != null) {
+			myBar.setStringPainted(etaEnabled);
+		}
 	}
 }
