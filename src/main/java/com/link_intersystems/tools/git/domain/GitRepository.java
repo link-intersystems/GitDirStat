@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.eclipse.jgit.api.GarbageCollectCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -288,8 +289,8 @@ public class GitRepository {
 			IndexFilter indexFilter) throws IOException,
 			CheckoutConflictException, GitAPIException {
 		Git git = getGit();
-		BranchMemento branchMemento = new BranchMemento(git);
-		branchMemento.save();
+		BranchMemento currentBranchMemento = new BranchMemento(git);
+		currentBranchMemento.save();
 
 		CommitWalk commitWalk = createCommitWalk(commitRanges);
 		RewriteIndexCommitWalkIterator rewriteIterator = new RewriteIndexCommitWalkIterator(
@@ -312,8 +313,8 @@ public class GitRepository {
 		}
 
 		historyUpdate.updateRefs();
-		historyUpdate.gc();
-		branchMemento.restore();
+		currentBranchMemento.restore();
+		pruneObjectsNow();
 
 		rewriteIterator.close();
 
@@ -321,6 +322,16 @@ public class GitRepository {
 
 		System.out.println("Duration: " + (end - start));
 		System.out.println("RevCommits: " + revCommits);
+	}
+
+	private void pruneObjectsNow() throws GitAPIException {
+		ExpireReflogCommand expireReflogCommand = new ExpireReflogCommand(this);
+		expireReflogCommand.call();
+
+		Git git = getGit();
+		GarbageCollectCommand gc = git.gc();
+		gc.setExpire(null);
+		gc.call();
 	}
 
 	private CommitWalk createCommitWalk(Collection<CommitRange> commitRanges)

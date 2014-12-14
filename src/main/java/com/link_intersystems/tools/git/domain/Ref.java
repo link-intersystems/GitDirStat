@@ -1,13 +1,18 @@
 package com.link_intersystems.tools.git.domain;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.internal.storage.file.ReflogWriter;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.RefUpdate;
+import org.eclipse.jgit.lib.ReflogEntry;
+import org.eclipse.jgit.lib.ReflogReader;
 import org.eclipse.jgit.lib.Repository;
 
-public class Ref {
+public abstract class Ref {
 
 	private org.eclipse.jgit.lib.Ref jgitRef;
 	private GitRepository gitRepository;
@@ -33,6 +38,13 @@ public class Ref {
 		String name = jgitRef.getName();
 		String simpleName = StringUtils.substringAfterLast(name, "/");
 		return simpleName;
+	}
+
+	public List<ReflogEntry> getReflogEntries() throws IOException {
+		Repository repo = gitRepository.getRepository();
+		ReflogReader reflogReader = repo.getReflogReader(getName());
+		List<ReflogEntry> reverseEntries = reflogReader.getReverseEntries();
+		return reverseEntries;
 	}
 
 	@Override
@@ -77,6 +89,28 @@ public class Ref {
 
 	public boolean isUpdateable() {
 		return true;
+	}
+
+	public abstract void clearReflog() throws IOException;
+
+	protected ReflogWriter getReflogWriter() {
+		Repository repository = gitRepository.getRepository();
+		ReflogWriter reflogWriter = new ReflogWriter(repository);
+		return reflogWriter;
+	}
+
+	public void addReflogEntries(List<ReflogEntry> nonExpiredEntries)
+			throws IOException {
+		String refName = getName();
+		ReflogWriter reflogWriter = getReflogWriter();
+		for (ReflogEntry nonExpiredEntry : nonExpiredEntries) {
+			ObjectId oldId = nonExpiredEntry.getOldId();
+			ObjectId newId = nonExpiredEntry.getNewId();
+			PersonIdent ident = nonExpiredEntry.getWho();
+			String message = nonExpiredEntry.getComment();
+			reflogWriter.log(refName, oldId, newId, ident, message);
+		}
+
 	}
 
 }
