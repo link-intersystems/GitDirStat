@@ -14,6 +14,7 @@ public class GitRepositoryModel extends AbstractPropertyChangeSupport {
 	public static final String PROP_GIT_DIR = "gitDir";
 	public static final String PROP_COMMIT_RANGE_TREE = "commitRangeTree";
 	public static final String PROP_REFS = "refs";
+	public static final String PROP_SELECTED_PATHS = "selectedPaths";
 	public static final String PROP_SELECTED_REFS = "selectedRefs";
 
 	private File gitDir;
@@ -21,6 +22,7 @@ public class GitRepositoryModel extends AbstractPropertyChangeSupport {
 	private TreeObject commitRangeTree;
 	private List<? extends Ref> refs = new ArrayList<Ref>();
 	private List<Ref> selectedRefs = new ArrayList<Ref>();
+	private List<String> selectedPaths = new ArrayList<String>();
 
 	public GitRepositoryModel() {
 		gitDir = new File(System.getProperty("user.dir"));
@@ -32,6 +34,10 @@ public class GitRepositoryModel extends AbstractPropertyChangeSupport {
 		List<Ref> refs = Collections.emptyList();
 		setSelectedRefs(refs);
 		setRefs(refs);
+	}
+
+	public boolean isGitDirSet() {
+		return getGitDir() != null;
 	}
 
 	public File getGitDir() {
@@ -69,7 +75,17 @@ public class GitRepositoryModel extends AbstractPropertyChangeSupport {
 	}
 
 	public List<? extends Ref> getRefs() {
-		return this.refs;
+		return Collections.unmodifiableList(this.refs);
+	}
+
+	public void setSelectedPaths(List<String> selectedPaths) {
+		List<String> oldSelectedPaths = this.selectedPaths;
+		this.selectedPaths = new ArrayList<String>(selectedPaths);
+		firePropertyChange(PROP_REFS, oldSelectedPaths, this.selectedPaths);
+	}
+
+	public List<String> getSelectedPaths() {
+		return Collections.unmodifiableList(selectedPaths);
 	}
 
 	public void setRefs(List<? extends Ref> refs) {

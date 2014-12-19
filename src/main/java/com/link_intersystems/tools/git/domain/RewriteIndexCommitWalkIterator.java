@@ -1,5 +1,6 @@
 package com.link_intersystems.tools.git.domain;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import org.eclipse.jgit.api.CheckoutCommand;
@@ -7,6 +8,8 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 
 public class RewriteIndexCommitWalkIterator implements Iterator<Commit> {
 
@@ -35,11 +38,21 @@ public class RewriteIndexCommitWalkIterator implements Iterator<Commit> {
 	private void readIndex(Commit commit) {
 		try {
 			if (rewriteBranch == null) {
-				CheckoutCommand checkout = git.checkout();
-				checkout.setStartPoint(commit.getRevCommit());
-				checkout.setName(rewriteBranchName);
-				checkout.setCreateBranch(true);
-				rewriteBranch = checkout.call();
+				Repository repository = git.getRepository();
+				Ref ref = repository.getRef(rewriteBranchName);
+				if (ref == null) {
+					CheckoutCommand checkout = git.checkout();
+					checkout.setStartPoint(commit.getRevCommit());
+					checkout.setName(rewriteBranchName);
+					checkout.setCreateBranch(true);
+					rewriteBranch = checkout.call();
+				} else {
+					CheckoutCommand checkout = git.checkout();
+					checkout.setForce(true);
+					checkout.setName(rewriteBranchName);
+					Ref call = checkout.call();
+					rewriteBranch = ref;
+				}
 
 			} else {
 				String resetObjectId = commit.getId().getName();
@@ -49,6 +62,8 @@ public class RewriteIndexCommitWalkIterator implements Iterator<Commit> {
 				reset.call();
 			}
 		} catch (GitAPIException e) {
+			throw new RuntimeException(e);
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}

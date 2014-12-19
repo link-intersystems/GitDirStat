@@ -6,6 +6,7 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -25,9 +26,12 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
 
+import com.link_intersystems.swing.AsyncActionMediator;
+import com.link_intersystems.swing.CompositeAction;
 import com.link_intersystems.swing.ProgressDialogMonitor;
-import com.link_intersystems.swing.ProgressMonitor;
 import com.link_intersystems.swing.SingleActionSelectionMediator;
+import com.link_intersystems.tools.git.GitDirStatArguments;
+import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
 
 public class MainFrame implements Serializable {
 
@@ -67,45 +71,94 @@ public class MainFrame implements Serializable {
 	private JMenuBar menuBar = new JMenuBar();
 	private JMenu fileMenu = new JMenu("File");
 	private JMenu viewMenu = new JMenu("View");
-	private JPanel northPanel = new JPanel();
+	private JPanel actionPanel = new JPanel();
+	private ProgressDialogMonitor progressDialogMonitor = new ProgressDialogMonitor(
+			mainFrame);
 
 	private Map<String, SingleActionSelectionMediator> actionGroupMediator = new HashMap<String, SingleActionSelectionMediator>();
 
 	private Component mainComponent;
-	private ProgressMonitor progressMonitor;
 	private JToolBar jToolBar = new JToolBar();
 
-	public MainFrame(GitRepositoryModel gitRepositoryModel) {
+	private UpdateRefsAction updateRefsAction;
+
+	private UpdateTreeObjectAction updateTreeObjectAction;
+
+	private LoadRepositoryAction updateRepositoryAction;
+
+	private OpenAction openRepoAction;
+
+	private GitRepositoryModel repoModel;
+
+	public MainFrame(GitDirStatArguments arguments,
+			GitRepositoryAccess repoAccess) {
+		repoModel = new GitRepositoryModel();
+		File gitRepositoryDir = arguments.getGitRepositoryDir();
+		if (gitRepositoryDir != null) {
+			repoModel.setGitDir(gitRepositoryDir);
+		}
+
+		configureMainFrame();
+
+		progressDialogMonitor.setMillisToDecideToPopup(100);
+		progressDialogMonitor.setETAEnabled(true);
+
+		SizeMetricsView sizeMetricsView = new SizeMetricsView();
+		setMainComponent(sizeMetricsView);
+		sizeMetricsView.setModel(repoModel);
+
+		updateRefsAction = new UpdateRefsAction(repoAccess, repoModel);
+		updateTreeObjectAction = new UpdateTreeObjectAction(repoAccess,
+				repoModel, progressDialogMonitor);
+		updateRepositoryAction = new LoadRepositoryAction("Update Repository",
+				updateRefsAction, updateTreeObjectAction);
+
+		openRepoAction = new OpenAction(repoModel, updateRepositoryAction);
+
+		addMenuBarAction(MainFrame.MB_PATH_FILE, openRepoAction);
+		addMenuBarAction(MainFrame.MB_PATH_FILE, updateRepositoryAction);
+		Action updateBranchSelection = sizeMetricsView
+				.createApplyBranchSelectionAction();
+		updateBranchSelection.putValue(Action.NAME, "Apply selection");
+		CompositeAction applyBranchSelectionAction = new CompositeAction(
+				updateBranchSelection, updateRefsAction, updateRepositoryAction);
+
+		AsyncActionMediator asyncActionMediator = new AsyncActionMediator(
+				updateTreeObjectAction);
+		asyncActionMediator
+				.addDisabledActionWhileRunning(applyBranchSelectionAction);
+		addToolbarAction(applyBranchSelectionAction);
+
+		Action showTableAction = sizeMetricsView.getSetTableAction();
+		showTableAction.putValue(Action.NAME, "Show table");
+		Action showTreeAction = sizeMetricsView.getSetTreeAction();
+		showTreeAction.putValue(Action.NAME, "Show tree");
+
+		addMenuBarActionGroup(MainFrame.MENU_PATH_VIEW, showTableAction,
+				showTreeAction);
+
+		RemovePathAction removePathAction = new RemovePathAction(repoModel, repoAccess, progressDialogMonitor);
+		removePathAction.putValue(Action.NAME, "Remove selected paths");
+		addToolbarAction(removePathAction);
+	}
+
+	private void configureMainFrame() {
 		mainFrame.setSize(800, 600);
 		mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		mainFrame.setLocationRelativeTo(null);
 
-		Container contentPane = mainFrame.getContentPane();
-		contentPane.setLayout(new BorderLayout());
-
-		progressMonitor = createProgressMonitor(mainFrame);
-
 		menuBar.add(fileMenu);
 		menuBar.add(viewMenu);
 
-		northPanel.setLayout(new BorderLayout());
-		northPanel.add(menuBar, BorderLayout.NORTH);
-		northPanel.add(jToolBar, BorderLayout.SOUTH);
+		actionPanel.setLayout(new BorderLayout());
+		actionPanel.add(menuBar, BorderLayout.NORTH);
+		actionPanel.add(jToolBar, BorderLayout.SOUTH);
 
-		mainFrame.add(northPanel, BorderLayout.NORTH);
+		mainFrame.add(actionPanel, BorderLayout.NORTH);
 	}
 
 	public void addToolbarAction(Action action) {
 		this.jToolBar.add(action);
-	}
-
-	private ProgressMonitor createProgressMonitor(JFrame mainFrame) {
-		ProgressMonitor progressMonitor = null;
-		ProgressDialogMonitor progressDialogMonitor = new ProgressDialogMonitor(
-				mainFrame);
-		progressDialogMonitor.setMillisToDecideToPopup(100);
-		progressMonitor = progressDialogMonitor;
-		return progressMonitor;
 	}
 
 	public void addMenuBarAction(String menubarPath, Action action) {
@@ -127,12 +180,11 @@ public class MainFrame implements Serializable {
 		contentPane.repaint();
 	}
 
-	public ProgressMonitor getProgressMonitor() {
-		return progressMonitor;
-	}
-
 	public void setVisible(boolean visible) {
 		mainFrame.setVisible(visible);
+		if (repoModel.isGitDirSet()) {
+			updateRepositoryAction.actionPerformed(null);
+		}
 	}
 
 	public void addMenuBarActionGroup(String menubarPath, Action... actions) {

@@ -28,8 +28,14 @@ public class SizeMetricsTableModel extends AbstractTableModel {
 	private Map<String, TreeObject> pathMap = new HashMap<String, TreeObject>();
 	private boolean sortAsc;
 
+	private TreeObject commitRangeTree;
+
 	public void setSortOrder(boolean sortAsc) {
 		this.sortAsc = sortAsc;
+	}
+
+	public String getPath(int row){
+		return pathList.get(row);
 	}
 
 	@Override
@@ -89,7 +95,7 @@ public class SizeMetricsTableModel extends AbstractTableModel {
 
 	public void setCommitRangeTree(TreeObject commitRangeTree) {
 		if (commitRangeTree != null) {
-			pathMap = commitRangeTree.asPathMap();
+			pathMap = commitRangeTree.asRootRelativePathMap();
 
 			pathMap = applySorting(pathMap);
 

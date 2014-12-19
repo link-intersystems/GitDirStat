@@ -6,7 +6,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -87,16 +86,19 @@ public class GitRepository {
 		refDatabase.refresh();
 		List<String> prefixes = refFactory.getRefPrefixes(refType);
 
-		Map<String, org.eclipse.jgit.lib.Ref> allRefs = new HashMap<String, org.eclipse.jgit.lib.Ref>();
+		List<T> refList = new ArrayList<T>();
 		for (String prefix : prefixes) {
 			try {
 				Map<String, org.eclipse.jgit.lib.Ref> refs = refDatabase
 						.getRefs(prefix);
 				for (Entry<String, org.eclipse.jgit.lib.Ref> refEntry : refs
 						.entrySet()) {
-					org.eclipse.jgit.lib.Ref ref = refEntry.getValue();
-					String name = ref.getName();
-					allRefs.put(name, ref);
+					org.eclipse.jgit.lib.Ref jgitRef = refEntry.getValue();
+					Ref ref = refFactory.create(jgitRef);
+					if(ref != null){
+						refList.add((T) ref);
+					}
+
 				}
 			} catch (IOException e) {
 				throw new GitRepositoryException(e);
@@ -104,17 +106,9 @@ public class GitRepository {
 
 		}
 
-		List<T> refs = new ArrayList<T>();
-		for (Entry<String, org.eclipse.jgit.lib.Ref> refEntry : allRefs
-				.entrySet()) {
-			org.eclipse.jgit.lib.Ref jgitRef = refEntry.getValue();
-			Ref ref = refFactory.create(jgitRef);
-			refs.add((T) ref);
-		}
+		Collections.sort(refList, DefaultRefSorter.INSTANCE);
 
-		Collections.sort(refs, DefaultRefSorter.INSTANCE);
-
-		return refs;
+		return refList;
 	}
 
 	public CommitRange getCommitRange(String revstr) throws IOException {

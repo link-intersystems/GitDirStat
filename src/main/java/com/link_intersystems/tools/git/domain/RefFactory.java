@@ -53,10 +53,13 @@ public class RefFactory {
 	public <T extends Ref> T create(org.eclipse.jgit.lib.Ref jgitRef) {
 		Ref ref = null;
 		String name = jgitRef.getName();
+		boolean symbolic = jgitRef.isSymbolic();
 		if (name.startsWith(PREFIX_LOCAL)) {
 			ref = new LocalBranch(gitRepository, jgitRef);
 		} else if (name.startsWith(PREFIX_REMOTE)) {
-			ref = new RemoteBranch(gitRepository, jgitRef);
+			if(!symbolic){
+				ref = new RemoteBranch(gitRepository, jgitRef);
+			}
 		} else if (name.startsWith(PREFIX_TAG)) {
 			ref = new Tag(gitRepository, jgitRef);
 		} else if (jgitRef.isSymbolic()) {

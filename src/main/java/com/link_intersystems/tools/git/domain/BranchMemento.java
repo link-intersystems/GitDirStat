@@ -10,7 +10,6 @@ import org.eclipse.jgit.lib.Repository;
 public class BranchMemento {
 
 	private Git git;
-	private String ref;
 	private String branchName;
 
 	public BranchMemento(Git git) {
@@ -19,13 +18,12 @@ public class BranchMemento {
 
 	public void save() throws IOException {
 		Repository repository = git.getRepository();
-		ref = repository.getFullBranch();
 		branchName = repository.getBranch();
 	}
 
 	public void restore() throws GitAPIException {
-		if (ref != null && branchName != null) {
-			git.checkout().setName(branchName).setStartPoint(ref).call();
+		if (branchName != null) {
+			git.checkout().setName(branchName).call();
 			git.reset().setMode(ResetType.HARD).call();
 			git.clean().setCleanDirectories(true).setIgnore(true).call();
 		}

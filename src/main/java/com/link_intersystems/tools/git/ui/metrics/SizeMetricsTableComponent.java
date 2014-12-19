@@ -2,9 +2,14 @@ package com.link_intersystems.tools.git.ui.metrics;
 
 import java.awt.BorderLayout;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
@@ -24,7 +29,6 @@ public class SizeMetricsTableComponent extends GitRepositoryComponent {
 	private JTable sizeMetricsTable = new JTable(sizeMetricsTableModel);
 	private JScrollPane sizeMetricsScrollPane = new JScrollPane(
 			sizeMetricsTable);
-
 
 	public SizeMetricsTableComponent() {
 		setLayout(new BorderLayout());
@@ -49,6 +53,25 @@ public class SizeMetricsTableComponent extends GitRepositoryComponent {
 
 		relativeWidthResizer.apply(sizeMetricsTable);
 		sizeMetricsTable.addComponentListener(relativeWidthResizer);
+
+		final ListSelectionModel selectionModel = sizeMetricsTable
+				.getSelectionModel();
+		selectionModel.addListSelectionListener(new ListSelectionListener() {
+
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				int firstIndex = e.getFirstIndex();
+				int lastIndex = e.getLastIndex();
+				List<String> selectedPaths = new ArrayList<String>();
+				for (int i = firstIndex; i <= lastIndex; i++) {
+					if (selectionModel.isSelectedIndex(i)) {
+						String path = sizeMetricsTableModel.getPath(i);
+						selectedPaths.add(path);
+					}
+				}
+				getModel().setSelectedPaths(selectedPaths);
+			}
+		});
 	}
 
 	protected void updateCommitRangeTree() {

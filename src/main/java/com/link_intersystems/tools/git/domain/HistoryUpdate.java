@@ -12,7 +12,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 public class HistoryUpdate {
-	Map<ObjectId, Commit> replacedCommits = new HashMap<ObjectId, Commit>();
+	Map<String, Commit> replacedCommits = new HashMap<String, Commit>();
 	private GitRepository gitRepository;
 
 	public HistoryUpdate(GitRepository gitRepository) {
@@ -24,8 +24,9 @@ public class HistoryUpdate {
 		for (Ref ref : allRefs) {
 			if (ref.isUpdateable()) {
 				ObjectId objectId = ref.getJgitRef().getObjectId();
-				if (replacedCommits.containsKey(objectId)) {
-					Commit rewrittenCommit = replacedCommits.get(objectId);
+				String objectName = objectId.name();
+				if (replacedCommits.containsKey(objectName)) {
+					Commit rewrittenCommit = replacedCommits.get(objectName);
 					ref.update(rewrittenCommit.getId());
 				}
 			}
@@ -36,7 +37,8 @@ public class HistoryUpdate {
 		ObjectId[] parentIds = commit.getParentIds();
 		for (int i = 0; i < parentIds.length; i++) {
 			ObjectId parentId = parentIds[i];
-			if (replacedCommits.containsKey(parentId)) {
+			String parentName = parentId.name();
+			if (replacedCommits.containsKey(parentName)) {
 				return true;
 			}
 		}
@@ -46,7 +48,8 @@ public class HistoryUpdate {
 	public Commit replaceCommit(Commit commit, RevCommit revCommit) {
 		CommitAccess commitAccess = gitRepository.getCommitAccess();
 		Commit replacement = commitAccess.getCommit(revCommit);
-		replacedCommits.put(commit.getId(), replacement);
+		String commitName = commit.getId().name();
+		replacedCommits.put(commitName, replacement);
 		return replacement;
 	}
 
@@ -55,7 +58,8 @@ public class HistoryUpdate {
 		ObjectId[] replacedParentIds = new ObjectId[parentIds.length];
 		for (int i = 0; i < parentIds.length; i++) {
 			ObjectId parentId = parentIds[i];
-			Commit replacedCommit = replacedCommits.get(parentId);
+			String parentName = parentId.name();
+			Commit replacedCommit = replacedCommits.get(parentName);
 			if (replacedCommit != null) {
 				parentId = replacedCommit.getId();
 			}

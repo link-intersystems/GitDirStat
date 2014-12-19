@@ -38,6 +38,24 @@ public class TreeObjectPath {
 		return pathname.toString();
 	}
 
+	public String getRootRelativePathname() {
+		StringBuilder pathname = new StringBuilder();
+		Iterator<TreeObject> pathIterator = this.path.iterator();
+		if(pathIterator.hasNext()){
+			pathIterator.next();
+		}
+
+		while (pathIterator.hasNext()) {
+			TreeObject treeObject = pathIterator.next();
+
+			pathname.append(treeObject.getName());
+			if (pathIterator.hasNext()) {
+				pathname.append(PATH_SEPARATOR);
+			}
+		}
+		return pathname.toString();
+	}
+
 	public Enumeration<TreeObject> enumerate() {
 		return new IteratorEnumeration<TreeObject>(path.iterator());
 	}

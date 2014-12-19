@@ -137,6 +137,31 @@ public class TreeObject implements Comparable<TreeObject> {
 		return pathMap;
 	}
 
+	public Map<String, TreeObject> asRootRelativePathMap() {
+		Stack<TreeObject> treeObjectStack = new Stack<TreeObject>();
+		treeObjectStack.push(this);
+
+		Map<String, TreeObject> pathMap = new HashMap<String, TreeObject>();
+
+		TreeObject currTreeObject = null;
+		while (!treeObjectStack.isEmpty()) {
+			currTreeObject = treeObjectStack.pop();
+
+			if (currTreeObject.isFile()) {
+				TreeObjectPath treePath = currTreeObject.getPath();
+				String pathname = treePath.getRootRelativePathname();
+				pathMap.put(pathname, currTreeObject);
+			}
+
+			Enumeration<TreeObject> children = currTreeObject.children();
+			while (children.hasMoreElements()) {
+				TreeObject childTreeObject = children.nextElement();
+				treeObjectStack.push(childTreeObject);
+			}
+		}
+		return pathMap;
+	}
+
 	@Override
 	public int compareTo(TreeObject o) {
 		return getSize().compareTo(o.getSize());
