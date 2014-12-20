@@ -8,8 +8,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import org.apache.commons.io.FileUtils;
 
-import com.link_intersystems.tools.git.domain.TreeObject;
-
 public class HumanReadableFileSizeTableCellRenderer extends
 		DefaultTableCellRenderer {
 
@@ -21,9 +19,9 @@ public class HumanReadableFileSizeTableCellRenderer extends
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value,
 			boolean isSelected, boolean hasFocus, int row, int column) {
-		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-		TreeObject treeObject = (TreeObject) value;
-		BigInteger bytes = treeObject.getSize();
+		super.getTableCellRendererComponent(table, value, isSelected, hasFocus,
+				row, column);
+		BigInteger bytes = (BigInteger) value;
 		String displaySize = FileUtils.byteCountToDisplaySize(bytes);
 		setText(displaySize);
 		return this;

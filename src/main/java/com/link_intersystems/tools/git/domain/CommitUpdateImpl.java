@@ -227,4 +227,9 @@ public class CommitUpdateImpl implements CommitUpdate {
 	public TreeUpdate getTreeUpdate() throws IOException {
 		return getTreeUpdate(TreeFilter.ALL);
 	}
+
+	@Override
+	public String getId() {
+		return commit.getId().name();
+	}
 }

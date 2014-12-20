@@ -23,7 +23,7 @@ public class HistoryUpdate {
 		List<Ref> allRefs = gitRepository.getRefs(Ref.class);
 		for (Ref ref : allRefs) {
 			if (ref.isUpdateable()) {
-				ObjectId objectId = ref.getJgitRef().getObjectId();
+				ObjectId objectId = ref.getCommitId();
 				String objectName = objectId.name();
 				if (replacedCommits.containsKey(objectName)) {
 					Commit rewrittenCommit = replacedCommits.get(objectName);

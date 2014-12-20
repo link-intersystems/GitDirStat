@@ -209,4 +209,9 @@ public class CacheCommitUpdate implements CommitUpdate {
 		return getTreeUpdate(TreeFilter.ALL);
 	}
 
+	@Override
+	public String getId() {
+		return commit.getId().name();
+	}
+
 }

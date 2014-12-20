@@ -47,6 +47,8 @@ public class RemovePathAction extends AsyncProgressAction<Void, Void> {
 					String path = fileUpdate.getPath();
 					if (selectedPaths.contains(path)) {
 						fileUpdate.delete();
+					} else {
+						System.out.println(commitUpdate.getId() +  ": " + path);
 					}
 				}
 			}

@@ -2,15 +2,13 @@ package com.link_intersystems.tools.git.cli;
 
 import java.io.File;
 import java.io.OutputStream;
-import java.util.Map;
+import java.util.List;
 
 import org.eclipse.jgit.lib.Constants;
 
 import com.link_intersystems.tools.git.CommitRange;
 import com.link_intersystems.tools.git.GitDirStatApplication;
 import com.link_intersystems.tools.git.GitDirStatArguments;
-import com.link_intersystems.tools.git.common.SortOrder;
-import com.link_intersystems.tools.git.common.SortedMap;
 import com.link_intersystems.tools.git.common.SortedMap.SortBy;
 import com.link_intersystems.tools.git.domain.GitRepository;
 import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
@@ -29,14 +27,9 @@ public class CommandLineGitDirStatApplication implements GitDirStatApplication {
 		TreeObject commitRangeTree = gitRepository
 				.getCommitRangeTree(commitRange);
 
-		Map<String, TreeObject> pathMap = commitRangeTree.asPathMap();
+		List<TreeObject> treeObjects = commitRangeTree.toFileList();
 
-		SortOrder sortOrder = arguments.getSortOrder();
-		SortBy sortBy = getPathMapSortOrder(arguments);
-
-		SortedMap<String, TreeObject> sortedPathMap = new SortedMap<String, TreeObject>(
-				pathMap, sortBy, sortOrder);
-		PathMapFormatter pathMapFormatter = new PathMapFormatter(sortedPathMap);
+		PathListFormatter pathMapFormatter = new PathListFormatter(treeObjects);
 
 		OutputStream outputStream = arguments.getOutputStream();
 		pathMapFormatter.format(outputStream);

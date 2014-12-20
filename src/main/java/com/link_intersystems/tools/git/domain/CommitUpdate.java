@@ -24,4 +24,6 @@ public interface CommitUpdate {
 
 	public abstract TreeUpdate getTreeUpdate() throws IOException;
 
+	public abstract String getId();
+
 }

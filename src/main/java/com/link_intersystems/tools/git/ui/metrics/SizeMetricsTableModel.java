@@ -1,17 +1,12 @@
 package com.link_intersystems.tools.git.ui.metrics;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
+import javax.swing.ListModel;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import javax.swing.table.AbstractTableModel;
 
-import com.link_intersystems.tools.git.common.SortOrder;
-import com.link_intersystems.tools.git.common.SortedMap;
-import com.link_intersystems.tools.git.common.SortedMap.SortBy;
 import com.link_intersystems.tools.git.domain.TreeObject;
 
 public class SizeMetricsTableModel extends AbstractTableModel {
@@ -24,23 +19,41 @@ public class SizeMetricsTableModel extends AbstractTableModel {
 	private static final int COL_PATH_INDEX = 0;
 	private static final int COL_SIZE_INDEX = 1;
 
-	private List<String> pathList = new ArrayList<String>();
-	private Map<String, TreeObject> pathMap = new HashMap<String, TreeObject>();
-	private boolean sortAsc;
+	private ListModel listModel;
 
-	private TreeObject commitRangeTree;
+	public SizeMetricsTableModel(ListModel listModel) {
+		this.listModel = listModel;
+		this.listModel.addListDataListener(new ListDataListener() {
 
-	public void setSortOrder(boolean sortAsc) {
-		this.sortAsc = sortAsc;
+			@Override
+			public void intervalRemoved(ListDataEvent e) {
+				fireTableDataChanged();
+			}
+
+			@Override
+			public void intervalAdded(ListDataEvent e) {
+				fireTableDataChanged();
+			}
+
+			@Override
+			public void contentsChanged(ListDataEvent e) {
+				fireTableDataChanged();
+			}
+		});
 	}
 
-	public String getPath(int row){
-		return pathList.get(row);
+	private TreeObject getTreeObject(int row) {
+		return (TreeObject) listModel.getElementAt(row);
+	}
+
+	public String getPath(int row) {
+		TreeObject treeObject = getTreeObject(row);
+		return treeObject.getPath().getPathname();
 	}
 
 	@Override
 	public int getRowCount() {
-		return pathList.size();
+		return listModel.getSize();
 	}
 
 	@Override
@@ -52,14 +65,14 @@ public class SizeMetricsTableModel extends AbstractTableModel {
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		Object value = null;
 
-		String path = pathList.get(rowIndex);
+		TreeObject treeObject = getTreeObject(rowIndex);
 		switch (columnIndex) {
 		case COL_PATH_INDEX:
-			value = path;
+			value = treeObject.getRootRelativePath().getPathname();
 			break;
 
 		case COL_SIZE_INDEX:
-			value = pathMap.get(path);
+			value = treeObject.getSize();
 			break;
 		}
 		return value;
@@ -91,29 +104,6 @@ public class SizeMetricsTableModel extends AbstractTableModel {
 			break;
 		}
 		return columnClass;
-	}
-
-	public void setCommitRangeTree(TreeObject commitRangeTree) {
-		if (commitRangeTree != null) {
-			pathMap = commitRangeTree.asRootRelativePathMap();
-
-			pathMap = applySorting(pathMap);
-
-			Set<String> parhKeySet = pathMap.keySet();
-			pathList = new ArrayList<String>(parhKeySet);
-		}
-		fireTableDataChanged();
-	}
-
-	private Map<String, TreeObject> applySorting(Map<String, TreeObject> pathMap) {
-		if (sortAsc) {
-			pathMap = new SortedMap<String, TreeObject>(pathMap, SortBy.VALUE,
-					SortOrder.ASC);
-		} else {
-			pathMap = new SortedMap<String, TreeObject>(pathMap, SortBy.VALUE,
-					SortOrder.DESC);
-		}
-		return pathMap;
 	}
 
 }

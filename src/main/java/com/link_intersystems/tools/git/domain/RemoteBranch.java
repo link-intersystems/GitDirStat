@@ -17,11 +17,6 @@ public class RemoteBranch extends Branch {
 		super(gitRepository, jgitRef);
 	}
 
-	@Override
-	public boolean isUpdateable() {
-		return false;
-	}
-
 	public void clearReflog() throws IOException {
 	}
 

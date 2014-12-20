@@ -18,6 +18,7 @@ public class TreeObject implements Comparable<TreeObject> {
 	private String name;
 	private BigInteger size;
 	private TreeObject parent;
+	private TreeObjectPath rootRelativePath;
 	private TreeObjectPath thisPath;
 
 	TreeObject(String name) {
@@ -49,6 +50,23 @@ public class TreeObject implements Comparable<TreeObject> {
 			}
 		}
 		return size;
+	}
+
+	public List<TreeObject> toFileList() {
+		List<TreeObject> fileList = new ArrayList<TreeObject>();
+
+		if (this.isFile()) {
+			fileList.add(this);
+		}
+
+		Enumeration<TreeObject> children = children();
+		while (children.hasMoreElements()) {
+			TreeObject treeObject = children.nextElement();
+			List<TreeObject> childFiles = treeObject.toFileList();
+			fileList.addAll(childFiles);
+		}
+
+		return fileList;
 	}
 
 	public Enumeration<TreeObject> children() {
@@ -112,29 +130,15 @@ public class TreeObject implements Comparable<TreeObject> {
 		return thisPath;
 	}
 
-	public Map<String, TreeObject> asPathMap() {
-		Stack<TreeObject> treeObjectStack = new Stack<TreeObject>();
-		treeObjectStack.push(this);
-
-		Map<String, TreeObject> pathMap = new HashMap<String, TreeObject>();
-
-		TreeObject currTreeObject = null;
-		while (!treeObjectStack.isEmpty()) {
-			currTreeObject = treeObjectStack.pop();
-
-			if (currTreeObject.isFile()) {
-				TreeObjectPath treePath = currTreeObject.getPath();
-				String pathname = treePath.getPathname();
-				pathMap.put(pathname, currTreeObject);
-			}
-
-			Enumeration<TreeObject> children = currTreeObject.children();
-			while (children.hasMoreElements()) {
-				TreeObject childTreeObject = children.nextElement();
-				treeObjectStack.push(childTreeObject);
+	public TreeObjectPath getRootRelativePath() {
+		if (rootRelativePath == null) {
+			rootRelativePath = new TreeObjectPath(this);
+			if (parent != null && parent.parent != null) {
+				TreeObjectPath parentPath = parent.getRootRelativePath();
+				rootRelativePath.prepend(parentPath);
 			}
 		}
-		return pathMap;
+		return rootRelativePath;
 	}
 
 	public Map<String, TreeObject> asRootRelativePathMap() {

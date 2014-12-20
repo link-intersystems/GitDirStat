@@ -26,6 +26,11 @@ public abstract class Ref {
 		return jgitRef;
 	}
 
+
+	public ObjectId getCommitId() {
+		return getObjectId();
+	}
+
 	private ObjectId getObjectId() {
 		return jgitRef.getObjectId();
 	}
@@ -116,4 +121,5 @@ public abstract class Ref {
 	protected GitRepository getGitRepository() {
 		return gitRepository;
 	}
+
 }
