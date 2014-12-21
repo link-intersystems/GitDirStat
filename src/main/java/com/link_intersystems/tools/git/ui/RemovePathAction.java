@@ -32,6 +32,7 @@ public class RemovePathAction extends AsyncProgressAction<Void, Void> {
 	protected Void doInBackground() throws Exception {
 		ProgressListenerMonitorAdapter progressListenerMonitorAdapter = new ProgressListenerMonitorAdapter(
 				progressMonitor, "Removing paths from history");
+		progressListenerMonitorAdapter.setUpdateInterval(1000);
 		File gitDir = gitRepositoryModel.getGitDir();
 		GitRepository gitRepository = gitRepositoryAccess
 				.getGitRepository(gitDir);
@@ -47,8 +48,6 @@ public class RemovePathAction extends AsyncProgressAction<Void, Void> {
 					String path = fileUpdate.getPath();
 					if (selectedPaths.contains(path)) {
 						fileUpdate.delete();
-					} else {
-						System.out.println(commitUpdate.getId() +  ": " + path);
 					}
 				}
 			}

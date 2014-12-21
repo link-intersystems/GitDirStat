@@ -7,6 +7,9 @@ public class ProgressListenerMonitorAdapter implements ProgressListener {
 
 	private ProgressMonitor progressMonitor;
 	private String taskName;
+	private long updateIntervalMs;
+	private int completed;
+	private long nextUpdate;
 
 	public ProgressListenerMonitorAdapter(ProgressMonitor progressMonitor,
 			String taskName) {
@@ -14,9 +17,19 @@ public class ProgressListenerMonitorAdapter implements ProgressListener {
 		this.taskName = taskName;
 	}
 
+	public void setUpdateInterval(long updateIntervalMs) {
+		this.updateIntervalMs = updateIntervalMs;
+	}
+
 	@Override
 	public void update(int completed) {
-		progressMonitor.update(completed);
+		this.completed += completed;
+		long now = System.currentTimeMillis();
+		if (now > nextUpdate) {
+			progressMonitor.update(this.completed);
+			nextUpdate = now + updateIntervalMs;
+			this.completed = 0;
+		}
 	}
 
 	@Override
@@ -27,6 +40,8 @@ public class ProgressListenerMonitorAdapter implements ProgressListener {
 	@Override
 	public void end() {
 		progressMonitor.end();
+		this.completed = 0;
+		nextUpdate = 0;
 	}
 
 	@Override

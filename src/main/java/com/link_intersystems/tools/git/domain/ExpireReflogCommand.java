@@ -46,6 +46,8 @@ public class ExpireReflogCommand extends GitCommand<Void> {
 			}
 		} catch (IOException e) {
 			throw new GitAPIException("Unable to read reflog entries", e) {
+
+				private static final long serialVersionUID = 2266798959465371684L;
 			};
 		}
 
@@ -67,6 +69,7 @@ public class ExpireReflogCommand extends GitCommand<Void> {
 		return nonExpired;
 	}
 
+	@SuppressWarnings("unused")
 	private boolean isExpired(PersonIdent who) {
 		if (expireDate == null) {
 			return true;

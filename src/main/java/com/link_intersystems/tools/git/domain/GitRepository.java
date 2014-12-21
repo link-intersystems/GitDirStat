@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.collections4.Predicate;
-import org.apache.commons.collections4.functors.UniquePredicate;
 import org.eclipse.jgit.api.GarbageCollectCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
@@ -19,19 +17,14 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.AnyObjectId;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectDatabase;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.RefDatabase;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.ObjectWalk;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevSort;
-import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
-import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.link_intersystems.tools.git.CommitRange;
 
@@ -40,7 +33,10 @@ public class GitRepository {
 	private Repository repository;
 	private RefFactory refFactory;
 
-	private CommitAccess commitAccess = new CommitAccess();
+	private ObjectDatabase objectDatabase;
+	private ObjectReader objectReader;
+
+	private CommitDatabase commitDatabase = new CommitDatabase(this);
 
 	public GitRepository(Repository repository) {
 		this.repository = repository;
@@ -131,9 +127,7 @@ public class GitRepository {
 					break;
 				}
 				AnyObjectId toInclusive = ref.getCommitId();
-				AnyObjectId fromInclusive = getInitialCommit(toInclusive);
-				CommitRange revRange = new CommitRange(fromInclusive,
-						toInclusive);
+				CommitRange revRange = new CommitRange(null, toInclusive);
 				commitRanges.add(revRange);
 				progressListener.update(1);
 			}
@@ -169,69 +163,10 @@ public class GitRepository {
 
 	public TreeObject getCommitRangeTree(Collection<CommitRange> commitRanges,
 			ProgressListener progressListener) {
-		try {
-			CommitRangeTree root = new CommitRangeTree(getId(), commitRanges);
-			if (commitRanges.isEmpty()) {
-				return root;
-			}
 
-			int totalWork = getTotalWork(commitRanges);
-
-			RevWalk revWalk = createRevWalk(commitRanges);
-
-			ObjectDatabase objectDatabase = repository.getObjectDatabase();
-			ObjectReader objectReader = objectDatabase.newReader();
-
-			progressListener.start(totalWork);
-			Predicate<String> uniqueTreeObjects = UniquePredicate
-					.uniquePredicate();
-
-			for (RevCommit revCommit : revWalk) {
-				if (progressListener.isCanceled()) {
-					root = new CommitRangeTree(getId(), commitRanges);
-					break;
-				}
-
-				TreeWalk treeWalk = new TreeWalk(repository);
-				treeWalk.setRecursive(true);
-				RevTree tree = revCommit.getTree();
-				treeWalk.addTree(tree);
-				while (treeWalk.next()) {
-					String treeWalkEntryUniqueKey = createTreeWalkEntryUniqueKey(treeWalk);
-					if (uniqueTreeObjects.evaluate(treeWalkEntryUniqueKey)) {
-						ObjectId currentId = treeWalk.getObjectId(0);
-
-						long size = objectReader.getObjectSize(currentId,
-								Constants.OBJ_BLOB);
-
-						String pathString = treeWalk.getPathString();
-						TreeObject treeObject = root.makePath(pathString);
-						ObjectSize objectSize = new ObjectSize(currentId, size);
-						treeObject.addObjectSize(objectSize);
-					}
-				}
-				treeWalk.release();
-				progressListener.update(1);
-			}
-			return root;
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		} finally {
-			progressListener.end();
-		}
-	}
-
-	private String createTreeWalkEntryUniqueKey(TreeWalk treeWalk) {
-		String pathString = treeWalk.getPathString();
-		ObjectId currentId = treeWalk.getObjectId(0);
-		return currentId.name() + pathString;
-	}
-
-	ObjectWalk createObjectWalk(Collection<CommitRange> commitRanges)
-			throws IOException {
-		ObjectWalk objectWalk = new ObjectWalk(repository);
-		applyCommitRanges(objectWalk, commitRanges);
-		return objectWalk;
+		CommitRangeTreeBuilder commitRangeTreeBuilder = new RevWalkCommitRangeTreeBuilder(
+				this);
+		return commitRangeTreeBuilder.build(commitRanges, progressListener);
 	}
 
 	private void applyCommitRanges(RevWalk revWalk,
@@ -245,18 +180,19 @@ public class GitRepository {
 		}
 	}
 
-	private CommitWalk createCommitWalk(Collection<CommitRange> commitRanges)
+	private CommitWalker createCommitWalker(Collection<CommitRange> commitRanges)
 			throws IOException {
-		RevWalk revWalk = createRevWalk(commitRanges);
+		CommitWalker commitWalk = new CommitWalker(this);
+		commitWalk.setCommitRanges(commitRanges);
 
+		RevWalk revWalk = commitWalk.getRevWalk();
 		revWalk.sort(RevSort.TOPO);
 		revWalk.sort(RevSort.REVERSE, true);
 
-		CommitWalk commitWalk = new CommitWalk(revWalk, commitAccess);
 		return commitWalk;
 	}
 
-	RevWalk createRevWalk(Collection<CommitRange> commitRanges)
+	private RevWalk createRevWalk(Collection<CommitRange> commitRanges)
 			throws IOException {
 		RevWalk revWalk = new RevWalk(repository);
 		applyCommitRanges(revWalk, commitRanges);
@@ -271,11 +207,8 @@ public class GitRepository {
 			ProgressListener progressListener) throws IOException {
 		progressListener.start(1000);
 		try {
-			Collection<CommitRange> commitRanges = getCommitRanges(
-					selectedRefs,
-					new SubProgressListener(progressListener, 200));
-			return getCommitRangeTree(commitRanges, new SubProgressListener(
-					progressListener, 800));
+			Collection<CommitRange> commitRanges = getCommitRanges(selectedRefs);
+			return getCommitRangeTree(commitRanges, progressListener);
 		} finally {
 			progressListener.end();
 		}
@@ -289,7 +222,7 @@ public class GitRepository {
 		currentBranchMemento.save();
 
 		int totalWork = getTotalWork(commitRanges);
-		CommitWalk commitWalk = createCommitWalk(commitRanges);
+		CommitWalker commitWalk = createCommitWalker(commitRanges);
 		RewriteIndexCommitWalkIterator rewriteIterator = new RewriteIndexCommitWalkIterator(
 				git, commitWalk);
 
@@ -384,8 +317,33 @@ public class GitRepository {
 		applyFilter(commitRanges, indexFilter, progressListener);
 	}
 
-	CommitAccess getCommitAccess() {
-		return commitAccess;
+	CommitDatabase getCommitAccess() {
+		return commitDatabase;
+	}
+
+	public Commit getCommit(RevCommit revCommit) {
+		return getCommitAccess().getCommit(revCommit);
+	}
+
+	ObjectDatabase getObjectDatabase() {
+		if (objectDatabase == null) {
+			objectDatabase = repository.getObjectDatabase();
+		}
+		return objectDatabase;
+	}
+
+	ObjectReader getObjectReader() {
+		if (objectReader == null) {
+			objectReader = getObjectDatabase().newReader();
+		}
+		return objectReader;
+	}
+
+	public void release() {
+		if (objectReader != null) {
+			objectReader.release();
+		}
+		repository.close();
 	}
 
 }

@@ -45,10 +45,11 @@ public class UpdateTreeObjectAction extends
 		List<? extends Ref> selectedRefs = gitRepositoryModel.getSelectedRefs();
 
 		String progressMessage = MessageFormat.format(
-				"Loading repository: {0}",
+				"Analyzing repository: {0}",
 				FileUtils.abbreviatedPath(gitDir, 50));
 		ProgressListenerMonitorAdapter progressListenerMonitorAdapter = new ProgressListenerMonitorAdapter(
 				progressListener, progressMessage);
+		progressListenerMonitorAdapter.setUpdateInterval(250);
 		TreeObject commitRangeTree = gitRepository.getCommitRangeTree(
 				selectedRefs, progressListenerMonitorAdapter);
 		return commitRangeTree;

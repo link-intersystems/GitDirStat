@@ -1,5 +1,7 @@
 package com.link_intersystems.tools.git.domain;
 
+import java.io.IOException;
+
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -9,10 +11,10 @@ public class Commit {
 	private RevCommit revCommit;
 	private Commit[] parents;
 
-	private CommitAccess commitAccess;
+	private GitRepository gitRepository;
 
-	Commit(RevCommit revCommit, CommitAccess commitAccess) {
-		this.commitAccess = commitAccess;
+	Commit(RevCommit revCommit, GitRepository gitRepository) {
+		this.gitRepository = gitRepository;
 		this.revCommit = revCommit;
 	}
 
@@ -60,10 +62,18 @@ public class Commit {
 			parents = new Commit[revParents.length];
 			for (int i = 0; i < revParents.length; i++) {
 				RevCommit revParent = revParents[i];
-				parents[i] = commitAccess.getCommit(revParent);
+				parents[i] = gitRepository.getCommit(revParent);
 			}
 		}
 		return parents;
+	}
+
+	public TreeWalker createTreeWalker() throws IOException {
+		return new TreeWalker(this);
+	}
+
+	public GitRepository getGitRepository() {
+		return gitRepository;
 	}
 
 }

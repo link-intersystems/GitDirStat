@@ -31,6 +31,11 @@ public class FilterCondition {
 			} else if (!localBranch.isUpToDate()) {
 				throw new GitAPIException("Local branch of remote branch "
 						+ remoteBranch + " contains changes.") {
+
+					/**
+							 *
+							 */
+					private static final long serialVersionUID = -7544517884597872780L;
 				};
 			}
 		}

@@ -46,7 +46,7 @@ public class HistoryUpdate {
 	}
 
 	public Commit replaceCommit(Commit commit, RevCommit revCommit) {
-		CommitAccess commitAccess = gitRepository.getCommitAccess();
+		CommitDatabase commitAccess = gitRepository.getCommitAccess();
 		Commit replacement = commitAccess.getCommit(revCommit);
 		String commitName = commit.getId().name();
 		replacedCommits.put(commitName, replacement);

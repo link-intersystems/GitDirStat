@@ -18,7 +18,7 @@ public class RewriteIndexCommitWalkIterator implements Iterator<Commit> {
 	String rewriteBranchName = "rewrite_branch";
 	private Object rewriteBranch;
 
-	public RewriteIndexCommitWalkIterator(Git git, CommitWalk commitWalk) {
+	public RewriteIndexCommitWalkIterator(Git git, CommitWalker commitWalk) {
 		this.git = git;
 		this.commitWalk = commitWalk.iterator();
 	}
@@ -50,7 +50,7 @@ public class RewriteIndexCommitWalkIterator implements Iterator<Commit> {
 					CheckoutCommand checkout = git.checkout();
 					checkout.setForce(true);
 					checkout.setName(rewriteBranchName);
-					Ref call = checkout.call();
+					checkout.call();
 					rewriteBranch = ref;
 				}
 
