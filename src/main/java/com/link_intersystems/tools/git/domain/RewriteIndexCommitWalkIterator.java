@@ -11,6 +11,8 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 
+import com.link_intersystems.tools.git.domain.walk.CommitWalker;
+
 public class RewriteIndexCommitWalkIterator implements Iterator<Commit> {
 
 	private Iterator<Commit> commitWalk;

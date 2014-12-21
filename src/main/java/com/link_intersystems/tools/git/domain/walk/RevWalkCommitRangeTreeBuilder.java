@@ -1,4 +1,4 @@
-package com.link_intersystems.tools.git.domain;
+package com.link_intersystems.tools.git.domain.walk;
 
 import java.util.Collection;
 
@@ -8,7 +8,12 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 
 import com.link_intersystems.tools.git.CommitRange;
+import com.link_intersystems.tools.git.domain.CommitRangeTree;
+import com.link_intersystems.tools.git.domain.GitRepository;
+import com.link_intersystems.tools.git.domain.ProgressListener;
 import com.link_intersystems.tools.git.domain.TreeEntryWalk.TreeEntry;
+import com.link_intersystems.tools.git.domain.TreeObject;
+import com.link_intersystems.tools.git.domain.TreeObjectBuilderTreeEntryWalk;
 
 public class RevWalkCommitRangeTreeBuilder implements CommitRangeTreeBuilder {
 

@@ -1,4 +1,4 @@
-package com.link_intersystems.tools.git.domain;
+package com.link_intersystems.tools.git.domain.walk;
 
 import java.io.IOException;
 
@@ -11,6 +11,7 @@ import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import com.link_intersystems.tools.git.domain.TreeEntryWalk;
 import com.link_intersystems.tools.git.domain.TreeEntryWalk.TreeEntry;
 
 public class TreeWalkTreeEntryWalkAdapter implements RevCommitWalk {

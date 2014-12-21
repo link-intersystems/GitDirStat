@@ -27,6 +27,9 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import com.link_intersystems.tools.git.CommitRange;
+import com.link_intersystems.tools.git.domain.walk.CommitRangeTreeBuilder;
+import com.link_intersystems.tools.git.domain.walk.CommitWalker;
+import com.link_intersystems.tools.git.domain.walk.RevWalkCommitRangeTreeBuilder;
 
 public class GitRepository {
 
@@ -332,7 +335,7 @@ public class GitRepository {
 		return objectDatabase;
 	}
 
-	ObjectReader getObjectReader() {
+	public ObjectReader getObjectReader() {
 		if (objectReader == null) {
 			objectReader = getObjectDatabase().newReader();
 		}

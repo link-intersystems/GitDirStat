@@ -1,10 +1,13 @@
-package com.link_intersystems.tools.git.domain;
+package com.link_intersystems.tools.git.domain.walk;
 
 import java.io.IOException;
 
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevSort;
 import org.eclipse.jgit.revwalk.RevWalk;
+
+import com.link_intersystems.tools.git.domain.GitRepository;
+import com.link_intersystems.tools.git.domain.ProgressListener;
 
 public class ProgressAwareRevWalkTemplate extends AbstractRevWalkTemplate {
 

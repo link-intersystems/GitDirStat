@@ -16,6 +16,8 @@ import org.eclipse.jgit.revwalk.RevSort;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.link_intersystems.tools.git.CommitRange;
+import com.link_intersystems.tools.git.domain.walk.CommitRangeTreeBuilder;
+import com.link_intersystems.tools.git.domain.walk.CommitWalker;
 
 public class CommitWalkCommitRangeTreeBuilder implements CommitRangeTreeBuilder {
 

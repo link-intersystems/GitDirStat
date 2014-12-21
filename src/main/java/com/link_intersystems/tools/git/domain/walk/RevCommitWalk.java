@@ -1,4 +1,4 @@
-package com.link_intersystems.tools.git.domain;
+package com.link_intersystems.tools.git.domain.walk;
 
 import java.io.IOException;
 
