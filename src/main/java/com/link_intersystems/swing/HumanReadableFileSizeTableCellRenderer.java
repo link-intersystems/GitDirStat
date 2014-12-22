@@ -1,4 +1,4 @@
-package com.link_intersystems.tools.git.ui.metrics;
+package com.link_intersystems.swing;
 
 import java.awt.Component;
 import java.math.BigInteger;
@@ -11,9 +11,6 @@ import org.apache.commons.io.FileUtils;
 public class HumanReadableFileSizeTableCellRenderer extends
 		DefaultTableCellRenderer {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 9218037116141144226L;
 
 	@Override

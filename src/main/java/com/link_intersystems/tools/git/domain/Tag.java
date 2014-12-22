@@ -15,13 +15,13 @@ public class Tag extends Ref {
 	}
 
 	@Override
-	public ObjectId getCommitId() {
+	public ObjectId getId() {
 		org.eclipse.jgit.lib.Ref jgitRef = getJgitRef();
-		ObjectId commitId = jgitRef.getPeeledObjectId();
-		if (commitId == null) {
-			commitId = jgitRef.getObjectId();
+		ObjectId objectId = jgitRef.getPeeledObjectId();
+		if (objectId == null) {
+			objectId = jgitRef.getObjectId();
 		}
-		return commitId;
+		return objectId;
 	}
 
 }

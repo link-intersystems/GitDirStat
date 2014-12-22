@@ -3,13 +3,18 @@ package com.link_intersystems.tools.git.ui.metrics;
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.math.BigInteger;
 
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
 
+import com.link_intersystems.swing.FileModel;
+import com.link_intersystems.swing.FileModelAdapterFactory;
+import com.link_intersystems.swing.HumanReadableFileSizeTreeCellRenderer;
 import com.link_intersystems.swing.PopupMenuMouseAdapter;
 import com.link_intersystems.swing.RadioButtonGroupModel;
 import com.link_intersystems.tools.git.common.SortOrder;
@@ -30,8 +35,10 @@ public class SizeMetricsTreeComponent extends GitRepositoryComponent {
 
 	public SizeMetricsTreeComponent() {
 		setLayout(new BorderLayout());
-		sizeMetricsTree
-				.setCellRenderer(new HumanReadableFileSizeTreeCellRenderer());
+		HumanReadableFileSizeTreeCellRenderer cellRenderer = new HumanReadableFileSizeTreeCellRenderer();
+		TreeObjectFileModelAdapterFactory modelAdapterFactory = new TreeObjectFileModelAdapterFactory();
+		cellRenderer.setFileModelAdapterFactory(modelAdapterFactory);
+		sizeMetricsTree.setCellRenderer(cellRenderer);
 		add(sizeMetricsScrollPane, BorderLayout.CENTER);
 
 		createPopupMenu();
@@ -126,5 +133,50 @@ public class SizeMetricsTreeComponent extends GitRepositoryComponent {
 					.getSelectionValue();
 			sizeMetricsTreeModel.setSorting(sortBy, sortOrder);
 		}
+	}
+
+	private static class TreeObjectFileModel implements FileModel {
+
+		private TreeObject treeObject;
+
+		public TreeObjectFileModel(TreeObject treeObject) {
+			this.treeObject = treeObject;
+		}
+
+		@Override
+		public String getName() {
+			return treeObject.getName();
+		}
+
+		@Override
+		public BigInteger getSize() {
+			return treeObject.getSize();
+		}
+
+	}
+
+	private static class TreeObjectFileModelAdapterFactory implements
+			FileModelAdapterFactory {
+
+		@Override
+		public FileModel createAdapter(Object treeModelObject) {
+			FileModel fileModel = null;
+			TreeObject treeObject = null;
+			if (treeModelObject instanceof DefaultMutableTreeNode) {
+				DefaultMutableTreeNode mutableTreeNode = DefaultMutableTreeNode.class
+						.cast(treeModelObject);
+				Object userObject = mutableTreeNode.getUserObject();
+				if (userObject instanceof TreeObject) {
+					treeObject = TreeObject.class.cast(userObject);
+				}
+			}
+
+			if (treeObject != null) {
+				fileModel = new TreeObjectFileModel(treeObject);
+			}
+
+			return fileModel;
+		}
+
 	}
 }

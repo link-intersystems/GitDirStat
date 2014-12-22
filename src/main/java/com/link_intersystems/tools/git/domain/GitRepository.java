@@ -18,6 +18,7 @@ import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectDatabase;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.RefDatabase;
 import org.eclipse.jgit.lib.Repository;
@@ -113,8 +114,8 @@ public class GitRepository {
 
 	public CommitRange getCommitRange(String revstr) throws IOException {
 		Repository repository = getRepository();
-		AnyObjectId toInclusive = repository.resolve(revstr);
-		AnyObjectId fromInclusive = getInitialCommit(toInclusive);
+		ObjectId toInclusive = repository.resolve(revstr);
+		ObjectId fromInclusive = getInitialCommit(toInclusive);
 		CommitRange revRange = new CommitRange(fromInclusive, toInclusive);
 		return revRange;
 	}
@@ -129,7 +130,7 @@ public class GitRepository {
 					commitRanges = Collections.emptyList();
 					break;
 				}
-				AnyObjectId toInclusive = ref.getCommitId();
+				ObjectId toInclusive = ref.getId();
 				CommitRange revRange = new CommitRange(null, toInclusive);
 				commitRanges.add(revRange);
 				progressListener.update(1);

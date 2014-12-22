@@ -68,7 +68,7 @@ public class SizeMetricsView extends JPanel {
 		add(jSplitPane, BorderLayout.CENTER);
 		this.addPropertyChangeListener(weakReferencePropertyChangeSupport);
 
-		setTreeAction.actionPerformed(null);
+		setTableAction.actionPerformed(null);
 	}
 
 	private void setViewComponent(GitRepositoryComponent gitRepositoryComponent) {

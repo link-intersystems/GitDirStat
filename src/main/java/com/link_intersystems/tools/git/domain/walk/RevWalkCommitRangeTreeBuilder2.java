@@ -15,11 +15,11 @@ import com.link_intersystems.tools.git.domain.TreeEntryWalk.TreeEntry;
 import com.link_intersystems.tools.git.domain.TreeObject;
 import com.link_intersystems.tools.git.domain.TreeObjectBuilderTreeEntryWalk;
 
-public class RevWalkCommitRangeTreeBuilder implements CommitRangeTreeBuilder {
+public class RevWalkCommitRangeTreeBuilder2 implements CommitRangeTreeBuilder {
 
 	private GitRepository gitRepository;
 
-	public RevWalkCommitRangeTreeBuilder(GitRepository gitRepository) {
+	public RevWalkCommitRangeTreeBuilder2(GitRepository gitRepository) {
 		this.gitRepository = gitRepository;
 	}
 
@@ -41,15 +41,17 @@ public class RevWalkCommitRangeTreeBuilder implements CommitRangeTreeBuilder {
 		ObjectReader objectReader = gitRepository.getObjectReader();
 		TreeObjectBuilderTreeEntryWalk treeObjectBuilder = new TreeObjectBuilderTreeEntryWalk(
 				root);
-		TreeWalkTreeEntryWalkAdapter commitWalk = new TreeWalkTreeEntryWalkAdapter(
+		TreeParserTreeEntryWalkAdapter commitWalk = new TreeParserTreeEntryWalkAdapter(
 				objectReader, treeObjectBuilder);
 		class TreeWalkFilter implements Predicate<TreeEntry> {
 
 			Predicate<ObjectId> uniqueIds = UniquePredicate.uniquePredicate();
+			Predicate<String> uniquePaths = UniquePredicate.uniquePredicate();
 
 			@Override
 			public boolean evaluate(TreeEntry treeEntry) {
-				return !uniqueIds.evaluate(treeEntry.getObjectId());
+				return !(uniqueIds.evaluate(treeEntry.getObjectId()) || uniquePaths
+						.evaluate(treeEntry.getPathString()));
 			}
 
 		}

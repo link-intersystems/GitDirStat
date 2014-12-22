@@ -17,6 +17,8 @@ public interface TreeEntryWalk {
 
 		long getSize() throws IOException;
 
+		byte[] getRawPath();
+
 	}
 
 	void walk(TreeEntry treeEntry) throws IOException;

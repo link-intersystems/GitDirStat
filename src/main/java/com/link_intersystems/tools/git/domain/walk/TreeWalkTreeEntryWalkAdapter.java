@@ -82,6 +82,11 @@ public class TreeWalkTreeEntryWalkAdapter implements RevCommitWalk {
 			return objectSize;
 		}
 
+		@Override
+		public byte[] getRawPath() {
+			return treeWalk.getRawPath();
+		}
+
 	}
 
 }

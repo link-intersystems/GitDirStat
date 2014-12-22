@@ -3,7 +3,6 @@ package com.link_intersystems.tools.git.domain.walk;
 import java.io.IOException;
 
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevSort;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.link_intersystems.tools.git.domain.GitRepository;
@@ -21,16 +20,17 @@ public class ProgressAwareRevWalkTemplate extends AbstractRevWalkTemplate {
 
 	@Override
 	public void walk(RevCommitWalk revCommitWalk) throws IOException {
-		int totalWork = getTotalWork();
+		RevWalk revWalk = createRevWalk();
+		int totalWork = countRevCommits(revWalk);
 		progressListener.start(totalWork);
 		try {
-			RevWalk revWalk = createRevWalk();
+			revWalk = createRevWalk();
 			RevCommit revCommit = null;
 
 			while ((revCommit = revWalk.next()) != null) {
-//				if (revCommitFilter.accept(revCommit)) {
+				if (revCommitFilter.accept(revCommit)) {
 					revCommitWalk.walk(revCommit);
-//				}
+				}
 				progressListener.update(1);
 			}
 
@@ -39,17 +39,11 @@ public class ProgressAwareRevWalkTemplate extends AbstractRevWalkTemplate {
 		}
 	}
 
-	private int getTotalWork() throws IOException {
-		RevWalk revWalk = createRevWalk();
-
-		revWalk.sort(RevSort.TOPO);
-		revWalk.sort(RevSort.REVERSE, true);
-
+	private int countRevCommits(RevWalk revWalk) throws IOException {
 		int total = 0;
 		while (revWalk.next() != null) {
 			total++;
 		}
-
 		return total;
 	}
 

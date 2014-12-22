@@ -1,22 +1,22 @@
 package com.link_intersystems.tools.git;
 
-import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.ObjectId;
 
 public class CommitRange {
 
-	private AnyObjectId fromInclusive;
-	private AnyObjectId toInclusive;
+	private ObjectId fromInclusive;
+	private ObjectId toInclusive;
 
-	public CommitRange(AnyObjectId fromInclusive, AnyObjectId toInclusive) {
+	public CommitRange(ObjectId fromInclusive, ObjectId toInclusive) {
 		this.fromInclusive = fromInclusive;
 		this.toInclusive = toInclusive;
 	}
 
-	public AnyObjectId getFromInclusive() {
+	public ObjectId getFromInclusive() {
 		return fromInclusive;
 	}
 
-	public AnyObjectId getToInclusive() {
+	public ObjectId getToInclusive() {
 		return toInclusive;
 	}
 

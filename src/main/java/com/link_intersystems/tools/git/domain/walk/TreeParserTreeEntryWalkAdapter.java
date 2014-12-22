@@ -1,6 +1,8 @@
 package com.link_intersystems.tools.git.domain.walk;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.collections4.functors.FalsePredicate;
@@ -20,7 +22,6 @@ public class TreeParserTreeEntryWalkAdapter implements RevCommitWalk {
 
 	private ObjectReader objectReader;
 	private CanonicalTreeParser treeParser;
-	private TreeParserTreeEntry treeParserEntry;
 
 	private TreeEntryWalk treeEntryWalk;
 	private Predicate<TreeEntry> filterPredicate = FalsePredicate
@@ -31,7 +32,6 @@ public class TreeParserTreeEntryWalkAdapter implements RevCommitWalk {
 		this.objectReader = objectReader;
 		this.treeEntryWalk = treeEntryWalk;
 		treeParser = new CanonicalTreeParser();
-		treeParserEntry = new TreeParserTreeEntry(treeParser, objectReader);
 	}
 
 	@Override
@@ -39,11 +39,31 @@ public class TreeParserTreeEntryWalkAdapter implements RevCommitWalk {
 		RevTree tree = revCommit.getTree();
 		treeParser.reset(objectReader, tree);
 
+		processTreeParser(treeParser);
+	}
+
+	private void processTreeParser(CanonicalTreeParser treeParser)
+			throws IOException {
+		TreeParserTreeEntry treeParserEntry = new TreeParserTreeEntry(
+				treeParser, objectReader);
+
+		List<CanonicalTreeParser> subTrees = new ArrayList<CanonicalTreeParser>();
 		while (!treeParser.eof()) {
-			treeParser.next();
-			if (!filterPredicate.evaluate(treeParserEntry)) {
-				treeEntryWalk.walk(treeParserEntry);
+			FileMode entryFileMode = treeParser.getEntryFileMode();
+			if (FileMode.TREE.equals(entryFileMode)) {
+				CanonicalTreeParser canonicalTreeParser = new CanonicalTreeParser();
+				canonicalTreeParser.reset(objectReader,
+						treeParser.getEntryObjectId());
+				subTrees.add(canonicalTreeParser);
+			} else {
+				if (!filterPredicate.evaluate(treeParserEntry)) {
+					treeEntryWalk.walk(treeParserEntry);
+				}
 			}
+			treeParser.next();
+		}
+		for (CanonicalTreeParser subTreeParser : subTrees) {
+			processTreeParser(subTreeParser);
 		}
 	}
 
@@ -85,6 +105,11 @@ public class TreeParserTreeEntryWalkAdapter implements RevCommitWalk {
 			long objectSize = objectReader.getObjectSize(getObjectId(),
 					Constants.OBJ_BLOB);
 			return objectSize;
+		}
+
+		@Override
+		public byte[] getRawPath() {
+			return abstractTreeIterator.getEntryPathBuffer();
 		}
 
 	}
