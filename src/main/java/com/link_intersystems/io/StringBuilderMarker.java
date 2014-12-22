@@ -1,12 +1,12 @@
 package com.link_intersystems.io;
 
-class StringBuilderMark {
+class StringBuilderMarker {
 
 	private int begin = -1;
 	private StringBuilder stringBuilder;
 	private int end = -1;
 
-	public StringBuilderMark(StringBuilder stringBuilder) {
+	public StringBuilderMarker(StringBuilder stringBuilder) {
 		this.stringBuilder = stringBuilder;
 	}
 

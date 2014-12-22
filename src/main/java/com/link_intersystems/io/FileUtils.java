@@ -18,7 +18,7 @@ public class FileUtils {
 		}
 
 		StringBuilder abbreviatedPath = new StringBuilder();
-		StringBuilderMark abbreviationMark = new StringBuilderMark(
+		StringBuilderMarker abbreviationMarker = new StringBuilderMarker(
 				abbreviatedPath);
 		String[] pathSegments = StringUtils.split(filePath, File.separator);
 
@@ -29,10 +29,10 @@ public class FileUtils {
 			abbreviatedPath.append(File.separator);
 
 			if (pathSegments.length > 1) {
-				abbreviationMark.begin();
+				abbreviationMarker.begin();
 				abbreviatedPath.append(PATH_ABBRIVIATION);
 				abbreviatedPath.append(File.separator);
-				abbreviationMark.end();
+				abbreviationMarker.end();
 			}
 
 			if (abbreviatedPath.length() < size) {
@@ -45,15 +45,15 @@ public class FileUtils {
 				for (; i < pathSegments.length; i++) {
 					String pathSegment = pathSegments[i];
 					if (abbreviatedPath.length() + pathSegment.length() < size) {
-						abbreviationMark.appendBeforeMark(pathSegment);
-						abbreviationMark.appendBeforeMark(File.separator);
+						abbreviationMarker.appendBeforeMark(pathSegment);
+						abbreviationMarker.appendBeforeMark(File.separator);
 					} else {
 						break;
 					}
 				}
 
 				if (i >= pathSegments.length) {
-					abbreviationMark.delete();
+					abbreviationMarker.delete();
 				}
 			}
 		}
