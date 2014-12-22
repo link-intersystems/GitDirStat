@@ -46,10 +46,12 @@ public class RevWalkCommitRangeTreeBuilder implements CommitRangeTreeBuilder {
 		class TreeWalkFilter implements Predicate<TreeEntry> {
 
 			Predicate<ObjectId> uniqueIds = UniquePredicate.uniquePredicate();
+			Predicate<String> uniquePaths = UniquePredicate.uniquePredicate();
 
 			@Override
 			public boolean evaluate(TreeEntry treeEntry) {
-				return !uniqueIds.evaluate(treeEntry.getObjectId());
+				return !(uniqueIds.evaluate(treeEntry.getObjectId()) || uniquePaths
+						.evaluate(treeEntry.getPathString()));
 			}
 
 		}

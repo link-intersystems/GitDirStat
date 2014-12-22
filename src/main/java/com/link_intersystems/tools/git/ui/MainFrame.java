@@ -3,6 +3,12 @@ package com.link_intersystems.tools.git.ui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -26,7 +32,6 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
 
-import com.link_intersystems.swing.AsyncActionMediator;
 import com.link_intersystems.swing.CompositeAction;
 import com.link_intersystems.swing.ProgressDialogMonitor;
 import com.link_intersystems.swing.SingleActionSelectionMediator;
@@ -82,9 +87,9 @@ public class MainFrame implements Serializable {
 
 	private UpdateRefsAction updateRefsAction;
 
-	private UpdateTreeObjectAction updateTreeObjectAction;
+	private UpdateRepositoryAction updateRepositoryAction;
 
-	private LoadRepositoryAction updateRepositoryAction;
+	private Action startupAction;
 
 	private OpenAction openRepoAction;
 
@@ -108,26 +113,22 @@ public class MainFrame implements Serializable {
 		sizeMetricsView.setModel(repoModel);
 
 		updateRefsAction = new UpdateRefsAction(repoAccess, repoModel);
-		updateTreeObjectAction = new UpdateTreeObjectAction(repoAccess,
-				repoModel, progressDialogMonitor);
-		updateRepositoryAction = new LoadRepositoryAction("Update Repository",
-				updateRefsAction, updateTreeObjectAction);
+		updateRepositoryAction = new UpdateRepositoryAction(new UIContext() {
 
-		openRepoAction = new OpenAction(repoModel, updateRepositoryAction);
+			@Override
+			public Window getMainFrame() {
+				return MainFrame.this.mainFrame;
+			}
+		}, repoModel, repoAccess);
+		updateRepositoryAction.setDisableWhileRunning(true);
+
+		startupAction = updateRefsAction;
+
+		openRepoAction = new OpenAction(repoModel, new CompositeAction(
+				updateRefsAction, updateRepositoryAction));
 
 		addMenuBarAction(MainFrame.MB_PATH_FILE, openRepoAction);
 		addMenuBarAction(MainFrame.MB_PATH_FILE, updateRepositoryAction);
-		Action updateBranchSelection = sizeMetricsView
-				.createApplyBranchSelectionAction();
-		updateBranchSelection.putValue(Action.NAME, "Apply selection");
-		CompositeAction applyBranchSelectionAction = new CompositeAction(
-				updateBranchSelection, updateRefsAction, updateRepositoryAction);
-
-		AsyncActionMediator asyncActionMediator = new AsyncActionMediator(
-				updateTreeObjectAction);
-		asyncActionMediator
-				.addDisabledActionWhileRunning(applyBranchSelectionAction);
-		addToolbarAction(applyBranchSelectionAction);
 
 		Action showTableAction = sizeMetricsView.getSetTableAction();
 		showTableAction.putValue(Action.NAME, "Show table");
@@ -137,13 +138,26 @@ public class MainFrame implements Serializable {
 		addMenuBarActionGroup(MainFrame.MENU_PATH_VIEW, showTableAction,
 				showTreeAction);
 
-		RemovePathAction removePathAction = new RemovePathAction(repoModel, repoAccess, progressDialogMonitor);
+		addToolbarActions(repoAccess, sizeMetricsView);
+	}
+
+	private void addToolbarActions(GitRepositoryAccess repoAccess,
+			SizeMetricsView sizeMetricsView) {
+		RemovePathAction removePathAction = new RemovePathAction(repoModel,
+				repoAccess);
+		removePathAction.setProgressMonitor(progressDialogMonitor);
+
 		removePathAction.putValue(Action.NAME, "Remove selected paths");
 		addToolbarAction(removePathAction);
+
+		updateRepositoryAction.putValue(Action.NAME, "Select Refs");
+		updateRepositoryAction.setProgressMonitor(progressDialogMonitor);
+		addToolbarAction(updateRepositoryAction);
 	}
 
 	private void configureMainFrame() {
-		mainFrame.setSize(800, 600);
+		Dimension size = getInitialSize();
+		mainFrame.setSize(size);
 		mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		mainFrame.setLocationRelativeTo(null);
 
@@ -155,6 +169,18 @@ public class MainFrame implements Serializable {
 		actionPanel.add(jToolBar, BorderLayout.SOUTH);
 
 		mainFrame.add(actionPanel, BorderLayout.NORTH);
+	}
+
+	private Dimension getInitialSize() {
+		GraphicsEnvironment lge = GraphicsEnvironment
+				.getLocalGraphicsEnvironment();
+		GraphicsDevice defaultScreenDevice = lge.getDefaultScreenDevice();
+		GraphicsConfiguration defaultConfiguration = defaultScreenDevice
+				.getDefaultConfiguration();
+		Rectangle bounds = defaultConfiguration.getBounds();
+		int initialWidth = (int) (bounds.width * 0.8);
+		int initialHeight = (int) (bounds.height * 0.8);
+		return new Dimension(initialWidth, initialHeight);
 	}
 
 	public void addToolbarAction(Action action) {
@@ -182,8 +208,8 @@ public class MainFrame implements Serializable {
 
 	public void setVisible(boolean visible) {
 		mainFrame.setVisible(visible);
-		if (repoModel.isGitDirSet()) {
-			updateRepositoryAction.actionPerformed(null);
+		if (startupAction != null) {
+			startupAction.actionPerformed(null);
 		}
 	}
 

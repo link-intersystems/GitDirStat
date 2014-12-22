@@ -123,8 +123,4 @@ public class SizeMetricsView extends JPanel {
 				.addWeakReferencePropertyChangeListener(listener);
 	}
 
-	public Action createApplyBranchSelectionAction() {
-		return branchSelectionList.createApplyBranchSelectionAction();
-	}
-
 }

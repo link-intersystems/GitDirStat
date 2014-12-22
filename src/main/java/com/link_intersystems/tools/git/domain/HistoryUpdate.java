@@ -23,12 +23,18 @@ public class HistoryUpdate {
 		List<Ref> allRefs = gitRepository.getRefs(Ref.class);
 		for (Ref ref : allRefs) {
 			if (ref.isUpdateable()) {
-				ObjectId objectId = ref.getId();
-				String objectName = objectId.name();
-				if (replacedCommits.containsKey(objectName)) {
-					Commit rewrittenCommit = replacedCommits.get(objectName);
-					ref.update(rewrittenCommit.getId());
-				}
+				nullSafeCommitUpdate(ref);
+			}
+		}
+	}
+
+	private void nullSafeCommitUpdate(Ref ref) throws IOException {
+		ObjectId objectId = ref.getCommitId();
+		if (objectId != null) {
+			String objectName = objectId.name();
+			if (replacedCommits.containsKey(objectName)) {
+				Commit rewrittenCommit = replacedCommits.get(objectName);
+				ref.update(rewrittenCommit.getId());
 			}
 		}
 	}

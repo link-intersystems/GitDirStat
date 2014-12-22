@@ -13,23 +13,21 @@ import com.link_intersystems.tools.git.domain.IndexFilter;
 import com.link_intersystems.tools.git.domain.TreeFileUpdate;
 import com.link_intersystems.tools.git.domain.TreeUpdate;
 
-public class RemovePathAction extends AsyncProgressAction<Void, Void> {
+public class RemovePathAction extends AsyncProgressAction<Void, Void, Void> {
 
 	private static final long serialVersionUID = -2409080673565317180L;
 	private GitRepositoryModel gitRepositoryModel;
-	private ProgressMonitor progressMonitor;
 	private GitRepositoryAccess gitRepositoryAccess;
 
 	public RemovePathAction(GitRepositoryModel gitRepositoryModel,
-			GitRepositoryAccess gitRepositoryAccess,
-			ProgressMonitor progressMonitor) {
+			GitRepositoryAccess gitRepositoryAccess) {
 		this.gitRepositoryModel = gitRepositoryModel;
 		this.gitRepositoryAccess = gitRepositoryAccess;
-		this.progressMonitor = progressMonitor;
 	}
 
 	@Override
-	protected Void doInBackground() throws Exception {
+	protected Void doInBackground(Void actionInput,
+			ProgressMonitor progressMonitor) throws Exception {
 		ProgressListenerMonitorAdapter progressListenerMonitorAdapter = new ProgressListenerMonitorAdapter(
 				progressMonitor, "Removing paths from history");
 		progressListenerMonitorAdapter.setUpdateInterval(1000);

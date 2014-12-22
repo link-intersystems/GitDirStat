@@ -20,9 +20,12 @@ public class GitRepositoryModel extends AbstractPropertyChangeSupport {
 	private File gitDir;
 	private String repositoryId;
 	private TreeObject commitRangeTree;
-	private List<? extends Ref> refs = new ArrayList<Ref>();
+	private List<Ref> refs = new ArrayList<Ref>();
 	private List<Ref> selectedRefs = new ArrayList<Ref>();
 	private List<String> selectedPaths = new ArrayList<String>();
+
+	private RefsListModel refsListModel = new RefsListModel();
+
 
 	public GitRepositoryModel() {
 		gitDir = new File(System.getProperty("user.dir"));
@@ -89,9 +92,17 @@ public class GitRepositoryModel extends AbstractPropertyChangeSupport {
 	}
 
 	public void setRefs(List<? extends Ref> refs) {
-		List<? extends Ref> oldRefs = this.refs;
+		List<Ref> oldRefs = this.refs;
 		this.refs = new ArrayList<Ref>(refs);
+		refsListModel.setList(this.refs);
 		firePropertyChange(PROP_REFS, oldRefs, this.refs);
+
 	}
+
+	public RefsListModel getRefsListModel() {
+		return refsListModel;
+	}
+
+
 
 }

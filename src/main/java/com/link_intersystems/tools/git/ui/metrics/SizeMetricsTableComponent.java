@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
@@ -45,6 +46,11 @@ public class SizeMetricsTableComponent extends GitRepositoryComponent {
 
 	public SizeMetricsTableComponent() {
 		setLayout(new BorderLayout());
+
+		JPanel northPanel = new JPanel();
+		northPanel.setLayout(new BorderLayout());
+
+		add(northPanel,BorderLayout.NORTH);
 		add(sizeMetricsScrollPane, BorderLayout.CENTER);
 		add(summaryTable, BorderLayout.SOUTH);
 

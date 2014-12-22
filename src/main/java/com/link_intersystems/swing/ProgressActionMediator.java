@@ -7,13 +7,13 @@ import java.util.HashSet;
 
 import javax.swing.Action;
 
-public class AsyncActionMediator implements PropertyChangeListener {
+public class ProgressActionMediator implements PropertyChangeListener {
 
 	Collection<Action> disabledActionsWhileRunning = new HashSet<Action>();
 	Collection<Action> enabledActionsWhileRunning = new HashSet<Action>();
 
-	public AsyncActionMediator(AsyncProgressAction<?, ?> asyncAction) {
-		asyncAction.addPropertyChangeListener(this);
+	public ProgressActionMediator(ProgressAction progressAction) {
+		progressAction.addPropertyChangeListener(this);
 	}
 
 	public void addDisabledActionWhileRunning(Action action) {

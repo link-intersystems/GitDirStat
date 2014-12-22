@@ -7,6 +7,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -16,6 +17,7 @@ public class BeanPropertySync<T> implements PropertyChangeListener {
 	private T beanSync;
 	private BeanInfo baseBeanInfo;
 	private T baseBean;
+	private boolean skipMissingPropertiesEnabled;
 
 	public BeanPropertySync(T beanSync) {
 		this.beanSync = beanSync;
@@ -25,6 +27,15 @@ public class BeanPropertySync<T> implements PropertyChangeListener {
 		return beanSync;
 	}
 
+	public void setSkipMissingPropertiesEnabled(
+			boolean skipMissingPropertiesEnabled) {
+		this.skipMissingPropertiesEnabled = skipMissingPropertiesEnabled;
+	}
+
+	public boolean isSkipMissingPropertiesEnabled() {
+		return skipMissingPropertiesEnabled;
+	}
+
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
 		String propertyName = evt.getPropertyName();
@@ -32,8 +43,17 @@ public class BeanPropertySync<T> implements PropertyChangeListener {
 		try {
 			propertyDescriptor = PropertyUtils.getPropertyDescriptor(beanSync,
 					propertyName);
-			Method writeMethod = propertyDescriptor.getWriteMethod();
-			writeMethod.invoke(beanSync, evt.getNewValue());
+			if (propertyDescriptor == null) {
+				if (!skipMissingPropertiesEnabled) {
+					String msg = MessageFormat
+							.format("Can't find write method for property '{0}' of bean '{1}'",
+									propertyName, beanSync.getClass());
+					throw new RuntimeException(msg);
+				}
+			} else {
+				Method writeMethod = propertyDescriptor.getWriteMethod();
+				writeMethod.invoke(beanSync, evt.getNewValue());
+			}
 		} catch (Exception e) {
 			throw new RuntimeException("Unable to sync bean", e);
 		}

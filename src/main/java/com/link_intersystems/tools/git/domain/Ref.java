@@ -27,7 +27,7 @@ public abstract class Ref {
 	}
 
 
-	public ObjectId getId() {
+	public ObjectId getCommitId() {
 		return getObjectId();
 	}
 

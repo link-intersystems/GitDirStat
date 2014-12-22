@@ -22,6 +22,7 @@ public class CompositeAction extends AbstractAction implements
 		this.actions.add(mainAction);
 		this.actions.addAll(Arrays.asList(actions));
 		propertySync.setSynchronization(mainAction);
+		propertySync.setSkipMissingPropertiesEnabled(true);
 	}
 
 	@Override

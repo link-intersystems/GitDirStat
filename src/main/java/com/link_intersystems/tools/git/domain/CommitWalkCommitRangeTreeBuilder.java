@@ -118,8 +118,8 @@ public class CommitWalkCommitRangeTreeBuilder implements CommitRangeTreeBuilder 
 			throws MissingObjectException, IncorrectObjectTypeException,
 			IOException {
 		for (CommitRange commitRange : commitRanges) {
-			AnyObjectId fromInclusive = commitRange.getToInclusive();
-			RevCommit revCommit = revWalk.parseCommit(fromInclusive);
+			AnyObjectId toInclusive = commitRange.getToInclusive();
+			RevCommit revCommit = revWalk.parseCommit(toInclusive);
 			revWalk.markStart(revCommit);
 		}
 	}

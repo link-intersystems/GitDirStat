@@ -24,7 +24,7 @@ public class ListAdapterListModel<E> extends AbstractListModel {
 
 	private List<E> list = new ArrayList<E>();
 
-	public void setList(List<E> list) {
+	public void setList(List<? extends E> list) {
 		this.list.clear();
 		this.list.addAll(list);
 		fireListDataChanged();
@@ -39,7 +39,7 @@ public class ListAdapterListModel<E> extends AbstractListModel {
 		fireContentsChanged(this, 0, Math.max(list.size() - 1, 0));
 	}
 
-	public void addAll(List<E> elements) {
+	public void addAll(List<? extends E> elements) {
 		if (this.list.addAll(elements)) {
 			fireIntervalAdded(elements.size());
 		}

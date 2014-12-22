@@ -130,9 +130,11 @@ public class GitRepository {
 					commitRanges = Collections.emptyList();
 					break;
 				}
-				ObjectId toInclusive = ref.getId();
-				CommitRange revRange = new CommitRange(null, toInclusive);
-				commitRanges.add(revRange);
+				ObjectId toInclusive = ref.getCommitId();
+				if (toInclusive != null) {
+					CommitRange revRange = new CommitRange(null, toInclusive);
+					commitRanges.add(revRange);
+				}
 				progressListener.update(1);
 			}
 			return commitRanges;
