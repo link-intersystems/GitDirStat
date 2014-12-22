@@ -13,7 +13,7 @@ import com.link_intersystems.tools.git.GitDirStatArguments;
 import com.link_intersystems.tools.git.domain.GitRepository;
 import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
 import com.link_intersystems.tools.git.domain.IndexFilter;
-import com.link_intersystems.tools.git.domain.PathBranchFilter;
+import com.link_intersystems.tools.git.domain.GlobPathIndexFilter;
 
 public class FilterGitRepoApplication implements GitDirStatApplication {
 
@@ -27,7 +27,7 @@ public class FilterGitRepoApplication implements GitDirStatApplication {
 
 		Collection<CommitRange> commitRanges = Collections
 				.singleton(commitRange);
-		IndexFilter indexFilter = new PathBranchFilter(new GlobPattern(
+		IndexFilter indexFilter = new GlobPathIndexFilter(new GlobPattern(
 				"**/main/java/**/input/*.java"));
 		gitRepository.applyFilter(commitRanges, indexFilter);
 
