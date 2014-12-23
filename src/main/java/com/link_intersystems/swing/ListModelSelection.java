@@ -7,15 +7,12 @@ import java.util.List;
 
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.RowSorter;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class ListModelSelection<E> {
-
-	public static final String PROP_SELECTION = "selection";
+public class ListModelSelection<E> implements SelectionModel<E> {
 
 	private ListModel listModel;
 	private ListDataListener listChangeAdapter = new ListModelChangeAdapter();
@@ -27,7 +24,6 @@ public class ListModelSelection<E> {
 			this);
 
 	private List<E> selection;
-	private RowSorter<?> rowSorter;
 
 	public ListModelSelection(ListModel listModel,
 			ListSelectionModel listSelectionModel) {
@@ -57,10 +53,6 @@ public class ListModelSelection<E> {
 				listener);
 	}
 
-	public void setRowSorter(RowSorter<?> rowSorter) {
-		this.rowSorter = rowSorter;
-	}
-
 	public boolean isEmpty() {
 		return listSelectionModel.isSelectionEmpty();
 	}
@@ -86,12 +78,7 @@ public class ListModelSelection<E> {
 
 		for (int i = minIndex; i <= maxIndex; i++) {
 			if (listSelectionModel.isSelectedIndex(i)) {
-				int selectionIndex = i;
-				if (rowSorter != null) {
-					selectionIndex = rowSorter
-							.convertRowIndexToModel(selectionIndex);
-				}
-				E selectedElement = (E) listModel.getElementAt(selectionIndex);
+				E selectedElement = (E) listModel.getElementAt(i);
 				selection.add(selectedElement);
 			}
 		}

@@ -24,7 +24,7 @@ public class GitRepositoryModel extends AbstractPropertyChangeSupport {
 	private List<Ref> refs = new ArrayList<Ref>();
 
 	private RefsListModel refsListModel = new RefsListModel();
-	private PathListModel pathListModel = new PathListModel();
+	private PathModel pathListModel = new PathModel();
 
 	public GitRepositoryModel() {
 		gitDir = new File(System.getProperty("user.dir"));
@@ -35,8 +35,7 @@ public class GitRepositoryModel extends AbstractPropertyChangeSupport {
 		setCommitRangeTree(null);
 		List<Ref> refs = Collections.emptyList();
 		refsListModel.setList(refs);
-		List<TreeObject> paths = Collections.emptyList();
-		pathListModel.setList(paths);
+		pathListModel.clear();
 	}
 
 	public boolean isGitDirSet() {
@@ -68,7 +67,7 @@ public class GitRepositoryModel extends AbstractPropertyChangeSupport {
 			pathList.addAll(commitRangeTree.toFileList());
 
 		}
-		this.pathListModel.setList(pathList);
+		this.pathListModel.setRootTreeObject(commitRangeTree);
 	}
 
 	public List<? extends Ref> getRefs() {
@@ -87,7 +86,7 @@ public class GitRepositoryModel extends AbstractPropertyChangeSupport {
 		return refsListModel;
 	}
 
-	public PathListModel getPathListModel() {
+	public PathModel getPathListModel() {
 		return pathListModel;
 	}
 

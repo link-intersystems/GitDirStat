@@ -116,7 +116,7 @@ public class TreeObject implements Comparable<TreeObject> {
 	}
 
 	public boolean isFile() {
-		return this.children.isEmpty();
+		return this.children.isEmpty() && this.parent != null;
 	}
 
 	public TreeObjectPath getPath() {

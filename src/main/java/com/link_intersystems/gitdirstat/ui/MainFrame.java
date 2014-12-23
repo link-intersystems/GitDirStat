@@ -197,7 +197,7 @@ public class MainFrame implements Serializable {
 				"Update repository");
 		updateRepositoryAction.setProgressMonitor(progressDialogMonitor);
 
-		PathListModel pathListModel = repoModel.getPathListModel();
+		PathModel pathListModel = repoModel.getPathListModel();
 		ListModelSelectionMediator<TreeObject> listSelectionMediator = new ListModelSelectionMediator<TreeObject>();
 		listSelectionMediator.setListModelSelection(pathListModel
 				.getSelectionModel());

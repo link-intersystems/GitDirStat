@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -14,11 +15,12 @@ import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import com.link_intersystems.gitdirstat.ui.GitRepositoryModel;
-import com.link_intersystems.gitdirstat.ui.PathListModel;
+import com.link_intersystems.gitdirstat.ui.PathModel;
 import com.link_intersystems.swing.AlternatingColorTableCellRenderer;
 import com.link_intersystems.swing.ComponentResize;
 import com.link_intersystems.swing.HumanReadableFileSizeTableCellRenderer;
 import com.link_intersystems.swing.RelativeWidthResizer;
+import com.link_intersystems.swing.RowSorterAwareListSelectionModelUpdater;
 import com.link_intersystems.swing.TableColumnResize;
 
 public class TreeObjectsTableComponent extends GitRepositoryComponent {
@@ -31,6 +33,8 @@ public class TreeObjectsTableComponent extends GitRepositoryComponent {
 	private JTable summaryTable = new JTable();
 	private JScrollPane treeObjectsScrollPane = new JScrollPane(
 			treeObjectsTable);
+
+	private RowSorterAwareListSelectionModelUpdater rowSorterAwareListSelectionModelUpdater;
 
 	public TreeObjectsTableComponent() {
 		setLayout(new BorderLayout());
@@ -85,12 +89,18 @@ public class TreeObjectsTableComponent extends GitRepositoryComponent {
 	protected void updateCommitRangeTree() {
 		GitRepositoryModel gitRepositoryModel = getModel();
 		if (gitRepositoryModel != null) {
-			PathListModel pathListModel = gitRepositoryModel.getPathListModel();
-			treeObjectsTableModel.setEntryModel(pathListModel);
-			pathListModel.getSelectionModel().setRowSorter(
+			PathModel pathModel = gitRepositoryModel.getPathListModel();
+			ListModel entryModel = pathModel.getListModel();
+			treeObjectsTableModel.setEntryModel(entryModel);
+			if (rowSorterAwareListSelectionModelUpdater != null) {
+				rowSorterAwareListSelectionModelUpdater.setSourceModel(null,
+						null);
+			}
+			rowSorterAwareListSelectionModelUpdater = new RowSorterAwareListSelectionModelUpdater(
+					pathModel.getListSelectionModel());
+			rowSorterAwareListSelectionModelUpdater.setSourceModel(
+					treeObjectsTable.getSelectionModel(),
 					treeObjectsTable.getRowSorter());
-			treeObjectsTable.setSelectionModel(pathListModel
-					.getListSelectionModel());
 		}
 		ListSelectionModel selectionModel = treeObjectsTable
 				.getSelectionModel();

@@ -39,6 +39,7 @@ public class TreeObjectsTreeComponent extends GitRepositoryComponent {
 		TreeObjectFileModelAdapterFactory modelAdapterFactory = new TreeObjectFileModelAdapterFactory();
 		cellRenderer.setFileModelAdapterFactory(modelAdapterFactory);
 		treeObjectsTree.setCellRenderer(cellRenderer);
+		treeObjectsTree.setRootVisible(false);
 		add(treeObjectsScrollPane, BorderLayout.CENTER);
 
 		createPopupMenu();
