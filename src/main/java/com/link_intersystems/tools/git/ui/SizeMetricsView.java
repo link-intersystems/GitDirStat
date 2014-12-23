@@ -117,21 +117,21 @@ public class SizeMetricsView extends JPanel {
 		GitRepositoryComponent oldView = this.viewComponent;
 		if (this.viewComponent != null) {
 			this.viewComponent.setModel(null);
-			mainComponent.remove(gitRepositoryComponent);
+			mainComponent.remove(this.viewComponent);
 		}
 
 		this.viewComponent = gitRepositoryComponent;
 
 		if (this.viewComponent != null) {
 			this.viewComponent.setModel(gitRepositoryModel);
-			mainComponent.add(gitRepositoryComponent, BorderLayout.CENTER);
+			mainComponent.add(this.viewComponent, BorderLayout.CENTER);
 		}
 
 		firePropertyChange(PROP_VIEW_COMPONENT, oldView, this.viewComponent);
 
-		invalidate();
-		validate();
-		repaint();
+		mainComponent.invalidate();
+		mainComponent.validate();
+		mainComponent.repaint();
 	}
 
 	public GitRepositoryComponent getViewComponent() {
