@@ -10,7 +10,7 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
 
-import com.link_intersystems.tools.git.domain.GitRepository;
+import com.link_intersystems.gitdirstat.domain.GitRepository;
 
 public class GitRepositoryTestRunner extends BlockJUnit4ClassRunner {
 

@@ -8,12 +8,12 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.link_intersystems.tools.git.domain.CommitUpdate;
-import com.link_intersystems.tools.git.domain.GitRepository;
-import com.link_intersystems.tools.git.domain.IndexFilter;
-import com.link_intersystems.tools.git.domain.Ref;
-import com.link_intersystems.tools.git.domain.TreeFileUpdate;
-import com.link_intersystems.tools.git.domain.TreeUpdate;
+import com.link_intersystems.gitdirstat.domain.CommitUpdate;
+import com.link_intersystems.gitdirstat.domain.GitRepository;
+import com.link_intersystems.gitdirstat.domain.IndexFilter;
+import com.link_intersystems.gitdirstat.domain.Ref;
+import com.link_intersystems.gitdirstat.domain.TreeFileUpdate;
+import com.link_intersystems.gitdirstat.domain.TreeUpdate;
 import com.link_intersystems.tools.git.test.GitRepositoryLocation;
 import com.link_intersystems.tools.git.test.GitRepositoryTestRunner;
 
