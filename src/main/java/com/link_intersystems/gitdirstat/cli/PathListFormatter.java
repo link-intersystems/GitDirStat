@@ -1,6 +1,6 @@
 package com.link_intersystems.gitdirstat.cli;
 
-import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.List;
@@ -16,19 +16,18 @@ public class PathListFormatter {
 		this.treeObjects = treeObjects;
 	}
 
-	public void format(OutputStream outputStream) {
-
-		final BigInteger maxSize = getMaxSize();
+	public void format(PrintWriter printWriter) {
+		BigInteger maxSize = getMaxSize();
 		int maxLength = maxSize.toString().length();
 
 		for (TreeObject treeObject : treeObjects) {
 			BigInteger size = treeObject.getSize();
 			String sizeValue = size.toString();
 			String paddedSize = StringUtils.rightPad(sizeValue, maxLength);
-			String path = treeObject.getPath().getPathname();
+			String path = treeObject.getRootRelativePath().getPathname();
 			String pathSizeLine = MessageFormat.format("{0} {1}", paddedSize,
 					path);
-			System.out.println(pathSizeLine);
+			printWriter.println(pathSizeLine);
 		}
 	}
 

@@ -1,4 +1,4 @@
-package com.link_intersystems.gitdirstat;
+package com.link_intersystems.gitdirstat.ui;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -18,10 +18,11 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.link_intersystems.gitdirstat.GitDirStatArgumentsParseException;
 import com.link_intersystems.gitdirstat.domain.TreeObjectSortBy;
 import com.link_intersystems.util.SortOrder;
 
-public class CommandLineGitDirStatArguments implements GitDirStatArguments {
+public class GitDirStatUIArguments {
 
 	private static final String WORKING_DIR_SYS_PROP = "user.dir";
 
@@ -61,24 +62,24 @@ public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 		OPTIONS.addOption(OPTION_SORT_BY);
 	}
 
-	public static GitDirStatArguments parse(String[] args)
+	public static GitDirStatUIArguments parse(String[] args)
 			throws GitDirStatArgumentsParseException {
 		CommandLineParser parser = new PosixParser();
 		try {
 			CommandLine commandLine = parser.parse(OPTIONS, args);
-			GitDirStatArguments gitDirStatArguments = new CommandLineGitDirStatArguments(
+			GitDirStatUIArguments gitDirStatArguments = new GitDirStatUIArguments(
 					commandLine);
 			return gitDirStatArguments;
 		} catch (ParseException e) {
 			HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("java " + GitDirStatCLI.class.getName(),
-					OPTIONS);
+			formatter
+					.printHelp("java " + GitDirStatUI.class.getName(), OPTIONS);
 			throw new GitDirStatArgumentsParseException(e,
 					SerializationUtils.clone(OPTIONS));
 		}
 	}
 
-	public CommandLineGitDirStatArguments(CommandLine commandLine) {
+	public GitDirStatUIArguments(CommandLine commandLine) {
 		this.commandLine = commandLine;
 	}
 
@@ -99,7 +100,6 @@ public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 		return gitDir;
 	}
 
-	@Override
 	public OutputStream getOutputStream() {
 		OutputStream outputStream = null;
 
@@ -121,7 +121,6 @@ public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 		return outputStream;
 	}
 
-	@Override
 	public SortOrder getSortOrder() {
 		String sortOrderOption = commandLine.getOptionValue(OPTION_SORT_ORDER
 				.getOpt());
@@ -137,7 +136,6 @@ public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 		return sortOrder;
 	}
 
-	@Override
 	public TreeObjectSortBy getSortBy() {
 		String sortByOption = commandLine.getOptionValue(OPTION_SORT_BY
 				.getOpt());

@@ -38,7 +38,6 @@ import javax.swing.WindowConstants;
 
 import org.apache.commons.io.IOUtils;
 
-import com.link_intersystems.gitdirstat.GitDirStatArguments;
 import com.link_intersystems.gitdirstat.domain.GitRepositoryAccess;
 import com.link_intersystems.gitdirstat.domain.TreeObject;
 import com.link_intersystems.gitdirstat.ui.UIContext.IconType;
@@ -142,7 +141,7 @@ public class MainFrame implements Serializable {
 
 	private GitRepositoryModel repoModel;
 
-	public MainFrame(GitDirStatArguments arguments,
+	public MainFrame(GitDirStatUIArguments arguments,
 			GitRepositoryAccess repoAccess) {
 		repoModel = new GitRepositoryModel();
 		File gitRepositoryDir = arguments.getGitRepositoryDir();

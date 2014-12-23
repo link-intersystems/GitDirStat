@@ -3,17 +3,14 @@ package com.link_intersystems.gitdirstat.ui;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import com.link_intersystems.gitdirstat.GitDirStatApplication;
-import com.link_intersystems.gitdirstat.GitDirStatArguments;
 import com.link_intersystems.gitdirstat.domain.GitRepositoryAccess;
 
-public class GUIApplication implements GitDirStatApplication {
+public class GUIApplication {
 
-	@Override
-	public void run(GitDirStatArguments gitDirStatArguments) throws Exception {
+	public void run(GitDirStatUIArguments dirStatUIArguments) throws Exception {
 		setLookAndFeel();
 		GitRepositoryAccess repoAccess = new GitRepositoryAccess();
-		MainFrame mainFrame = new MainFrame(gitDirStatArguments, repoAccess);
+		MainFrame mainFrame = new MainFrame(dirStatUIArguments, repoAccess);
 		mainFrame.setVisible(true);
 	}
 
