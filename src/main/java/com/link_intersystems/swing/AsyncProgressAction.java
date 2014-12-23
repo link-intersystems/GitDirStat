@@ -14,6 +14,8 @@ public abstract class AsyncProgressAction<I, V, O> extends ProgressAction {
 	private static final int TYPE_PARAM_ACTION_INPUT = 0;
 	private static final long serialVersionUID = 7131523498822927047L;
 
+	private ActionInputSource<I> actionInputSource = NullActionInputSource.getInstance();
+
 	@Override
 	public final void doActionPerformed(ActionEvent e,
 			ProgressMonitor progressMonitor) {
@@ -37,8 +39,15 @@ public abstract class AsyncProgressAction<I, V, O> extends ProgressAction {
 		return actionInput != null;
 	}
 
+	public void setActionInputSource(ActionInputSource<I> actionInputSource) {
+		if (actionInputSource == null) {
+			actionInputSource = NullActionInputSource.getInstance();
+		}
+		this.actionInputSource = actionInputSource;
+	}
+
 	protected I getInput(ActionEvent e) {
-		return null;
+		return actionInputSource.getActionInput(e);
 	}
 
 	protected abstract O doInBackground(I actionInput,
@@ -101,6 +110,24 @@ public abstract class AsyncProgressAction<I, V, O> extends ProgressAction {
 
 	protected interface ResultRef<T> {
 		public T get() throws InterruptedException, ExecutionException;
+	}
+
+	private static class NullActionInputSource<I> implements
+			ActionInputSource<I> {
+
+		@SuppressWarnings("rawtypes")
+		private static final NullActionInputSource INSTANCE = new NullActionInputSource();
+
+		@SuppressWarnings("unchecked")
+		private static <I> NullActionInputSource<I> getInstance() {
+			return INSTANCE;
+		}
+
+		@Override
+		public I getActionInput(ActionEvent e) {
+			return null;
+		}
+
 	}
 
 }

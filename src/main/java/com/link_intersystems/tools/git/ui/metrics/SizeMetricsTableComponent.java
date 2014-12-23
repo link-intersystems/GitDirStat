@@ -1,13 +1,7 @@
 package com.link_intersystems.tools.git.ui.metrics;
 
 import java.awt.BorderLayout;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -23,21 +17,18 @@ import javax.swing.table.TableRowSorter;
 import com.link_intersystems.swing.AlternatingColorTableCellRenderer;
 import com.link_intersystems.swing.ComponentResize;
 import com.link_intersystems.swing.HumanReadableFileSizeTableCellRenderer;
-import com.link_intersystems.swing.ListAdapterListModel;
-import com.link_intersystems.swing.ListModelSelection;
 import com.link_intersystems.swing.RelativeWidthResizer;
 import com.link_intersystems.swing.TableColumnResize;
-import com.link_intersystems.tools.git.domain.TreeObject;
 import com.link_intersystems.tools.git.ui.GitRepositoryModel;
+import com.link_intersystems.tools.git.ui.PathListModel;
 
 public class SizeMetricsTableComponent extends GitRepositoryComponent {
 
 	private static final long serialVersionUID = 8588810751988085851L;
 
-	private ListAdapterListModel<TreeObject> listAdapterListModel = new ListAdapterListModel<TreeObject>();
-	private SizeMetricsTableModel sizeMetricsTableModel = new SizeMetricsTableModel(
-			listAdapterListModel);
-	private JTable sizeMetricsTable = new JTable(sizeMetricsTableModel);
+	private TreeObjectTableModel treeObjectTableModel = new TreeObjectTableModel();
+
+	private JTable sizeMetricsTable = new JTable(treeObjectTableModel);
 	private JTable summaryTable = new JTable();
 	private JScrollPane sizeMetricsScrollPane = new JScrollPane(
 			sizeMetricsTable);
@@ -50,12 +41,12 @@ public class SizeMetricsTableComponent extends GitRepositoryComponent {
 		JPanel northPanel = new JPanel();
 		northPanel.setLayout(new BorderLayout());
 
-		add(northPanel,BorderLayout.NORTH);
+		add(northPanel, BorderLayout.NORTH);
 		add(sizeMetricsScrollPane, BorderLayout.CENTER);
 		add(summaryTable, BorderLayout.SOUTH);
 
 		sizeMetricsTable.setRowSorter(new TableRowSorter<TableModel>(
-				sizeMetricsTableModel));
+				treeObjectTableModel));
 
 		TableCellRenderer defaultRenderer = new AlternatingColorTableCellRenderer();
 		sizeMetricsTable.setDefaultRenderer(String.class, defaultRenderer);
@@ -74,10 +65,10 @@ public class SizeMetricsTableComponent extends GitRepositoryComponent {
 
 		TableColumnModel columnModel = sizeMetricsTable.getColumnModel();
 		TableColumn firstColumn = columnModel.getColumn(0);
-		firstColumn.setHeaderValue(sizeMetricsTableModel.getColumnName(0));
+		firstColumn.setHeaderValue(treeObjectTableModel.getColumnName(0));
 
 		TableColumn secondColumn = columnModel.getColumn(1);
-		secondColumn.setHeaderValue(sizeMetricsTableModel.getColumnName(1));
+		secondColumn.setHeaderValue(treeObjectTableModel.getColumnName(1));
 
 		ComponentResize<TableColumn> columnResize = new TableColumnResize();
 		RelativeWidthResizer<TableColumn> relativeWidthResizer = new RelativeWidthResizer<TableColumn>(
@@ -88,53 +79,17 @@ public class SizeMetricsTableComponent extends GitRepositoryComponent {
 
 		relativeWidthResizer.apply(sizeMetricsTable);
 		sizeMetricsTable.addComponentListener(relativeWidthResizer);
-
-		final ListSelectionModel selectionModel = sizeMetricsTable
-				.getSelectionModel();
-		ListModelSelection<TreeObject> listModelSelection = new ListModelSelection<TreeObject>(
-				listAdapterListModel, selectionModel);
-		listModelSelection.setRowSorter(sizeMetricsTable.getRowSorter());
-		listModelSelection.addPropertyChangeListener(
-				ListModelSelection.PROP_SELECTION,
-				new PropertyChangeListener() {
-
-					@SuppressWarnings("unchecked")
-					@Override
-					public void propertyChange(PropertyChangeEvent evt) {
-						ListModelSelection<TreeObject> source = (ListModelSelection<TreeObject>) evt
-								.getSource();
-						List<TreeObject> selection = source.getSelection();
-						List<String> selectedPaths = new ArrayList<String>();
-						for (TreeObject treeObject : selection) {
-							selectedPaths.add(treeObject.getRootRelativePath()
-									.getPathname());
-						}
-
-						getModel().setSelectedPaths(selectedPaths);
-					}
-				});
 	}
 
 	protected void updateCommitRangeTree() {
 		GitRepositoryModel gitRepositoryModel = getModel();
 		if (gitRepositoryModel != null) {
-			TreeObject commitRangeTree = gitRepositoryModel
-					.getCommitRangeTree();
-			if (commitRangeTree != null) {
-
-				List<TreeObject> fileList = commitRangeTree.toFileList();
-				Comparator<TreeObject> reverseOrder = Collections
-						.reverseOrder();
-				Collections.sort(fileList, reverseOrder);
-				listAdapterListModel.setList(fileList);
-				Object pathCount = listAdapterListModel.getSize();
-				Object repoSize = 0;
-
-				if (dataModel.getRowCount() > 0) {
-					dataModel.removeRow(0);
-				}
-				dataModel.addRow(new Object[] { pathCount, repoSize });
-			}
+			PathListModel pathListModel = gitRepositoryModel.getPathListModel();
+			treeObjectTableModel.setEntryModel(pathListModel);
+			pathListModel.getSelectionModel().setRowSorter(
+					sizeMetricsTable.getRowSorter());
+			sizeMetricsTable.setSelectionModel(pathListModel
+					.getListSelectionModel());
 		}
 		ListSelectionModel selectionModel = sizeMetricsTable
 				.getSelectionModel();

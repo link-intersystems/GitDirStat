@@ -16,6 +16,8 @@ public class RelativeWidthResizer<T> extends ComponentAdapter {
 	private Map<T, Double> relativeWidths = new HashMap<T, Double>();
 	private ComponentResize<T> componentResize;
 
+	private boolean fillLastComponent = true;
+
 	public RelativeWidthResizer(ComponentResize<T> componentResize) {
 		this.componentResize = componentResize;
 	}
@@ -51,6 +53,14 @@ public class RelativeWidthResizer<T> extends ComponentAdapter {
 		relativeWidths.put(component, relativeWidth);
 	}
 
+	public void setFillLastComponent(boolean fillLastComponent) {
+		this.fillLastComponent = fillLastComponent;
+	}
+
+	public boolean isFillLastComponent() {
+		return this.fillLastComponent;
+	}
+
 	@Override
 	public void componentResized(ComponentEvent e) {
 		Component component = e.getComponent();
@@ -60,8 +70,7 @@ public class RelativeWidthResizer<T> extends ComponentAdapter {
 	public void apply(Component baseComponent) {
 		Dimension size = baseComponent.getSize();
 		int maxWidth = (int) size.getWidth();
-
-		int remaining = maxWidth;
+		int remainingWidth = maxWidth;
 
 		Set<Entry<T, Double>> entrySet = relativeWidths.entrySet();
 		Iterator<Entry<T, Double>> entrySetIter = entrySet.iterator();
@@ -70,15 +79,74 @@ public class RelativeWidthResizer<T> extends ComponentAdapter {
 			Entry<T, Double> componentEntry = entrySetIter.next();
 			T componentToResize = componentEntry.getKey();
 			Double relativeWidth = componentEntry.getValue();
-
-			int width = (int) (maxWidth * relativeWidth.doubleValue());
-			remaining -= width;
-
 			boolean lastComponent = !entrySetIter.hasNext();
-			if (lastComponent && remaining > 0) {
-				width += remaining;
-			}
+			ResizeCalcParams<T> resizeCalcParams = new ResizeCalcParams<T>(
+					componentToResize, maxWidth, remainingWidth, lastComponent,
+					relativeWidth);
+			remainingWidth -= resizeCalcParams.getRemainingWidth();
+
+			int width = calculateWidth(resizeCalcParams);
+
 			componentResize.setWidth(componentToResize, width);
+
+		}
+	}
+
+	protected int calculateWidth(ResizeCalcParams<T> componentResize) {
+		int width = (int) (componentResize.getMaxWidth() * componentResize
+				.getRelativeWidth());
+		componentResize.substractRemaining(width);
+
+		if (componentResize.isLastComponent() && componentResize.hasRemaining()
+				&& fillLastComponent) {
+			width += componentResize.getRemainingWidth();
+		}
+		return width;
+	}
+
+	protected static class ResizeCalcParams<T> {
+
+		private int maxWidth;
+		private int remainingWidth;
+		private boolean lastComponent;
+		private Double relativeWidth;
+		private T componentToResize;
+
+		public ResizeCalcParams(T componentToResize, int maxWidth,
+				int remainingWidth, boolean lastComponent, Double relativeWidth) {
+			this.componentToResize = componentToResize;
+			this.maxWidth = maxWidth;
+			this.remainingWidth = remainingWidth;
+			this.lastComponent = lastComponent;
+			this.relativeWidth = relativeWidth;
+		}
+
+		public Double getRelativeWidth() {
+			return relativeWidth;
+		}
+
+		public boolean isLastComponent() {
+			return lastComponent;
+		}
+
+		public int getMaxWidth() {
+			return maxWidth;
+		}
+
+		public boolean hasRemaining() {
+			return remainingWidth > 0;
+		}
+
+		public void substractRemaining(int size) {
+			this.remainingWidth -= size;
+		}
+
+		public int getRemainingWidth() {
+			return remainingWidth;
+		}
+
+		public T getComponentToResize() {
+			return componentToResize;
 		}
 	}
 }

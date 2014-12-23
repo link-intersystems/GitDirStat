@@ -61,6 +61,10 @@ public class ListModelSelection<E> {
 		this.rowSorter = rowSorter;
 	}
 
+	public boolean isEmpty() {
+		return listSelectionModel.isSelectionEmpty();
+	}
+
 	public List<E> getSelection() {
 		return selection;
 	}

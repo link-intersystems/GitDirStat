@@ -7,6 +7,9 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
 
+import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
+import com.link_intersystems.tools.git.ui.UIContext.IconType;
+
 public class OpenAction extends AbstractAction {
 
 	/**
@@ -14,13 +17,15 @@ public class OpenAction extends AbstractAction {
 	 */
 	private static final long serialVersionUID = 6082672924263782869L;
 	private GitRepositoryModel gitRepositoryModel;
-	private AbstractAction loadRepoAction;
+	private UpdateRepositoryAction updateRepositoryAction;
 
 	public OpenAction(GitRepositoryModel gitRepositoryModel,
-			AbstractAction loadRepoAction) {
+			GitRepositoryAccess gitRepositoryAccess, UIContext uiContext) {
 		this.gitRepositoryModel = gitRepositoryModel;
-		this.loadRepoAction = loadRepoAction;
 		putValue(Action.NAME, "Open Git Repository");
+		putValue(Action.SMALL_ICON, uiContext.getIcon(IconType.OPEN));
+		updateRepositoryAction = new UpdateRepositoryAction(uiContext,
+				gitRepositoryModel, gitRepositoryAccess);
 	}
 
 	@Override
@@ -37,7 +42,7 @@ public class OpenAction extends AbstractAction {
 		if (JFileChooser.APPROVE_OPTION == result) {
 			File selectedFile = jFileChooser.getSelectedFile();
 			gitRepositoryModel.setGitDir(selectedFile);
-			loadRepoAction.actionPerformed(e);
+			updateRepositoryAction.actionPerformed(e);
 		}
 	}
 

@@ -13,7 +13,10 @@ import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +25,7 @@ import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -32,11 +36,15 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
 
-import com.link_intersystems.swing.CompositeAction;
+import org.apache.commons.io.IOUtils;
+
+import com.link_intersystems.swing.ListModelSelectionMediator;
 import com.link_intersystems.swing.ProgressDialogMonitor;
 import com.link_intersystems.swing.SingleActionSelectionMediator;
 import com.link_intersystems.tools.git.GitDirStatArguments;
 import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
+import com.link_intersystems.tools.git.domain.TreeObject;
+import com.link_intersystems.tools.git.ui.UIContext.IconType;
 
 public class MainFrame implements Serializable {
 
@@ -71,7 +79,42 @@ public class MainFrame implements Serializable {
 		}
 	};
 
+	private class UIContextImpl implements UIContext {
+
+		private MainFrame mainFrame;
+
+		public UIContextImpl(MainFrame mainFrame) {
+			this.mainFrame = mainFrame;
+		}
+
+		@Override
+		public Window getMainFrame() {
+			return mainFrame.mainFrame;
+		}
+
+		@Override
+		public ImageIcon getIcon(IconType iconType) {
+			String iconFromClasspath = getIconFromClasspath(iconType.getName());
+			InputStream resourceAsStream = getClass().getClassLoader()
+					.getResourceAsStream(iconFromClasspath);
+			try {
+				byte[] imageData = IOUtils.toByteArray(resourceAsStream);
+				ImageIcon imageIcon = new ImageIcon(imageData);
+				return imageIcon;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		private String getIconFromClasspath(String iconName) {
+			String resolution = "16x16";
+			return MessageFormat.format("icons/{0}/{1}", resolution, iconName);
+		}
+
+	}
+
 	private JFrame mainFrame = new JFrame("GitDirStat");
+	private UIContextImpl uiContext = new UIContextImpl(this);
 
 	private JMenuBar menuBar = new JMenuBar();
 	private JMenu fileMenu = new JMenu("File");
@@ -84,8 +127,6 @@ public class MainFrame implements Serializable {
 
 	private Component mainComponent;
 	private JToolBar jToolBar = new JToolBar();
-
-	private UpdateRefsAction updateRefsAction;
 
 	private UpdateRepositoryAction updateRepositoryAction;
 
@@ -101,6 +142,8 @@ public class MainFrame implements Serializable {
 		File gitRepositoryDir = arguments.getGitRepositoryDir();
 		if (gitRepositoryDir != null) {
 			repoModel.setGitDir(gitRepositoryDir);
+			startupAction = new UpdateRepositoryAction(uiContext, repoModel,
+					repoAccess);
 		}
 
 		configureMainFrame();
@@ -112,20 +155,11 @@ public class MainFrame implements Serializable {
 		setMainComponent(sizeMetricsView);
 		sizeMetricsView.setModel(repoModel);
 
-		updateRefsAction = new UpdateRefsAction(repoAccess, repoModel);
-		updateRepositoryAction = new UpdateRepositoryAction(new UIContext() {
-
-			@Override
-			public Window getMainFrame() {
-				return MainFrame.this.mainFrame;
-			}
-		}, repoModel, repoAccess);
+		updateRepositoryAction = new UpdateRepositoryAction(uiContext,
+				repoModel, repoAccess);
 		updateRepositoryAction.setDisableWhileRunning(true);
 
-		startupAction = updateRefsAction;
-
-		openRepoAction = new OpenAction(repoModel, new CompositeAction(
-				updateRefsAction, updateRepositoryAction));
+		openRepoAction = new OpenAction(repoModel, repoAccess, uiContext);
 
 		addMenuBarAction(MainFrame.MB_PATH_FILE, openRepoAction);
 		addMenuBarAction(MainFrame.MB_PATH_FILE, updateRepositoryAction);
@@ -145,13 +179,26 @@ public class MainFrame implements Serializable {
 			SizeMetricsView sizeMetricsView) {
 		RemovePathAction removePathAction = new RemovePathAction(repoModel,
 				repoAccess);
+		removePathAction.putValue(Action.SMALL_ICON,
+				uiContext.getIcon(IconType.CLEAN));
 		removePathAction.setProgressMonitor(progressDialogMonitor);
 
 		removePathAction.putValue(Action.NAME, "Remove selected paths");
+		removePathAction.putValue(Action.SHORT_DESCRIPTION,
+				"Remove selected paths from repository");
 		addToolbarAction(removePathAction);
 
-		updateRepositoryAction.putValue(Action.NAME, "Select Refs");
+		updateRepositoryAction.putValue(Action.NAME, "Update repository");
+		updateRepositoryAction.putValue(Action.SHORT_DESCRIPTION,
+				"Update repository");
 		updateRepositoryAction.setProgressMonitor(progressDialogMonitor);
+
+		PathListModel pathListModel = repoModel.getPathListModel();
+		ListModelSelectionMediator<TreeObject> listSelectionMediator = new ListModelSelectionMediator<TreeObject>();
+		listSelectionMediator.setListModelSelection(pathListModel
+				.getSelectionModel());
+		listSelectionMediator
+				.addDisabledActionOnEmptySelection(removePathAction);
 		addToolbarAction(updateRepositoryAction);
 	}
 
@@ -160,6 +207,9 @@ public class MainFrame implements Serializable {
 		mainFrame.setSize(size);
 		mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		mainFrame.setLocationRelativeTo(null);
+
+		ImageIcon gitIcon = uiContext.getIcon(IconType.GIT_LOGO);
+		mainFrame.setIconImage(gitIcon.getImage());
 
 		menuBar.add(fileMenu);
 		menuBar.add(viewMenu);

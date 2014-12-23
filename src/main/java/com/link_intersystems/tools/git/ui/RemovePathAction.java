@@ -2,6 +2,7 @@ package com.link_intersystems.tools.git.ui;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.link_intersystems.swing.AsyncProgressAction;
@@ -11,6 +12,7 @@ import com.link_intersystems.tools.git.domain.GitRepository;
 import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
 import com.link_intersystems.tools.git.domain.IndexFilter;
 import com.link_intersystems.tools.git.domain.TreeFileUpdate;
+import com.link_intersystems.tools.git.domain.TreeObject;
 import com.link_intersystems.tools.git.domain.TreeUpdate;
 
 public class RemovePathAction extends AsyncProgressAction<Void, Void, Void> {
@@ -34,8 +36,13 @@ public class RemovePathAction extends AsyncProgressAction<Void, Void, Void> {
 		File gitDir = gitRepositoryModel.getGitDir();
 		GitRepository gitRepository = gitRepositoryAccess
 				.getGitRepository(gitDir);
-		final List<String> selectedPaths = gitRepositoryModel
-				.getSelectedPaths();
+		List<TreeObject> selectedTreeObjects = gitRepositoryModel
+				.getPathListModel().getSelectionModel().getSelection();
+		final List<String> selectedPaths = new ArrayList<String>();
+		for (TreeObject treeObject : selectedTreeObjects) {
+			selectedPaths.add(treeObject.getRootRelativePath().getPathname());
+		}
+
 		IndexFilter pathFilter = new IndexFilter() {
 
 			@Override
