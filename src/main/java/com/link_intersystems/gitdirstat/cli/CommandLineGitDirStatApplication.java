@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.eclipse.jgit.lib.Constants;
 
-import com.link_intersystems.gitdirstat.CommitRange;
 import com.link_intersystems.gitdirstat.GitDirStatApplication;
 import com.link_intersystems.gitdirstat.GitDirStatArguments;
+import com.link_intersystems.gitdirstat.domain.CommitRange;
 import com.link_intersystems.gitdirstat.domain.GitRepository;
 import com.link_intersystems.gitdirstat.domain.GitRepositoryAccess;
 import com.link_intersystems.gitdirstat.domain.TreeObject;

@@ -1,4 +1,4 @@
-package com.link_intersystems.gitdirstat.common;
+package com.link_intersystems.util;
 
 import java.util.Collections;
 import java.util.Comparator;

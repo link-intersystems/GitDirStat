@@ -18,8 +18,8 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.link_intersystems.gitdirstat.common.SortOrder;
 import com.link_intersystems.gitdirstat.domain.TreeObjectSortBy;
+import com.link_intersystems.util.SortOrder;
 
 public class CommandLineGitDirStatArguments implements GitDirStatArguments {
 

@@ -2,8 +2,6 @@ package com.link_intersystems.gitdirstat.domain;
 
 import java.util.Collection;
 
-import com.link_intersystems.gitdirstat.CommitRange;
-
 public class CommitRangeTree extends TreeObject {
 
 	private Collection<CommitRange> commitRanges;

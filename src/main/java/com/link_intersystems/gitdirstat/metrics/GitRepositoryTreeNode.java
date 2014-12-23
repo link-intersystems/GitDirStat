@@ -12,10 +12,10 @@ import org.apache.commons.collections.comparators.TransformingComparator;
 import org.apache.commons.collections4.EnumerationUtils;
 import org.apache.commons.collections4.comparators.ReverseComparator;
 
-import com.link_intersystems.gitdirstat.common.SortOrder;
 import com.link_intersystems.gitdirstat.domain.TreeObject;
 import com.link_intersystems.gitdirstat.domain.TreeObjectPath;
 import com.link_intersystems.gitdirstat.domain.TreeObjectSortBy;
+import com.link_intersystems.util.SortOrder;
 
 public class GitRepositoryTreeNode extends DefaultMutableTreeNode {
 

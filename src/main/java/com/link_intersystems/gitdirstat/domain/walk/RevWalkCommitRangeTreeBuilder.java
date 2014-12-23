@@ -7,7 +7,7 @@ import org.apache.commons.collections4.functors.UniquePredicate;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 
-import com.link_intersystems.gitdirstat.CommitRange;
+import com.link_intersystems.gitdirstat.domain.CommitRange;
 import com.link_intersystems.gitdirstat.domain.CommitRangeTree;
 import com.link_intersystems.gitdirstat.domain.GitRepository;
 import com.link_intersystems.gitdirstat.domain.ProgressListener;

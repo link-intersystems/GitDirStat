@@ -11,8 +11,8 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
-import com.link_intersystems.gitdirstat.CommitRange;
 import com.link_intersystems.gitdirstat.domain.Commit;
+import com.link_intersystems.gitdirstat.domain.CommitRange;
 import com.link_intersystems.gitdirstat.domain.GitRepository;
 
 public class CommitWalker implements Iterable<Commit> {

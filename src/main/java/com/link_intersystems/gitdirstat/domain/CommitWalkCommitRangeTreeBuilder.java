@@ -15,7 +15,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevSort;
 import org.eclipse.jgit.revwalk.RevWalk;
 
-import com.link_intersystems.gitdirstat.CommitRange;
 import com.link_intersystems.gitdirstat.domain.walk.CommitRangeTreeBuilder;
 import com.link_intersystems.gitdirstat.domain.walk.CommitWalker;
 

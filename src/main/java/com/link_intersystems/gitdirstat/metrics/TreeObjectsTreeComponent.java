@@ -12,7 +12,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 
-import com.link_intersystems.gitdirstat.common.SortOrder;
 import com.link_intersystems.gitdirstat.domain.TreeObject;
 import com.link_intersystems.gitdirstat.domain.TreeObjectSortBy;
 import com.link_intersystems.gitdirstat.ui.GitRepositoryModel;
@@ -21,6 +20,7 @@ import com.link_intersystems.swing.FileModelAdapterFactory;
 import com.link_intersystems.swing.HumanReadableFileSizeTreeCellRenderer;
 import com.link_intersystems.swing.PopupMenuMouseAdapter;
 import com.link_intersystems.swing.RadioButtonGroupModel;
+import com.link_intersystems.util.SortOrder;
 
 public class TreeObjectsTreeComponent extends GitRepositoryComponent {
 

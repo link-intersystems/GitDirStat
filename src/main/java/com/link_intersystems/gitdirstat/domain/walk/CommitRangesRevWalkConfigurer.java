@@ -11,7 +11,7 @@ import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevSort;
 import org.eclipse.jgit.revwalk.RevWalk;
 
-import com.link_intersystems.gitdirstat.CommitRange;
+import com.link_intersystems.gitdirstat.domain.CommitRange;
 
 public class CommitRangesRevWalkConfigurer implements RevWalkConfigurer {
 

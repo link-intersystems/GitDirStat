@@ -8,9 +8,9 @@ import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.collections4.Transformer;
 import org.apache.commons.collections4.iterators.EnumerationIterator;
 
-import com.link_intersystems.gitdirstat.common.SortOrder;
 import com.link_intersystems.gitdirstat.domain.TreeObject;
 import com.link_intersystems.gitdirstat.domain.TreeObjectSortBy;
+import com.link_intersystems.util.SortOrder;
 
 public class TreeObjectsTreeModel extends DefaultTreeModel {
 

@@ -1,4 +1,4 @@
-package com.link_intersystems.gitdirstat;
+package com.link_intersystems.gitdirstat.domain;
 
 import org.eclipse.jgit.lib.ObjectId;
 
