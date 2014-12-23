@@ -22,53 +22,53 @@ import com.link_intersystems.swing.TableColumnResize;
 import com.link_intersystems.tools.git.ui.GitRepositoryModel;
 import com.link_intersystems.tools.git.ui.PathListModel;
 
-public class SizeMetricsTableComponent extends GitRepositoryComponent {
+public class TreeObjectsTableComponent extends GitRepositoryComponent {
 
 	private static final long serialVersionUID = 8588810751988085851L;
 
-	private TreeObjectTableModel treeObjectTableModel = new TreeObjectTableModel();
+	private TreeObjectTableModel treeObjectsTableModel = new TreeObjectTableModel();
 
-	private JTable sizeMetricsTable = new JTable(treeObjectTableModel);
+	private JTable treeObjectsTable = new JTable(treeObjectsTableModel);
 	private JTable summaryTable = new JTable();
-	private JScrollPane sizeMetricsScrollPane = new JScrollPane(
-			sizeMetricsTable);
+	private JScrollPane treeObjectsScrollPane = new JScrollPane(
+			treeObjectsTable);
 
 	private DefaultTableModel dataModel;
 
-	public SizeMetricsTableComponent() {
+	public TreeObjectsTableComponent() {
 		setLayout(new BorderLayout());
 
 		JPanel northPanel = new JPanel();
 		northPanel.setLayout(new BorderLayout());
 
 		add(northPanel, BorderLayout.NORTH);
-		add(sizeMetricsScrollPane, BorderLayout.CENTER);
+		add(treeObjectsScrollPane, BorderLayout.CENTER);
 		add(summaryTable, BorderLayout.SOUTH);
 
-		sizeMetricsTable.setRowSorter(new TableRowSorter<TableModel>(
-				treeObjectTableModel));
+		treeObjectsTable.setRowSorter(new TableRowSorter<TableModel>(
+				treeObjectsTableModel));
 
 		TableCellRenderer defaultRenderer = new AlternatingColorTableCellRenderer();
-		sizeMetricsTable.setDefaultRenderer(String.class, defaultRenderer);
+		treeObjectsTable.setDefaultRenderer(String.class, defaultRenderer);
 
 		AlternatingColorTableCellRenderer alternatingColorTableCellRenderer = new AlternatingColorTableCellRenderer(
 				new HumanReadableFileSizeTableCellRenderer());
 
-		sizeMetricsTable.setDefaultRenderer(BigInteger.class,
+		treeObjectsTable.setDefaultRenderer(BigInteger.class,
 				alternatingColorTableCellRenderer);
 
-		sizeMetricsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+		treeObjectsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
-		summaryTable.setColumnModel(sizeMetricsTable.getColumnModel());
+		summaryTable.setColumnModel(treeObjectsTable.getColumnModel());
 		dataModel = new DefaultTableModel(0, 2);
 		summaryTable.setModel(dataModel);
 
-		TableColumnModel columnModel = sizeMetricsTable.getColumnModel();
+		TableColumnModel columnModel = treeObjectsTable.getColumnModel();
 		TableColumn firstColumn = columnModel.getColumn(0);
-		firstColumn.setHeaderValue(treeObjectTableModel.getColumnName(0));
+		firstColumn.setHeaderValue(treeObjectsTableModel.getColumnName(0));
 
 		TableColumn secondColumn = columnModel.getColumn(1);
-		secondColumn.setHeaderValue(treeObjectTableModel.getColumnName(1));
+		secondColumn.setHeaderValue(treeObjectsTableModel.getColumnName(1));
 
 		ComponentResize<TableColumn> columnResize = new TableColumnResize();
 		RelativeWidthResizer<TableColumn> relativeWidthResizer = new RelativeWidthResizer<TableColumn>(
@@ -77,21 +77,21 @@ public class SizeMetricsTableComponent extends GitRepositoryComponent {
 		relativeWidthResizer.setRelativeWidth(secondColumn, 0.1);
 		secondColumn.setMinWidth(50);
 
-		relativeWidthResizer.apply(sizeMetricsTable);
-		sizeMetricsTable.addComponentListener(relativeWidthResizer);
+		relativeWidthResizer.apply(treeObjectsTable);
+		treeObjectsTable.addComponentListener(relativeWidthResizer);
 	}
 
 	protected void updateCommitRangeTree() {
 		GitRepositoryModel gitRepositoryModel = getModel();
 		if (gitRepositoryModel != null) {
 			PathListModel pathListModel = gitRepositoryModel.getPathListModel();
-			treeObjectTableModel.setEntryModel(pathListModel);
+			treeObjectsTableModel.setEntryModel(pathListModel);
 			pathListModel.getSelectionModel().setRowSorter(
-					sizeMetricsTable.getRowSorter());
-			sizeMetricsTable.setSelectionModel(pathListModel
+					treeObjectsTable.getRowSorter());
+			treeObjectsTable.setSelectionModel(pathListModel
 					.getListSelectionModel());
 		}
-		ListSelectionModel selectionModel = sizeMetricsTable
+		ListSelectionModel selectionModel = treeObjectsTable
 				.getSelectionModel();
 		selectionModel.clearSelection();
 	}

@@ -12,7 +12,7 @@ import com.link_intersystems.tools.git.common.SortOrder;
 import com.link_intersystems.tools.git.domain.TreeObject;
 import com.link_intersystems.tools.git.domain.TreeObjectSortBy;
 
-public class SizeMetricsTreeModel extends DefaultTreeModel {
+public class TreeObjectsTreeModel extends DefaultTreeModel {
 
 	/**
 	 *
@@ -22,7 +22,7 @@ public class SizeMetricsTreeModel extends DefaultTreeModel {
 	private TreeObjectSortBy treeObjectSortBy = TreeObjectSortBy.SIZE;
 	private SortOrder sortOrder = SortOrder.DESC;
 
-	public SizeMetricsTreeModel() {
+	public TreeObjectsTreeModel() {
 		super(new GitRepositoryTreeNode());
 	}
 

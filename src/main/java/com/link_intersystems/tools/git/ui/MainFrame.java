@@ -157,9 +157,9 @@ public class MainFrame implements Serializable {
 		progressDialogMonitor.setMillisToDecideToPopup(100);
 		progressDialogMonitor.setETAEnabled(true);
 
-		SizeMetricsView sizeMetricsView = new SizeMetricsView();
-		setMainComponent(sizeMetricsView);
-		sizeMetricsView.setModel(repoModel);
+		GitRepositoryView gitRepositoryView = new GitRepositoryView();
+		setMainComponent(gitRepositoryView);
+		gitRepositoryView.setModel(repoModel);
 
 		updateRepositoryAction = new UpdateRepositoryAction(uiContext,
 				repoModel, repoAccess);
@@ -170,19 +170,18 @@ public class MainFrame implements Serializable {
 		addMenuBarAction(MainFrame.MB_PATH_FILE, openRepoAction);
 		addMenuBarAction(MainFrame.MB_PATH_FILE, updateRepositoryAction);
 
-		Action showTableAction = sizeMetricsView.getSetTableAction();
+		Action showTableAction = gitRepositoryView.getSetTableAction();
 		showTableAction.putValue(Action.NAME, "Show table");
-		Action showTreeAction = sizeMetricsView.getSetTreeAction();
+		Action showTreeAction = gitRepositoryView.getSetTreeAction();
 		showTreeAction.putValue(Action.NAME, "Show tree");
 
 		addMenuBarActionGroup(MainFrame.MENU_PATH_VIEW, showTableAction,
 				showTreeAction);
 
-		addToolbarActions(repoAccess, sizeMetricsView);
+		addToolbarActions(repoAccess);
 	}
 
-	private void addToolbarActions(GitRepositoryAccess repoAccess,
-			SizeMetricsView sizeMetricsView) {
+	private void addToolbarActions(GitRepositoryAccess repoAccess) {
 		RemovePathAction removePathAction = new RemovePathAction(repoModel,
 				repoAccess, uiContext);
 		removePathAction.putValue(Action.SMALL_ICON,

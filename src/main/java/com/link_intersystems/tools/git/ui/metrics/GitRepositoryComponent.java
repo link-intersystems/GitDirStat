@@ -11,7 +11,7 @@ public abstract class GitRepositoryComponent extends JComponent {
 
 	private static final long serialVersionUID = -3502081762632205262L;
 
-	private class SizeMetricsPropertyChangeListener implements
+	private class CommitRangeTreeeChangeListener implements
 			PropertyChangeListener {
 
 		public void propertyChange(PropertyChangeEvent evt) {
@@ -21,19 +21,19 @@ public abstract class GitRepositoryComponent extends JComponent {
 	}
 
 	private GitRepositoryModel gitRepositoryModel;
-	private SizeMetricsPropertyChangeListener sizeMetricsChangeListener = new SizeMetricsPropertyChangeListener();
+	private CommitRangeTreeeChangeListener commitRangeTreeChangeListener = new CommitRangeTreeeChangeListener();
 
 	public void setModel(GitRepositoryModel gitRepositoryModel) {
 		if (this.gitRepositoryModel != null) {
 			this.gitRepositoryModel.removePropertyChangeListener(
 					GitRepositoryModel.PROP_COMMIT_RANGE_TREE,
-					sizeMetricsChangeListener);
+					commitRangeTreeChangeListener);
 		}
 		this.gitRepositoryModel = gitRepositoryModel;
 		if (this.gitRepositoryModel != null) {
 			this.gitRepositoryModel.addPropertyChangeListener(
 					GitRepositoryModel.PROP_COMMIT_RANGE_TREE,
-					sizeMetricsChangeListener);
+					commitRangeTreeChangeListener);
 		}
 		updateCommitRangeTree();
 	}

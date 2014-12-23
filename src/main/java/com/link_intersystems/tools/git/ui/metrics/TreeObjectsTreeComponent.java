@@ -22,24 +22,24 @@ import com.link_intersystems.tools.git.domain.TreeObject;
 import com.link_intersystems.tools.git.domain.TreeObjectSortBy;
 import com.link_intersystems.tools.git.ui.GitRepositoryModel;
 
-public class SizeMetricsTreeComponent extends GitRepositoryComponent {
+public class TreeObjectsTreeComponent extends GitRepositoryComponent {
 
 	private static final long serialVersionUID = 8588810751988085851L;
 
-	private SizeMetricsTreeModel sizeMetricsTreeModel = new SizeMetricsTreeModel();
-	private JTree sizeMetricsTree = new JTree(sizeMetricsTreeModel);
-	private JScrollPane sizeMetricsScrollPane = new JScrollPane(sizeMetricsTree);
+	private TreeObjectsTreeModel treeObjectsTreeModel = new TreeObjectsTreeModel();
+	private JTree treeObjectsTree = new JTree(treeObjectsTreeModel);
+	private JScrollPane treeObjectsScrollPane = new JScrollPane(treeObjectsTree);
 
 	private RadioButtonGroupModel sortByButtonGroupModel;
 	private RadioButtonGroupModel sortOrderButtonGroupModel;
 
-	public SizeMetricsTreeComponent() {
+	public TreeObjectsTreeComponent() {
 		setLayout(new BorderLayout());
 		HumanReadableFileSizeTreeCellRenderer cellRenderer = new HumanReadableFileSizeTreeCellRenderer();
 		TreeObjectFileModelAdapterFactory modelAdapterFactory = new TreeObjectFileModelAdapterFactory();
 		cellRenderer.setFileModelAdapterFactory(modelAdapterFactory);
-		sizeMetricsTree.setCellRenderer(cellRenderer);
-		add(sizeMetricsScrollPane, BorderLayout.CENTER);
+		treeObjectsTree.setCellRenderer(cellRenderer);
+		add(treeObjectsScrollPane, BorderLayout.CENTER);
 
 		createPopupMenu();
 	}
@@ -54,7 +54,7 @@ public class SizeMetricsTreeComponent extends GitRepositoryComponent {
 
 		SortingUpdateListener sortingUpdateListener = new SortingUpdateListener(
 				sortByButtonGroupModel, sortOrderButtonGroupModel,
-				sizeMetricsTreeModel);
+				treeObjectsTreeModel);
 
 		sortByButtonGroupModel.addPropertyChangeListener("selectedValue",
 				sortingUpdateListener);
@@ -63,7 +63,7 @@ public class SizeMetricsTreeComponent extends GitRepositoryComponent {
 
 		PopupMenuMouseAdapter popupMenuMouseAdapter = new PopupMenuMouseAdapter(
 				popup);
-		sizeMetricsTree.addMouseListener(popupMenuMouseAdapter);
+		treeObjectsTree.addMouseListener(popupMenuMouseAdapter);
 	}
 
 	private RadioButtonGroupModel createSortOrderMenuEntries(JMenu parent) {
@@ -105,7 +105,7 @@ public class SizeMetricsTreeComponent extends GitRepositoryComponent {
 		GitRepositoryModel model = getModel();
 		if (model != null) {
 			TreeObject commitRangeTree = model.getCommitRangeTree();
-			sizeMetricsTreeModel.setCommitRangeTree(commitRangeTree);
+			treeObjectsTreeModel.setCommitRangeTree(commitRangeTree);
 		}
 	}
 
@@ -114,15 +114,15 @@ public class SizeMetricsTreeComponent extends GitRepositoryComponent {
 
 		private RadioButtonGroupModel sortByButtonGroupModel;
 		private RadioButtonGroupModel sortOrderButtonGroupModel;
-		private SizeMetricsTreeModel sizeMetricsTreeModel;
+		private TreeObjectsTreeModel treeObjectsTreeModel;
 
 		public SortingUpdateListener(
 				RadioButtonGroupModel sortByButtonGroupModel,
 				RadioButtonGroupModel sortOrderButtonGroupModel,
-				SizeMetricsTreeModel sizeMetricsTreeModel) {
+				TreeObjectsTreeModel treeObjectsTreeModel) {
 			this.sortByButtonGroupModel = sortByButtonGroupModel;
 			this.sortOrderButtonGroupModel = sortOrderButtonGroupModel;
-			this.sizeMetricsTreeModel = sizeMetricsTreeModel;
+			this.treeObjectsTreeModel = treeObjectsTreeModel;
 		}
 
 		@Override
@@ -131,7 +131,7 @@ public class SizeMetricsTreeComponent extends GitRepositoryComponent {
 					.getSelectionValue();
 			SortOrder sortOrder = (SortOrder) sortOrderButtonGroupModel
 					.getSelectionValue();
-			sizeMetricsTreeModel.setSorting(sortBy, sortOrder);
+			treeObjectsTreeModel.setSorting(sortBy, sortOrder);
 		}
 	}
 

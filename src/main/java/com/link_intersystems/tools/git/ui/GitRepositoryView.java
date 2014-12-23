@@ -21,10 +21,10 @@ import com.link_intersystems.swing.SimpleDocument;
 import com.link_intersystems.swing.UnmodifiablePlainDocument;
 import com.link_intersystems.swing.WeakReferencePropertyChangeSupport;
 import com.link_intersystems.tools.git.ui.metrics.GitRepositoryComponent;
-import com.link_intersystems.tools.git.ui.metrics.SizeMetricsTableComponent;
-import com.link_intersystems.tools.git.ui.metrics.SizeMetricsTreeComponent;
+import com.link_intersystems.tools.git.ui.metrics.TreeObjectsTableComponent;
+import com.link_intersystems.tools.git.ui.metrics.TreeObjectsTreeComponent;
 
-public class SizeMetricsView extends JPanel {
+public class GitRepositoryView extends JPanel {
 
 	private static final long serialVersionUID = -1113456173138142763L;
 	public static final String PROP_VIEW_COMPONENT = "viewComponent";
@@ -77,15 +77,15 @@ public class SizeMetricsView extends JPanel {
 
 	private GitRepositoryModel gitRepositoryModel = new GitRepositoryModel();
 
-	private SizeMetricsTableComponent sizeMetricsTableComponent = new SizeMetricsTableComponent();
-	private SizeMetricsTreeComponent sizeMetricsTreeComponent = new SizeMetricsTreeComponent();
+	private TreeObjectsTableComponent treeObjectsTableComponent = new TreeObjectsTableComponent();
+	private TreeObjectsTreeComponent treeObjectsTreeComponent = new TreeObjectsTreeComponent();
 
 	private JRootPane rootPane = new JRootPane();
 
 	SetViewComponentAction setTableAction = new SetViewComponentAction(
-			sizeMetricsTableComponent);
+			treeObjectsTableComponent);
 	SetViewComponentAction setTreeAction = new SetViewComponentAction(
-			sizeMetricsTreeComponent);
+			treeObjectsTreeComponent);
 
 	private GitRepositoryComponent viewComponent;
 	private RelativeLayout relativeLayout = new RelativeLayout();
@@ -96,7 +96,7 @@ public class SizeMetricsView extends JPanel {
 
 	private GitRepositoryModelSync gitRepositoryModelSync = new GitRepositoryModelSync();
 
-	public SizeMetricsView() {
+	public GitRepositoryView() {
 		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
@@ -152,12 +152,12 @@ public class SizeMetricsView extends JPanel {
 		viewComponent.setModel(gitRepositoryModel);
 	}
 
-	public SizeMetricsTableComponent getSizeMetricsTableComponent() {
-		return sizeMetricsTableComponent;
+	public TreeObjectsTableComponent getSizeMetricsTableComponent() {
+		return treeObjectsTableComponent;
 	}
 
-	public SizeMetricsTreeComponent getSizeMetricsTreeComponent() {
-		return sizeMetricsTreeComponent;
+	public TreeObjectsTreeComponent getSizeMetricsTreeComponent() {
+		return treeObjectsTreeComponent;
 	}
 
 	public Action getSetTableAction() {
