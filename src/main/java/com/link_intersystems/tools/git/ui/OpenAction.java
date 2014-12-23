@@ -12,9 +12,6 @@ import com.link_intersystems.tools.git.ui.UIContext.IconType;
 
 public class OpenAction extends AbstractAction {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 6082672924263782869L;
 	private GitRepositoryModel gitRepositoryModel;
 	private UpdateRepositoryAction updateRepositoryAction;
