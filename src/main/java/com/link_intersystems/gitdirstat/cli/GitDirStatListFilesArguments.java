@@ -22,7 +22,7 @@ import com.link_intersystems.gitdirstat.GitDirStatArgumentsParseException;
 import com.link_intersystems.gitdirstat.domain.TreeObjectSortBy;
 import com.link_intersystems.util.SortOrder;
 
-public class CommandLineGitDirStatArguments {
+public class GitDirStatListFilesArguments {
 
 	private static final String WORKING_DIR_SYS_PROP = "user.dir";
 
@@ -62,12 +62,12 @@ public class CommandLineGitDirStatArguments {
 		OPTIONS.addOption(OPTION_SORT_BY);
 	}
 
-	public static CommandLineGitDirStatArguments parse(String[] args)
+	public static GitDirStatListFilesArguments parse(String[] args)
 			throws GitDirStatArgumentsParseException {
 		CommandLineParser parser = new PosixParser();
 		try {
 			CommandLine commandLine = parser.parse(OPTIONS, args);
-			CommandLineGitDirStatArguments gitDirStatArguments = new CommandLineGitDirStatArguments(
+			GitDirStatListFilesArguments gitDirStatArguments = new GitDirStatListFilesArguments(
 					commandLine);
 			return gitDirStatArguments;
 		} catch (ParseException e) {
@@ -75,14 +75,14 @@ public class CommandLineGitDirStatArguments {
 			formatter
 					.printHelp(
 							"java "
-									+ CommandLineGitDirStatApplication.class
+									+ GitDirStatListFilesApplication.class
 											.getName(), OPTIONS);
 			throw new GitDirStatArgumentsParseException(e,
 					SerializationUtils.clone(OPTIONS));
 		}
 	}
 
-	public CommandLineGitDirStatArguments(CommandLine commandLine) {
+	public GitDirStatListFilesArguments(CommandLine commandLine) {
 		this.commandLine = commandLine;
 	}
 

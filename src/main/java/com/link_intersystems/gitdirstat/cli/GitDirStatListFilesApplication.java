@@ -8,32 +8,31 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jgit.lib.Constants;
-
-import com.link_intersystems.gitdirstat.domain.CommitRange;
 import com.link_intersystems.gitdirstat.domain.GitRepository;
 import com.link_intersystems.gitdirstat.domain.GitRepositoryAccess;
+import com.link_intersystems.gitdirstat.domain.NullProgressListener;
+import com.link_intersystems.gitdirstat.domain.Ref;
 import com.link_intersystems.gitdirstat.domain.TreeObject;
 import com.link_intersystems.util.SortOrder;
 
-public class CommandLineGitDirStatApplication {
+public class GitDirStatListFilesApplication {
 
 	public static void main(String[] args) throws Exception {
-		CommandLineGitDirStatArguments cliArguments = CommandLineGitDirStatArguments
+		GitDirStatListFilesArguments cliArguments = GitDirStatListFilesArguments
 				.parse(args);
-		CommandLineGitDirStatApplication commandLineGitDirStatApplication = new CommandLineGitDirStatApplication();
+		GitDirStatListFilesApplication commandLineGitDirStatApplication = new GitDirStatListFilesApplication();
 		commandLineGitDirStatApplication.run(cliArguments);
 	}
 
-	public void run(CommandLineGitDirStatArguments arguments) throws Exception {
+	public void run(GitDirStatListFilesArguments arguments) throws Exception {
 		File gitRepositoryDir = arguments.getGitRepositoryDir();
 		GitRepositoryAccess gitRepositoryAccess = new GitRepositoryAccess();
 		GitRepository gitRepository = gitRepositoryAccess
 				.getGitRepository(gitRepositoryDir);
 
-		CommitRange commitRange = gitRepository.getCommitRange(Constants.HEAD);
-		TreeObject commitRangeTree = gitRepository
-				.getCommitRangeTree(commitRange);
+		List<? extends Ref> refs = gitRepository.getRefs(Ref.class);
+		TreeObject commitRangeTree = gitRepository.getCommitRangeTree(refs,
+				NullProgressListener.INSTANCE);
 
 		List<TreeObject> treeObjects = commitRangeTree.toFileList();
 
