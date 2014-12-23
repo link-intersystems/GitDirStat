@@ -1,4 +1,4 @@
-package com.link_intersystems.tools.git.ui.metrics;
+package com.link_intersystems.swing;
 
 import javax.swing.DefaultListModel;
 import javax.swing.ListModel;

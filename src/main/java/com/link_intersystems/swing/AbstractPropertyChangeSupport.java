@@ -1,4 +1,4 @@
-package com.link_intersystems.tools.git.ui;
+package com.link_intersystems.swing;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;

@@ -1,8 +1,6 @@
-package com.link_intersystems.tools.git.ui;
+package com.link_intersystems.swing;
 
 import javax.swing.BoundedRangeModel;
-
-import com.link_intersystems.swing.ProgressMonitor;
 
 public class BoundedRangeModelProgressListener implements ProgressMonitor {
 	private BoundedRangeModel progressModel;

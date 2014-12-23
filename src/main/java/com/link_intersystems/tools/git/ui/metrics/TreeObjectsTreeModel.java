@@ -14,9 +14,6 @@ import com.link_intersystems.tools.git.domain.TreeObjectSortBy;
 
 public class TreeObjectsTreeModel extends DefaultTreeModel {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 1L;
 
 	private TreeObjectSortBy treeObjectSortBy = TreeObjectSortBy.SIZE;

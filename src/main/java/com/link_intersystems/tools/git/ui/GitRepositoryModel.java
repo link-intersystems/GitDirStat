@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.link_intersystems.swing.AbstractPropertyChangeSupport;
 import com.link_intersystems.tools.git.domain.Ref;
 import com.link_intersystems.tools.git.domain.TreeObject;
 

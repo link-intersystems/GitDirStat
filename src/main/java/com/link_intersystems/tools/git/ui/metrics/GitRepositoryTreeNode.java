@@ -18,9 +18,7 @@ import com.link_intersystems.tools.git.domain.TreeObjectPath;
 import com.link_intersystems.tools.git.domain.TreeObjectSortBy;
 
 public class GitRepositoryTreeNode extends DefaultMutableTreeNode {
-	/**
-	 *
-	 */
+
 	private static final long serialVersionUID = -5276518794046807282L;
 
 	public void deepSort(TreeObjectSortBy treeObjectSortOrder) {
@@ -35,8 +33,7 @@ public class GitRepositoryTreeNode extends DefaultMutableTreeNode {
 	@SuppressWarnings("unchecked")
 	private void deepSort(DefaultMutableTreeNode parent,
 			TreeObjectSortBy sortBy, SortOrder order) {
-		Enumeration<DefaultMutableTreeNode> treeObjectNodes = parent
-				.children();
+		Enumeration<DefaultMutableTreeNode> treeObjectNodes = parent.children();
 		List<DefaultMutableTreeNode> treeNodes = EnumerationUtils
 				.toList(treeObjectNodes);
 

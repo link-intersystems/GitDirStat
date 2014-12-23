@@ -2,6 +2,7 @@ package com.link_intersystems.tools.git.ui.metrics;
 
 import java.math.BigInteger;
 
+import com.link_intersystems.swing.AbstractListModelTableModelAdapter;
 import com.link_intersystems.tools.git.domain.TreeObject;
 
 public class TreeObjectTableModel extends
