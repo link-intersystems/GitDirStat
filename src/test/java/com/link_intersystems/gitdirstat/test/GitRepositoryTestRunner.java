@@ -1,4 +1,4 @@
-package com.link_intersystems.tools.git.test;
+package com.link_intersystems.gitdirstat.test;
 
 import java.io.IOException;
 import java.lang.reflect.Method;

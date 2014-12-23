@@ -1,4 +1,4 @@
-package com.link_intersystems.tools.git.test;
+package com.link_intersystems.gitdirstat.test;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

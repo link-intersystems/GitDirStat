@@ -1,4 +1,4 @@
-package com.link_intersystems.tools.git;
+package com.link_intersystems.gitdirstat;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -14,8 +14,8 @@ import com.link_intersystems.gitdirstat.domain.IndexFilter;
 import com.link_intersystems.gitdirstat.domain.Ref;
 import com.link_intersystems.gitdirstat.domain.TreeFileUpdate;
 import com.link_intersystems.gitdirstat.domain.TreeUpdate;
-import com.link_intersystems.tools.git.test.GitRepositoryLocation;
-import com.link_intersystems.tools.git.test.GitRepositoryTestRunner;
+import com.link_intersystems.gitdirstat.test.GitRepositoryLocation;
+import com.link_intersystems.gitdirstat.test.GitRepositoryTestRunner;
 
 @RunWith(GitRepositoryTestRunner.class)
 @GitRepositoryLocation(value = "classpath:GitDirStat_simple_repository.zip")
