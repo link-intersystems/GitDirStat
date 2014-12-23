@@ -3,7 +3,7 @@ package com.link_intersystems.swing;
 import java.awt.Component;
 import java.awt.Dimension;
 
-public class ComponentPrefferedSizeResize implements ComponentResize<Component> {
+public class ComponentPreferredSizeResize implements ComponentResize<Component> {
 
 	@Override
 	public void setWidth(Component component, int width) {

@@ -25,7 +25,7 @@ public class RelativeLayout extends FlowLayout implements LayoutManager2 {
 		super(FlowLayout.LEFT);
 
 		relativeWidthResizer = new JComponentAwareRelativeWidthResizer(
-				new ComponentPrefferedSizeResize());
+				new ComponentPreferredSizeResize());
 		relativeWidthResizer.setFillLastComponent(false);
 	}
 

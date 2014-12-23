@@ -18,7 +18,7 @@ import com.link_intersystems.gitdirstat.ui.GitRepositoryModel;
 import com.link_intersystems.swing.FileModel;
 import com.link_intersystems.swing.FileModelAdapterFactory;
 import com.link_intersystems.swing.HumanReadableFileSizeTreeCellRenderer;
-import com.link_intersystems.swing.PopupMenuMouseAdapter;
+import com.link_intersystems.swing.ShowPopupMouseAdapter;
 import com.link_intersystems.swing.RadioButtonGroupModel;
 import com.link_intersystems.util.SortOrder;
 
@@ -61,7 +61,7 @@ public class TreeObjectsTreeComponent extends GitRepositoryComponent {
 		sortOrderButtonGroupModel.addPropertyChangeListener("selectedValue",
 				sortingUpdateListener);
 
-		PopupMenuMouseAdapter popupMenuMouseAdapter = new PopupMenuMouseAdapter(
+		ShowPopupMouseAdapter popupMenuMouseAdapter = new ShowPopupMouseAdapter(
 				popup);
 		treeObjectsTree.addMouseListener(popupMenuMouseAdapter);
 	}

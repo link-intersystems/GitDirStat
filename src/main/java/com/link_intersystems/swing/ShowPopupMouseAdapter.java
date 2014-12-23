@@ -5,11 +5,11 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JPopupMenu;
 
-public class PopupMenuMouseAdapter extends MouseAdapter {
+public class ShowPopupMouseAdapter extends MouseAdapter {
 
 	private JPopupMenu popupMenu;
 
-	public PopupMenuMouseAdapter(JPopupMenu popupMenu) {
+	public ShowPopupMouseAdapter(JPopupMenu popupMenu) {
 		this.popupMenu = popupMenu;
 	}
 
