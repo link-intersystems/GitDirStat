@@ -5,6 +5,7 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -29,7 +30,8 @@ public class UpdateRepositoryActionInput implements
 			UIContext uiContext, GitRepositoryAccess gitRepositoryAccess) {
 		this.uiContext = uiContext;
 		this.gitRepositoryModel = gitRepositoryModel;
-		updateRefsAction = new UpdateRefsAction(gitRepositoryAccess, gitRepositoryModel);
+		updateRefsAction = new UpdateRefsAction(gitRepositoryAccess,
+				gitRepositoryModel);
 	}
 
 	@Override
@@ -50,10 +52,11 @@ public class UpdateRepositoryActionInput implements
 
 		JScrollPane jScrollPane = new JScrollPane(jList);
 		jScrollPane.setPreferredSize(new Dimension(320, 480));
+		jScrollPane.setBorder(BorderFactory.createTitledBorder("Select refs"));
 
 		Window mainFrame = this.uiContext.getMainFrame();
 		int showOptionDialog = JOptionPane.showOptionDialog(mainFrame,
-				jScrollPane, "Select branches", JOptionPane.OK_CANCEL_OPTION,
+				jScrollPane, "Update Repository", JOptionPane.OK_CANCEL_OPTION,
 				JOptionPane.PLAIN_MESSAGE, null, null, null);
 
 		if (showOptionDialog == JOptionPane.OK_OPTION) {

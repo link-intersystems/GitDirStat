@@ -40,6 +40,7 @@ import org.apache.commons.io.IOUtils;
 
 import com.link_intersystems.swing.ListModelSelectionMediator;
 import com.link_intersystems.swing.ProgressDialogMonitor;
+import com.link_intersystems.swing.ProgressMonitor;
 import com.link_intersystems.swing.SingleActionSelectionMediator;
 import com.link_intersystems.tools.git.GitDirStatArguments;
 import com.link_intersystems.tools.git.domain.GitRepositoryAccess;
@@ -111,6 +112,11 @@ public class MainFrame implements Serializable {
 			return MessageFormat.format("icons/{0}/{1}", resolution, iconName);
 		}
 
+		@Override
+		public ProgressMonitor getProgressMonitor() {
+			return MainFrame.this.progressDialogMonitor;
+		}
+
 	}
 
 	private JFrame mainFrame = new JFrame("GitDirStat");
@@ -178,7 +184,7 @@ public class MainFrame implements Serializable {
 	private void addToolbarActions(GitRepositoryAccess repoAccess,
 			SizeMetricsView sizeMetricsView) {
 		RemovePathAction removePathAction = new RemovePathAction(repoModel,
-				repoAccess);
+				repoAccess, uiContext);
 		removePathAction.putValue(Action.SMALL_ICON,
 				uiContext.getIcon(IconType.CLEAN));
 		removePathAction.setProgressMonitor(progressDialogMonitor);

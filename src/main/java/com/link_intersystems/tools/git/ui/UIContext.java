@@ -4,6 +4,8 @@ import java.awt.Window;
 
 import javax.swing.ImageIcon;
 
+import com.link_intersystems.swing.ProgressMonitor;
+
 public interface UIContext {
 
 	public enum IconType {
@@ -25,4 +27,6 @@ public interface UIContext {
 	Window getMainFrame();
 
 	public ImageIcon getIcon(IconType iconType);
+
+	ProgressMonitor getProgressMonitor();
 }
