@@ -27,7 +27,7 @@ import javax.swing.UIManager;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
-import com.link_intersystems.lang.math.IncrementalAverage;
+import com.link_intersystems.math.IncrementalAverage;
 
 public class ProgressMonitor {
 	private ProgressMonitor root;

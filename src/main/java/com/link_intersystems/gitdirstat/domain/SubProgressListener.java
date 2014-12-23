@@ -1,7 +1,7 @@
 package com.link_intersystems.gitdirstat.domain;
 
-import com.link_intersystems.lang.math.LinearEquation;
-import com.link_intersystems.lang.math.TwoPointLinearEquation;
+import com.link_intersystems.math.LinearEquation;
+import com.link_intersystems.math.TwoPointLinearEquation;
 
 public class SubProgressListener implements ProgressListener {
 

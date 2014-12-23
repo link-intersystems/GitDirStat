@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.link_intersystems.lang.math;
+package com.link_intersystems.math;
 
 /**
- * This interface represents an aggregate function that can be applied to
- * {@link Number}s.
+ * This interface represents the average of a certain amount of values.
  * 
  * @author René Link <a
  *         href="mailto:rene.link@link-intersystems.com">[rene.link@link-
@@ -26,27 +25,26 @@ package com.link_intersystems.lang.math;
  *            the precision of the average.
  * @since 1.0.0.0
  */
-public interface Aggregate<N extends Number> {
+public interface Average<N extends Number> extends Aggregate<N> {
 
 	/**
-	 * The current value of this {@link Aggregate}.
+	 * The average value of all values that have been added to this
+	 * {@link Average}.
 	 * 
-	 * @return the result, according to the {@link Aggregate} specification, of
-	 *         all values that have been added until now.
-	 * @since 1.2.0.0
+	 * @return the average of all values that have been added.
+	 * @since 1.0.0.0
 	 */
 	public N getValue();
 
 	/**
-	 * Add another value to this {@link Aggregate}.
+	 * Add another value to this average.
 	 * 
 	 * @param value
 	 *            the value to add.
-	 * @return true if the {@link #addValue(Number)} operation changed the value
-	 *         of this {@link Aggregate}.
 	 * @throws IllegalArgumentException
 	 *             if value is null.
-	 * @since 1.2.0.0
+	 * @since 1.0.0.1
 	 */
 	public boolean addValue(Number value);
+
 }

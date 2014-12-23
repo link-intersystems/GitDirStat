@@ -1,4 +1,4 @@
-package com.link_intersystems.lang.math;
+package com.link_intersystems.math;
 /**
  * Copyright 2011 Link Intersystems GmbH <rene.link@link-intersystems.com>
  *

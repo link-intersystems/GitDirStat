@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.link_intersystems.lang.math;
+package com.link_intersystems.math;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

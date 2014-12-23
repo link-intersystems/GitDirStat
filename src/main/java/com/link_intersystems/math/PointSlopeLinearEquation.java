@@ -1,4 +1,4 @@
-package com.link_intersystems.lang.math;
+package com.link_intersystems.math;
 
 import com.link_intersystems.lang.Assert;
 /**
