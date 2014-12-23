@@ -2,8 +2,12 @@ package com.link_intersystems.gitdirstat.metrics;
 
 import java.math.BigInteger;
 
+import javax.swing.ListModel;
+import javax.swing.table.TableModel;
+
 import com.link_intersystems.gitdirstat.domain.TreeObject;
 import com.link_intersystems.swing.AbstractListModelTableModelAdapter;
+import com.link_intersystems.swing.SumTableModel;
 
 public class TreeObjectTableModel extends
 		AbstractListModelTableModelAdapter<TreeObject> {
@@ -12,9 +16,16 @@ public class TreeObjectTableModel extends
 	private static final int COL_PATH = 0;
 	private static final int COL_SIZE = 1;
 
+	private SumTableModel sumTableModel = new SumTableModel(this);
+
 	@Override
 	public int getColumnCount() {
 		return 2;
+	}
+
+	@Override
+	public void setEntryModel(ListModel entryModel) {
+		super.setEntryModel(entryModel);
 	}
 
 	@Override
@@ -57,5 +68,9 @@ public class TreeObjectTableModel extends
 			break;
 		}
 		return columnValue;
+	}
+
+	public TableModel getSummaryTableModel() {
+		return sumTableModel;
 	}
 }

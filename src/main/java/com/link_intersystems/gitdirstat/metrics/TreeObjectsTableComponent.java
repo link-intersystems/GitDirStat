@@ -7,7 +7,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -32,8 +31,6 @@ public class TreeObjectsTableComponent extends GitRepositoryComponent {
 	private JTable summaryTable = new JTable();
 	private JScrollPane treeObjectsScrollPane = new JScrollPane(
 			treeObjectsTable);
-
-	private DefaultTableModel dataModel;
 
 	public TreeObjectsTableComponent() {
 		setLayout(new BorderLayout());
@@ -60,8 +57,12 @@ public class TreeObjectsTableComponent extends GitRepositoryComponent {
 		treeObjectsTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 
 		summaryTable.setColumnModel(treeObjectsTable.getColumnModel());
-		dataModel = new DefaultTableModel(0, 2);
-		summaryTable.setModel(dataModel);
+
+		TableModel summaryTableModel = treeObjectsTableModel
+				.getSummaryTableModel();
+		summaryTable.setModel(summaryTableModel);
+		summaryTable.setDefaultRenderer(BigInteger.class,
+				new HumanReadableFileSizeTableCellRenderer());
 
 		TableColumnModel columnModel = treeObjectsTable.getColumnModel();
 		TableColumn firstColumn = columnModel.getColumn(0);
