@@ -86,7 +86,7 @@ public class GitRepositoryModel extends AbstractPropertyChangeSupport {
 		return refsListModel;
 	}
 
-	public PathModel getPathListModel() {
+	public PathModel getPathModel() {
 		return pathListModel;
 	}
 

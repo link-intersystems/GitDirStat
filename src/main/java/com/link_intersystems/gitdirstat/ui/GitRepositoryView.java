@@ -116,14 +116,12 @@ public class GitRepositoryView extends JPanel {
 	private void setViewComponent(GitRepositoryComponent gitRepositoryComponent) {
 		GitRepositoryComponent oldView = this.viewComponent;
 		if (this.viewComponent != null) {
-			this.viewComponent.setModel(null);
 			mainComponent.remove(this.viewComponent);
 		}
 
 		this.viewComponent = gitRepositoryComponent;
 
 		if (this.viewComponent != null) {
-			this.viewComponent.setModel(gitRepositoryModel);
 			mainComponent.add(this.viewComponent, BorderLayout.CENTER);
 		}
 
@@ -148,6 +146,9 @@ public class GitRepositoryView extends JPanel {
 			this.gitRepositoryModel
 					.addPropertyChangeListener(gitRepositoryModelSync);
 			gitRepositoryModelSync.updateGitDir(this.gitRepositoryModel);
+
+			treeObjectsTableComponent.setModel(gitRepositoryModel);
+			treeObjectsTreeComponent.setModel(gitRepositoryModel);
 		}
 		viewComponent.setModel(gitRepositoryModel);
 	}

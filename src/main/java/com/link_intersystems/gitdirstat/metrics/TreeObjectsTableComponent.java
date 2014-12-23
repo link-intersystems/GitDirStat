@@ -89,7 +89,7 @@ public class TreeObjectsTableComponent extends GitRepositoryComponent {
 	protected void updateCommitRangeTree() {
 		GitRepositoryModel gitRepositoryModel = getModel();
 		if (gitRepositoryModel != null) {
-			PathModel pathModel = gitRepositoryModel.getPathListModel();
+			PathModel pathModel = gitRepositoryModel.getPathModel();
 			ListModel entryModel = pathModel.getListModel();
 			treeObjectsTableModel.setEntryModel(entryModel);
 			if (rowSorterAwareListSelectionModelUpdater != null) {

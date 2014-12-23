@@ -48,7 +48,7 @@ public class RemovePathsActionInput implements ActionInputSource<IndexFilter> {
 
 	private IndexFilter createPathFilter() {
 		List<TreeObject> selectedTreeObjects = gitRepositoryModel
-				.getPathListModel().getSelectionModel().getSelection();
+				.getPathModel().getSelectionModel().getSelection();
 		final List<String> selectedPaths = new ArrayList<String>();
 		for (TreeObject treeObject : selectedTreeObjects) {
 			selectedPaths.add(treeObject.getRootRelativePath().getPathname());

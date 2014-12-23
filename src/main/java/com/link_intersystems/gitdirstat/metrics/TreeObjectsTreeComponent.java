@@ -11,27 +11,30 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeSelectionModel;
 
 import com.link_intersystems.gitdirstat.domain.TreeObject;
 import com.link_intersystems.gitdirstat.domain.TreeObjectSortBy;
 import com.link_intersystems.gitdirstat.ui.GitRepositoryModel;
+import com.link_intersystems.gitdirstat.ui.PathModel;
 import com.link_intersystems.swing.FileModel;
 import com.link_intersystems.swing.FileModelAdapterFactory;
 import com.link_intersystems.swing.HumanReadableFileSizeTreeCellRenderer;
-import com.link_intersystems.swing.ShowPopupMouseAdapter;
 import com.link_intersystems.swing.RadioButtonGroupModel;
+import com.link_intersystems.swing.ShowPopupMouseAdapter;
 import com.link_intersystems.util.SortOrder;
 
 public class TreeObjectsTreeComponent extends GitRepositoryComponent {
 
 	private static final long serialVersionUID = 8588810751988085851L;
 
-	private TreeObjectsTreeModel treeObjectsTreeModel = new TreeObjectsTreeModel();
-	private JTree treeObjectsTree = new JTree(treeObjectsTreeModel);
+	private JTree treeObjectsTree = new JTree();
 	private JScrollPane treeObjectsScrollPane = new JScrollPane(treeObjectsTree);
 
 	private RadioButtonGroupModel sortByButtonGroupModel;
 	private RadioButtonGroupModel sortOrderButtonGroupModel;
+
+	private SortingUpdateListener sortingUpdateListener;
 
 	public TreeObjectsTreeComponent() {
 		setLayout(new BorderLayout());
@@ -40,6 +43,7 @@ public class TreeObjectsTreeComponent extends GitRepositoryComponent {
 		cellRenderer.setFileModelAdapterFactory(modelAdapterFactory);
 		treeObjectsTree.setCellRenderer(cellRenderer);
 		treeObjectsTree.setRootVisible(false);
+		treeObjectsTree.setExpandsSelectedPaths(true);
 		add(treeObjectsScrollPane, BorderLayout.CENTER);
 
 		createPopupMenu();
@@ -53,9 +57,8 @@ public class TreeObjectsTreeComponent extends GitRepositoryComponent {
 		sortMenu.addSeparator();
 		sortOrderButtonGroupModel = createSortOrderMenuEntries(sortMenu);
 
-		SortingUpdateListener sortingUpdateListener = new SortingUpdateListener(
-				sortByButtonGroupModel, sortOrderButtonGroupModel,
-				treeObjectsTreeModel);
+		sortingUpdateListener = new SortingUpdateListener(
+				sortByButtonGroupModel, sortOrderButtonGroupModel);
 
 		sortByButtonGroupModel.addPropertyChangeListener("selectedValue",
 				sortingUpdateListener);
@@ -105,8 +108,13 @@ public class TreeObjectsTreeComponent extends GitRepositoryComponent {
 	protected void updateCommitRangeTree() {
 		GitRepositoryModel model = getModel();
 		if (model != null) {
-			TreeObject commitRangeTree = model.getCommitRangeTree();
-			treeObjectsTreeModel.setCommitRangeTree(commitRangeTree);
+			PathModel pathModel = model.getPathModel();
+			TreeObjectsTreeModel treeModel = pathModel.getTreeModel();
+			sortingUpdateListener.setTreeObjectsTreeModel(treeModel);
+			treeObjectsTree.setModel(treeModel);
+			TreeSelectionModel treeSelectionModel = pathModel
+					.getTreeSelectionModel();
+			treeObjectsTree.setSelectionModel(treeSelectionModel);
 		}
 	}
 
@@ -119,20 +127,25 @@ public class TreeObjectsTreeComponent extends GitRepositoryComponent {
 
 		public SortingUpdateListener(
 				RadioButtonGroupModel sortByButtonGroupModel,
-				RadioButtonGroupModel sortOrderButtonGroupModel,
-				TreeObjectsTreeModel treeObjectsTreeModel) {
+				RadioButtonGroupModel sortOrderButtonGroupModel) {
 			this.sortByButtonGroupModel = sortByButtonGroupModel;
 			this.sortOrderButtonGroupModel = sortOrderButtonGroupModel;
+		}
+
+		public void setTreeObjectsTreeModel(
+				TreeObjectsTreeModel treeObjectsTreeModel) {
 			this.treeObjectsTreeModel = treeObjectsTreeModel;
 		}
 
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
-			TreeObjectSortBy sortBy = (TreeObjectSortBy) sortByButtonGroupModel
-					.getSelectionValue();
-			SortOrder sortOrder = (SortOrder) sortOrderButtonGroupModel
-					.getSelectionValue();
-			treeObjectsTreeModel.setSorting(sortBy, sortOrder);
+			if (treeObjectsTreeModel != null) {
+				TreeObjectSortBy sortBy = (TreeObjectSortBy) sortByButtonGroupModel
+						.getSelectionValue();
+				SortOrder sortOrder = (SortOrder) sortOrderButtonGroupModel
+						.getSelectionValue();
+				treeObjectsTreeModel.setSorting(sortBy, sortOrder);
+			}
 		}
 	}
 

@@ -1,8 +1,12 @@
 package com.link_intersystems.gitdirstat.metrics;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 import org.apache.commons.collections4.IteratorUtils;
 import org.apache.commons.collections4.Transformer;
@@ -18,6 +22,7 @@ public class TreeObjectsTreeModel extends DefaultTreeModel {
 
 	private TreeObjectSortBy treeObjectSortBy = TreeObjectSortBy.SIZE;
 	private SortOrder sortOrder = SortOrder.DESC;
+	private Map<TreeObject, DefaultMutableTreeNode> treeObject2TreeNode = new HashMap<TreeObject, DefaultMutableTreeNode>();
 
 	public TreeObjectsTreeModel() {
 		super(new GitRepositoryTreeNode());
@@ -39,16 +44,16 @@ public class TreeObjectsTreeModel extends DefaultTreeModel {
 	}
 
 	public void setCommitRangeTree(TreeObject commitRangeTree) {
+		GitRepositoryTreeNode gitRepositoryTreeNode = (GitRepositoryTreeNode) getRoot();
+		gitRepositoryTreeNode.removeAllChildren();
+
 		if (commitRangeTree == null) {
 			return;
 		}
 
-		GitRepositoryTreeNode gitRepositoryTreeNode = (GitRepositoryTreeNode) getRoot();
-		gitRepositoryTreeNode.removeAllChildren();
 		gitRepositoryTreeNode.setUserObject(commitRangeTree);
-
+		treeObject2TreeNode.clear();
 		createTreeObjectNodes(gitRepositoryTreeNode, commitRangeTree);
-
 		gitRepositoryTreeNode.deepSort(treeObjectSortBy, sortOrder);
 
 		fireTreeStructureChanged();
@@ -58,14 +63,21 @@ public class TreeObjectsTreeModel extends DefaultTreeModel {
 			GitRepositoryTreeNode gitRepositoryTreeNode,
 			TreeObject commitRangeTree) {
 
+		Iterator<Object> leafNodeIterator = createLeafNodeIterator(commitRangeTree);
+
+		while (leafNodeIterator.hasNext()) {
+			TreeObject treeObject = (TreeObject) leafNodeIterator.next();
+			DefaultMutableTreeNode defaultMutableTreeNode = gitRepositoryTreeNode
+					.addTreeObject(treeObject);
+			treeObject2TreeNode.put(treeObject, defaultMutableTreeNode);
+		}
+	}
+
+	private Iterator<Object> createLeafNodeIterator(TreeObject commitRangeTree) {
 		Iterator<Object> objectGraphIterator = IteratorUtils
 				.objectGraphIterator(commitRangeTree,
 						new TreeObjectLeafNodeTransformer());
-
-		while (objectGraphIterator.hasNext()) {
-			TreeObject treeObject = (TreeObject) objectGraphIterator.next();
-			gitRepositoryTreeNode.addTreeObject(treeObject);
-		}
+		return objectGraphIterator;
 	}
 
 	private class TreeObjectLeafNodeTransformer implements
@@ -93,4 +105,9 @@ public class TreeObjectsTreeModel extends DefaultTreeModel {
 
 	}
 
+	public TreePath getTreePath(TreeObject treeObject) {
+		DefaultMutableTreeNode treeNode = treeObject2TreeNode.get(treeObject);
+		TreePath treePath = new TreePath(treeNode.getPath());
+		return treePath;
+	}
 }
