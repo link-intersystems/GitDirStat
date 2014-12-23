@@ -10,7 +10,6 @@ import java.text.MessageFormat;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -71,10 +70,8 @@ public class GitDirStatUIArguments {
 					commandLine);
 			return gitDirStatArguments;
 		} catch (ParseException e) {
-			HelpFormatter formatter = new HelpFormatter();
-			formatter
-					.printHelp("java " + GitDirStatUI.class.getName(), OPTIONS);
-			throw new GitDirStatArgumentsParseException(e,
+			throw new GitDirStatArgumentsParseException(e, "java "
+					+ GitDirStatUI.class.getName() + " [GIT_REPOSITORY_DIR]",
 					SerializationUtils.clone(OPTIONS));
 		}
 	}

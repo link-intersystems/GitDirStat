@@ -7,10 +7,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.MessageFormat;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -30,17 +30,12 @@ public class GitDirStatListFilesArguments {
 
 	static Options OPTIONS;
 
-	private static Option OPTION_GITDIR;
 	private static Option OPTION_OUTFILE;
 	private static Option OPTION_SORT_ORDER;
 	private static Option OPTION_SORT_BY;
 
 	static {
 		OPTIONS = new Options();
-
-		OPTION_GITDIR = new Option("gitdir", true,
-				"The git repository directory. " + "If not specified the "
-						+ "current work dir is considered the git repository.");
 
 		OPTION_OUTFILE = new Option(
 				"outfile",
@@ -56,7 +51,6 @@ public class GitDirStatListFilesArguments {
 				"The property by which the output should be sorted. Either size or name. "
 						+ "Default is size.");
 
-		OPTIONS.addOption(OPTION_GITDIR);
 		OPTIONS.addOption(OPTION_OUTFILE);
 		OPTIONS.addOption(OPTION_SORT_ORDER);
 		OPTIONS.addOption(OPTION_SORT_BY);
@@ -69,15 +63,16 @@ public class GitDirStatListFilesArguments {
 			CommandLine commandLine = parser.parse(OPTIONS, args);
 			GitDirStatListFilesArguments gitDirStatArguments = new GitDirStatListFilesArguments(
 					commandLine);
+			File gitRepositoryDir = gitDirStatArguments.getGitRepositoryDir();
+			if (gitRepositoryDir == null) {
+				throw new ParseException(
+						"A git repository directory must be provided");
+			}
 			return gitDirStatArguments;
 		} catch (ParseException e) {
-			HelpFormatter formatter = new HelpFormatter();
-			formatter
-					.printHelp(
-							"java "
-									+ GitDirStatListFilesApplication.class
-											.getName(), OPTIONS);
-			throw new GitDirStatArgumentsParseException(e,
+			throw new GitDirStatArgumentsParseException(e, "java "
+					+ GitDirStatListFilesApplication.class.getName()
+					+ " [GIT_REPOSITORY_DIR]",
 					SerializationUtils.clone(OPTIONS));
 		}
 	}
@@ -86,9 +81,13 @@ public class GitDirStatListFilesArguments {
 		this.commandLine = commandLine;
 	}
 
+	@SuppressWarnings("unchecked")
 	public File getGitRepositoryDir() {
-		String gitDirPathname = commandLine.getOptionValue(OPTION_GITDIR
-				.getOpt());
+		List<String> argList = commandLine.getArgList();
+		if (argList.isEmpty()) {
+			return null;
+		}
+		String gitDirPathname = argList.get(0);
 
 		if (StringUtils.isBlank(gitDirPathname)) {
 			gitDirPathname = System.getProperty(WORKING_DIR_SYS_PROP);

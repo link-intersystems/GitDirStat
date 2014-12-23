@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 
+import com.link_intersystems.gitdirstat.GitDirStatArgumentsParseException;
 import com.link_intersystems.gitdirstat.domain.GitRepository;
 import com.link_intersystems.gitdirstat.domain.GitRepositoryAccess;
 import com.link_intersystems.gitdirstat.domain.NullProgressListener;
@@ -18,10 +19,14 @@ import com.link_intersystems.util.SortOrder;
 public class GitDirStatListFilesApplication {
 
 	public static void main(String[] args) throws Exception {
-		GitDirStatListFilesArguments cliArguments = GitDirStatListFilesArguments
-				.parse(args);
-		GitDirStatListFilesApplication commandLineGitDirStatApplication = new GitDirStatListFilesApplication();
-		commandLineGitDirStatApplication.run(cliArguments);
+		GitDirStatListFilesArguments cliArguments;
+		try {
+			cliArguments = GitDirStatListFilesArguments.parse(args);
+			GitDirStatListFilesApplication commandLineGitDirStatApplication = new GitDirStatListFilesApplication();
+			commandLineGitDirStatApplication.run(cliArguments);
+		} catch (GitDirStatArgumentsParseException e) {
+			e.printHelp(System.err);
+		}
 	}
 
 	public void run(GitDirStatListFilesArguments arguments) throws Exception {
