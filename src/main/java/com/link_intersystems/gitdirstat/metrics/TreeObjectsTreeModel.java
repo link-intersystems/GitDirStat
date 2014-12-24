@@ -1,8 +1,6 @@
 package com.link_intersystems.gitdirstat.metrics;
 
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -22,7 +20,6 @@ public class TreeObjectsTreeModel extends DefaultTreeModel {
 
 	private TreeObjectSortBy treeObjectSortBy = TreeObjectSortBy.SIZE;
 	private SortOrder sortOrder = SortOrder.DESC;
-	private Map<TreeObject, DefaultMutableTreeNode> treeObject2TreeNode = new HashMap<TreeObject, DefaultMutableTreeNode>();
 
 	public TreeObjectsTreeModel() {
 		super(new GitRepositoryTreeNode());
@@ -52,7 +49,6 @@ public class TreeObjectsTreeModel extends DefaultTreeModel {
 		}
 
 		gitRepositoryTreeNode.setUserObject(commitRangeTree);
-		treeObject2TreeNode.clear();
 		createTreeObjectNodes(gitRepositoryTreeNode, commitRangeTree);
 		gitRepositoryTreeNode.deepSort(treeObjectSortBy, sortOrder);
 
@@ -67,9 +63,7 @@ public class TreeObjectsTreeModel extends DefaultTreeModel {
 
 		while (leafNodeIterator.hasNext()) {
 			TreeObject treeObject = (TreeObject) leafNodeIterator.next();
-			DefaultMutableTreeNode defaultMutableTreeNode = gitRepositoryTreeNode
-					.addTreeObject(treeObject);
-			treeObject2TreeNode.put(treeObject, defaultMutableTreeNode);
+			gitRepositoryTreeNode.addTreeObject(treeObject);
 		}
 	}
 
@@ -106,8 +100,14 @@ public class TreeObjectsTreeModel extends DefaultTreeModel {
 	}
 
 	public TreePath getTreePath(TreeObject treeObject) {
-		DefaultMutableTreeNode treeNode = treeObject2TreeNode.get(treeObject);
-		TreePath treePath = new TreePath(treeNode.getPath());
+		GitRepositoryTreeNode gitRepositoryTreeNode = (GitRepositoryTreeNode) getRoot();
+		DefaultMutableTreeNode treeNode = gitRepositoryTreeNode
+				.findTreeNode(treeObject);
+
+		TreePath treePath = null;
+		if (treeNode != null) {
+			treePath = new TreePath(treeNode.getPath());
+		}
 		return treePath;
 	}
 }

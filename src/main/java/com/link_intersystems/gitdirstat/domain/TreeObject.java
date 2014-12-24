@@ -170,4 +170,8 @@ public class TreeObject implements Comparable<TreeObject> {
 	public int compareTo(TreeObject o) {
 		return getSize().compareTo(o.getSize());
 	}
+
+	public boolean isRoot() {
+		return this.parent == null;
+	}
 }

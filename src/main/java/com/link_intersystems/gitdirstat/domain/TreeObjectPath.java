@@ -59,4 +59,9 @@ public class TreeObjectPath {
 	public Enumeration<TreeObject> enumerate() {
 		return new IteratorEnumeration<TreeObject>(path.iterator());
 	}
+
+	@Override
+	public String toString() {
+		return getRootRelativePathname();
+	}
 }

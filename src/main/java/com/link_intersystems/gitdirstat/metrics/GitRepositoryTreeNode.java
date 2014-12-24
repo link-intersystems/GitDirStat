@@ -3,7 +3,9 @@ package com.link_intersystems.gitdirstat.metrics;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -20,6 +22,8 @@ import com.link_intersystems.util.SortOrder;
 public class GitRepositoryTreeNode extends DefaultMutableTreeNode {
 
 	private static final long serialVersionUID = -5276518794046807282L;
+
+	private Map<TreeObject, DefaultMutableTreeNode> treeObject2Nodes = new HashMap<TreeObject, DefaultMutableTreeNode>();
 
 	public void deepSort(TreeObjectSortBy treeObjectSortOrder) {
 		deepSort(this, treeObjectSortOrder, SortOrder.DESC);
@@ -54,7 +58,13 @@ public class GitRepositoryTreeNode extends DefaultMutableTreeNode {
 			parent.add(childNode);
 			deepSort(childNode, sortBy, order);
 		}
+	}
 
+	@Override
+	public void setUserObject(Object userObject) {
+		treeObject2Nodes.clear();
+		super.setUserObject(userObject);
+		treeObject2Nodes.put((TreeObject) userObject, this);
 	}
 
 	private BeanToPropertyValueTransformer getSortByTransformer(
@@ -77,44 +87,32 @@ public class GitRepositoryTreeNode extends DefaultMutableTreeNode {
 		return beanValueTransformer;
 	}
 
-	@SuppressWarnings("unchecked")
-	public DefaultMutableTreeNode addTreeObject(TreeObject newTreeObject) {
-		DefaultMutableTreeNode parentTreeNode = this;
-		DefaultMutableTreeNode newTreeNode = null;
-		DefaultMutableTreeNode latestNode = null;
-
-		Enumeration<DefaultMutableTreeNode> treeNodes = parentTreeNode
-				.children();
-
-		TreeObjectPath treeObjectPath = newTreeObject.getPath();
-
+	public DefaultMutableTreeNode addTreeObject(TreeObject treeObject) {
+		TreeObjectPath treeObjectPath = treeObject.getPath();
 		Enumeration<TreeObject> treePathEnumeration = treeObjectPath
 				.enumerate();
-		treePathEnumeration.nextElement(); // pop root
 
-		pathTreeObjects: while (treePathEnumeration.hasMoreElements()) {
-			TreeObject pathTreeObject = treePathEnumeration.nextElement();
+		DefaultMutableTreeNode previousNode = null;
+		while (treePathEnumeration.hasMoreElements()) {
+			TreeObject pathSegment = treePathEnumeration.nextElement();
 
-			while (treeNodes.hasMoreElements()) {
-				newTreeNode = treeNodes.nextElement();
-				TreeObject treeObject = (TreeObject) newTreeNode
-						.getUserObject();
-				if (pathTreeObject.getName().equals(treeObject.getName())) {
-					latestNode = newTreeNode;
-					parentTreeNode = newTreeNode;
-					treeNodes = parentTreeNode.children();
-					continue pathTreeObjects;
+			DefaultMutableTreeNode treeNode = treeObject2Nodes.get(pathSegment);
+			if (treeNode == null) {
+				treeNode = new DefaultMutableTreeNode(pathSegment);
+				if (previousNode != null) {
+					previousNode.add(treeNode);
 				}
+				treeObject2Nodes.put(pathSegment, treeNode);
 			}
-
-			newTreeNode = new DefaultMutableTreeNode(pathTreeObject);
-			latestNode = newTreeNode;
-			parentTreeNode.add(newTreeNode);
-			parentTreeNode = newTreeNode;
-			treeNodes = parentTreeNode.children();
+			previousNode = treeNode;
 		}
 
-		return latestNode;
+		return previousNode;
 
 	}
+
+	public DefaultMutableTreeNode findTreeNode(TreeObject treeObject) {
+		return treeObject2Nodes.get(treeObject);
+	}
+
 }
