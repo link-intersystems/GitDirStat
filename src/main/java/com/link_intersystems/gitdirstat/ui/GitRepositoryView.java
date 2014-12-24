@@ -18,6 +18,7 @@ import javax.swing.JTextField;
 import com.link_intersystems.gitdirstat.metrics.GitRepositoryComponent;
 import com.link_intersystems.gitdirstat.metrics.TreeObjectsTableComponent;
 import com.link_intersystems.gitdirstat.metrics.TreeObjectsTreeComponent;
+import com.link_intersystems.gitdirstat.ui.PathModel.SelectionSource;
 import com.link_intersystems.swing.RelativeLayout;
 import com.link_intersystems.swing.RelativeLayout.RelativeConstraints;
 import com.link_intersystems.swing.SimpleDocument;
@@ -38,16 +39,29 @@ public class GitRepositoryView extends JPanel {
 
 		private GitRepositoryComponent gitRepositoryComponent;
 
+		private GitRepositoryModel gitRepositoryModel;
+
+		private SelectionSource selectionSource;
+
 		public SetViewComponentAction(
-				GitRepositoryComponent gitRepositoryComponent) {
+				GitRepositoryComponent gitRepositoryComponent,
+				SelectionSource selectionSource) {
 			this.gitRepositoryComponent = gitRepositoryComponent;
+			this.selectionSource = selectionSource;
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			if (gitRepositoryModel != null) {
+				PathModel pathModel = gitRepositoryModel.getPathModel();
+				pathModel.setSelectionSource(selectionSource);
+			}
 			setViewComponent(gitRepositoryComponent);
 			putValue(Action.SELECTED_KEY, true);
+		}
 
+		public void setGitRepositoryModel(GitRepositoryModel gitRepositoryModel) {
+			this.gitRepositoryModel = gitRepositoryModel;
 		}
 
 	}
@@ -75,7 +89,7 @@ public class GitRepositoryView extends JPanel {
 		}
 	}
 
-	private GitRepositoryModel gitRepositoryModel = new GitRepositoryModel();
+	private GitRepositoryModel gitRepositoryModel;
 
 	private TreeObjectsTableComponent treeObjectsTableComponent = new TreeObjectsTableComponent();
 	private TreeObjectsTreeComponent treeObjectsTreeComponent = new TreeObjectsTreeComponent();
@@ -83,9 +97,9 @@ public class GitRepositoryView extends JPanel {
 	private JRootPane rootPane = new JRootPane();
 
 	SetViewComponentAction setTableAction = new SetViewComponentAction(
-			treeObjectsTableComponent);
+			treeObjectsTableComponent, SelectionSource.LIST_SELECTION);
 	SetViewComponentAction setTreeAction = new SetViewComponentAction(
-			treeObjectsTreeComponent);
+			treeObjectsTreeComponent, SelectionSource.TREE_SELECTION);
 
 	private GitRepositoryComponent viewComponent;
 	private RelativeLayout relativeLayout = new RelativeLayout();
@@ -117,11 +131,13 @@ public class GitRepositoryView extends JPanel {
 		GitRepositoryComponent oldView = this.viewComponent;
 		if (this.viewComponent != null) {
 			mainComponent.remove(this.viewComponent);
+			this.viewComponent.afterInvisible();
 		}
 
 		this.viewComponent = gitRepositoryComponent;
 
 		if (this.viewComponent != null) {
+			this.viewComponent.beforeVisible();
 			mainComponent.add(this.viewComponent, BorderLayout.CENTER);
 		}
 
@@ -149,6 +165,8 @@ public class GitRepositoryView extends JPanel {
 
 			treeObjectsTableComponent.setModel(gitRepositoryModel);
 			treeObjectsTreeComponent.setModel(gitRepositoryModel);
+			setTableAction.setGitRepositoryModel(gitRepositoryModel);
+			setTreeAction.setGitRepositoryModel(gitRepositoryModel);
 		}
 		viewComponent.setModel(gitRepositoryModel);
 	}

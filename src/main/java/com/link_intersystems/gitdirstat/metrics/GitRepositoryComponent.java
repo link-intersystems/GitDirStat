@@ -42,5 +42,11 @@ public abstract class GitRepositoryComponent extends JComponent {
 		return gitRepositoryModel;
 	}
 
-	protected  abstract void updateCommitRangeTree();
+	protected abstract void updateCommitRangeTree();
+
+	public void afterInvisible() {
+	}
+
+	public void beforeVisible() {
+	}
 }

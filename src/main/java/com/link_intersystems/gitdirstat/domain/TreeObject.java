@@ -174,4 +174,5 @@ public class TreeObject implements Comparable<TreeObject> {
 	public boolean isRoot() {
 		return this.parent == null;
 	}
+
 }

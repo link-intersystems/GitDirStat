@@ -20,4 +20,5 @@ public interface SelectionModel<E> {
 	boolean isEmpty();
 
 	List<E> getSelection();
+
 }

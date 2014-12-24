@@ -43,13 +43,11 @@ public class TreeObjectsTableComponent extends GitRepositoryComponent {
 	private ComponentResize<TableColumn> tableColumnResize = new TableColumnResize();
 	private RelativeWidthResizer<TableColumn> relativeColumnWidthResize = new RelativeWidthResizer<TableColumn>(
 			tableColumnResize);
-
+	private RowSorterAwareListSelectionModelUpdater rowSorterAwareListSelectionModelUpdater = new RowSorterAwareListSelectionModelUpdater();
 	private JTable treeObjectsTable = new JTable(treeObjectsModel);
 
 	private JScrollPane treeObjectsScrollPane = new JScrollPane(
 			treeObjectsTable);
-
-	private RowSorterAwareListSelectionModelUpdater rowSorterAwareListSelectionModelUpdater;
 
 	public TreeObjectsTableComponent() {
 		configureThis();
@@ -72,6 +70,11 @@ public class TreeObjectsTableComponent extends GitRepositoryComponent {
 				alternatingColorHumanReadableCellRenderer);
 
 		treeObjectsTable.addComponentListener(relativeColumnWidthResize);
+
+		rowSorterAwareListSelectionModelUpdater.setSourceModel(
+				treeObjectsTable.getSelectionModel(),
+				treeObjectsTable.getRowSorter());
+
 		configureTreeObjectsTableColumns();
 	}
 
@@ -103,15 +106,8 @@ public class TreeObjectsTableComponent extends GitRepositoryComponent {
 			PathModel pathModel = gitRepositoryModel.getPathModel();
 			ListModel entryModel = pathModel.getListModel();
 			treeObjectsModel.setEntryModel(entryModel);
-			if (rowSorterAwareListSelectionModelUpdater != null) {
-				rowSorterAwareListSelectionModelUpdater.setSourceModel(null,
-						null);
-			}
-			rowSorterAwareListSelectionModelUpdater = new RowSorterAwareListSelectionModelUpdater(
-					pathModel.getListSelectionModel());
-			rowSorterAwareListSelectionModelUpdater.setSourceModel(
-					treeObjectsTable.getSelectionModel(),
-					treeObjectsTable.getRowSorter());
+			rowSorterAwareListSelectionModelUpdater.setTargetModel(pathModel
+					.getListSelectionModel());
 		}
 		ListSelectionModel selectionModel = treeObjectsTable
 				.getSelectionModel();

@@ -9,7 +9,7 @@ import javax.swing.Action;
 
 public class ListModelSelectionMediator<E> {
 
-	private ListModelSelection<? extends E> listModelSelection;
+	private SelectionModel<? extends E> selectionModel;
 
 	private class ListModelSelectionListener implements PropertyChangeListener {
 
@@ -17,8 +17,7 @@ public class ListModelSelectionMediator<E> {
 		@Override
 		public void propertyChange(PropertyChangeEvent evt) {
 			if (ListModelSelection.PROP_SELECTION.equals(evt.getPropertyName())) {
-				ListModelSelection<E> source = (ListModelSelection<E>) evt
-						.getSource();
+				SelectionModel<E> source = (SelectionModel<E>) evt.getSource();
 				ListModelSelectionMediator.this
 						.handleListModelSelectionUpdate(source);
 			}
@@ -32,15 +31,14 @@ public class ListModelSelectionMediator<E> {
 	public ListModelSelectionMediator() {
 	}
 
-	public void setListModelSelection(
-			ListModelSelection<? extends E> listModelSelection) {
-		if (this.listModelSelection != null) {
-			this.listModelSelection
+	public void setSelectionModel(SelectionModel<? extends E> selectionModel) {
+		if (this.selectionModel != null) {
+			this.selectionModel
 					.removePropertyChangeListener(listModelSelectionListener);
 		}
-		this.listModelSelection = listModelSelection;
-		if (this.listModelSelection != null) {
-			this.listModelSelection
+		this.selectionModel = selectionModel;
+		if (this.selectionModel != null) {
+			this.selectionModel
 					.addPropertyChangeListener(listModelSelectionListener);
 		}
 
@@ -48,16 +46,16 @@ public class ListModelSelectionMediator<E> {
 
 	public void addDisabledActionOnEmptySelection(Action action) {
 		disabledOnEmptySelection.add(action);
-		if (listModelSelection != null) {
-			handleListModelSelectionUpdate(listModelSelection);
+		if (selectionModel != null) {
+			handleListModelSelectionUpdate(selectionModel);
 		}
 	}
 
 	private void handleListModelSelectionUpdate(
-			ListModelSelection<? extends E> listModelSelection) {
+			SelectionModel<? extends E> selectionModel) {
 
 		for (Action action : disabledOnEmptySelection) {
-			action.setEnabled(!listModelSelection.isEmpty());
+			action.setEnabled(!selectionModel.isEmpty());
 		}
 	}
 }

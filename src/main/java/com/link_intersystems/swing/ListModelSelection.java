@@ -1,7 +1,6 @@
 package com.link_intersystems.swing;
 
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,18 +11,14 @@ import javax.swing.event.ListDataListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-public class ListModelSelection<E> implements SelectionModel<E> {
+public class ListModelSelection<E> extends AbstractPropertyChangeSupport
+		implements SelectionModel<E> {
 
 	private ListModel listModel;
 	private ListDataListener listChangeAdapter = new ListModelChangeAdapter();
 
 	private ListSelectionModel listSelectionModel;
 	private ListSelectionListener selectionChangeAdapter = new ListSelectionModelChangeAdapter();
-
-	private PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(
-			this);
-
-	private List<E> selection;
 
 	public ListModelSelection(ListModel listModel,
 			ListSelectionModel listSelectionModel) {
@@ -34,43 +29,25 @@ public class ListModelSelection<E> implements SelectionModel<E> {
 		listSelectionModel.addListSelectionListener(selectionChangeAdapter);
 	}
 
+	@Override
 	public void addPropertyChangeListener(PropertyChangeListener listener) {
-		propertyChangeSupport.addPropertyChangeListener(listener);
+		// TODO Auto-generated method stub
+		super.addPropertyChangeListener(listener);
 	}
 
-	public void removePropertyChangeListener(PropertyChangeListener listener) {
-		propertyChangeSupport.removePropertyChangeListener(listener);
-	}
-
+	@Override
 	public void addPropertyChangeListener(String propertyName,
 			PropertyChangeListener listener) {
-		propertyChangeSupport.addPropertyChangeListener(propertyName, listener);
-	}
-
-	public void removePropertyChangeListener(String propertyName,
-			PropertyChangeListener listener) {
-		propertyChangeSupport.removePropertyChangeListener(propertyName,
-				listener);
+		// TODO Auto-generated method stub
+		super.addPropertyChangeListener(propertyName, listener);
 	}
 
 	public boolean isEmpty() {
 		return listSelectionModel.isSelectionEmpty();
 	}
 
-	public List<E> getSelection() {
-		return selection;
-	}
-
-	protected void setSelection(List<E> selection) {
-		List<E> oldSelection = this.selection;
-		this.selection = new ArrayList<E>(selection);
-
-		propertyChangeSupport.firePropertyChange(PROP_SELECTION, oldSelection,
-				this.selection);
-	}
-
 	@SuppressWarnings("unchecked")
-	private void updateSelection() {
+	public List<E> getSelection() {
 		int minIndex = listSelectionModel.getMinSelectionIndex();
 		int maxIndex = listSelectionModel.getMaxSelectionIndex();
 
@@ -83,7 +60,11 @@ public class ListModelSelection<E> implements SelectionModel<E> {
 			}
 		}
 
-		setSelection(selection);
+		return selection;
+	}
+
+	private void updateSelection() {
+		firePropertyChange(PROP_SELECTION, null, null);
 	}
 
 	private class ListModelChangeAdapter implements ListDataListener {

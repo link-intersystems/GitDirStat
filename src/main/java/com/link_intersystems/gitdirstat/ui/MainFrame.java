@@ -141,6 +141,8 @@ public class MainFrame implements Serializable {
 
 	private GitRepositoryModel repoModel;
 
+	private ListModelSelectionMediator<TreeObject> listSelectionMediator;
+
 	public MainFrame(GitDirStatUIArguments arguments,
 			GitRepositoryAccess repoAccess) {
 		repoModel = new GitRepositoryModel();
@@ -157,8 +159,8 @@ public class MainFrame implements Serializable {
 		progressDialogMonitor.setETAEnabled(true);
 
 		GitRepositoryView gitRepositoryView = new GitRepositoryView();
-		setMainComponent(gitRepositoryView);
 		gitRepositoryView.setModel(repoModel);
+		setMainComponent(gitRepositoryView);
 
 		updateRepositoryAction = new UpdateRepositoryAction(uiContext,
 				repoModel, repoAccess);
@@ -198,8 +200,8 @@ public class MainFrame implements Serializable {
 		updateRepositoryAction.setProgressMonitor(progressDialogMonitor);
 
 		PathModel pathListModel = repoModel.getPathModel();
-		ListModelSelectionMediator<TreeObject> listSelectionMediator = new ListModelSelectionMediator<TreeObject>();
-		listSelectionMediator.setListModelSelection(pathListModel
+		listSelectionMediator = new ListModelSelectionMediator<TreeObject>();
+		listSelectionMediator.setSelectionModel(pathListModel
 				.getSelectionModel());
 		listSelectionMediator
 				.addDisabledActionOnEmptySelection(removePathAction);

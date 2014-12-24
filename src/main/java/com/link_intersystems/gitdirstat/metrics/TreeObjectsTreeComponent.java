@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.math.BigInteger;
+import java.util.Enumeration;
 
 import javax.swing.JMenu;
 import javax.swing.JPopupMenu;
@@ -11,6 +12,8 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import com.link_intersystems.gitdirstat.domain.TreeObject;
@@ -47,6 +50,34 @@ public class TreeObjectsTreeComponent extends GitRepositoryComponent {
 		add(treeObjectsScrollPane, BorderLayout.CENTER);
 
 		createPopupMenu();
+	}
+
+	@Override
+	public void beforeVisible() {
+		collapseAll(treeObjectsTree);
+	}
+
+	private void collapseAll(JTree tree) {
+		TreeNode root = (TreeNode) tree.getModel().getRoot();
+		int childCount = root.getChildCount();
+		for (int i = 0; i < childCount; i++) {
+			TreeNode childAt = root.getChildAt(i);
+			collapseAll(tree, new TreePath(new Object[] { root, childAt }));
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void collapseAll(JTree tree, TreePath parent) {
+		TreeNode node = (TreeNode) parent.getLastPathComponent();
+		if (node.getChildCount() >= 0) {
+			for (Enumeration<TreeNode> e = node.children(); e.hasMoreElements();) {
+				TreeNode n = e.nextElement();
+				TreePath path = parent.pathByAddingChild(n);
+				collapseAll(tree, path);
+			}
+		}
+		tree.collapsePath(parent);
+		// tree.collapsePath(parent);
 	}
 
 	private void createPopupMenu() {
