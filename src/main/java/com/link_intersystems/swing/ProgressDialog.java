@@ -5,7 +5,7 @@
  * ORACLE PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
 
-package com.link_intersystems.swing.patch;
+package com.link_intersystems.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -29,8 +29,8 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import com.link_intersystems.math.IncrementalAverage;
 
-public class ProgressMonitor {
-	private ProgressMonitor root;
+public class ProgressDialog {
+	private ProgressDialog root;
 	private JDialog dialog;
 	private JOptionPane pane;
 	private JProgressBar myBar;
@@ -74,13 +74,13 @@ public class ProgressMonitor {
 	 * @see JDialog
 	 * @see JOptionPane
 	 */
-	public ProgressMonitor(Component parentComponent, Object message,
+	public ProgressDialog(Component parentComponent, Object message,
 			String note, int min, int max) {
 		this(parentComponent, message, note, min, max, null);
 	}
 
-	private ProgressMonitor(Component parentComponent, Object message,
-			String note, int min, int max, ProgressMonitor group) {
+	private ProgressDialog(Component parentComponent, Object message,
+			String note, int min, int max, ProgressDialog group) {
 		this.min = min;
 		this.max = max;
 		this.parentComponent = parentComponent;
@@ -120,7 +120,7 @@ public class ProgressMonitor {
 		ProgressOptionPane(Object messageList) {
 			super(messageList, JOptionPane.INFORMATION_MESSAGE,
 					JOptionPane.DEFAULT_OPTION, null,
-					ProgressMonitor.this.cancelOption, null);
+					ProgressDialog.this.cancelOption, null);
 		}
 
 		public int getMaxCharactersPerLineCount() {
@@ -271,7 +271,8 @@ public class ProgressMonitor {
 			int remaining = maximum - newValue;
 
 			long etaTimeMs = (long) (value * remaining);
-			eta = DurationFormatUtils.formatDuration(etaTimeMs, "ETA: HH:mm:ss");
+			eta = DurationFormatUtils
+					.formatDuration(etaTimeMs, "ETA: HH:mm:ss");
 		}
 		return eta;
 	}

@@ -10,7 +10,7 @@ public class ProgressDialogMonitor implements ProgressMonitor {
 		this.dialogParent = dialogParent;
 	}
 
-	private com.link_intersystems.swing.patch.ProgressMonitor progressMonitor;
+	private com.link_intersystems.swing.ProgressDialog progressMonitor;
 	private int worked = 0;
 	private int millisToDecideToPopup = 250;
 	private int millisToPopup = 250;
@@ -28,7 +28,7 @@ public class ProgressDialogMonitor implements ProgressMonitor {
 	public void start(String taskName, int totalWork) {
 		this.worked = 0;
 		if (this.progressMonitor == null) {
-			this.progressMonitor = new com.link_intersystems.swing.patch.ProgressMonitor(
+			this.progressMonitor = new com.link_intersystems.swing.ProgressDialog(
 					dialogParent, taskName, "", 0, totalWork);
 			progressMonitor.setMillisToDecideToPopup(millisToDecideToPopup);
 			progressMonitor.setMillisToPopup(millisToPopup);
