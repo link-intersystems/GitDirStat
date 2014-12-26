@@ -18,7 +18,7 @@ import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import com.link_intersystems.gitdirstat.domain.TreeObject;
-import com.link_intersystems.gitdirstat.metrics.TreeObjectsTreeModel;
+import com.link_intersystems.gitdirstat.treeobjects.TreeObjectsTreeModel;
 import com.link_intersystems.swing.AbstractPropertyChangeSupport;
 import com.link_intersystems.swing.ListAdapterListModel;
 import com.link_intersystems.swing.ListModelSelection;

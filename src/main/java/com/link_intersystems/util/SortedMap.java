@@ -12,9 +12,6 @@ import org.apache.commons.collections4.comparators.ReverseComparator;
 
 public class SortedMap<K, V> extends LinkedHashMap<K, V> {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -5209192456981912398L;
 
 	public static enum SortBy {

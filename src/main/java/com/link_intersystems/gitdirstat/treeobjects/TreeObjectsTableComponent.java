@@ -1,4 +1,4 @@
-package com.link_intersystems.gitdirstat.metrics;
+package com.link_intersystems.gitdirstat.treeobjects;
 
 import java.awt.BorderLayout;
 import java.math.BigInteger;

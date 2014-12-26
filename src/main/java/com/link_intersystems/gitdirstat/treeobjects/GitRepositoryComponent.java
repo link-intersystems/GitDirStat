@@ -1,4 +1,4 @@
-package com.link_intersystems.gitdirstat.metrics;
+package com.link_intersystems.gitdirstat.treeobjects;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
