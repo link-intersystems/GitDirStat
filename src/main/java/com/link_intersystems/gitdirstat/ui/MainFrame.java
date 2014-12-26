@@ -118,29 +118,24 @@ public class MainFrame implements Serializable {
 
 	}
 
-	private JFrame mainFrame = new JFrame("GitDirStat");
+	private Map<String, SingleActionSelectionMediator> actionGroupMediator = new HashMap<String, SingleActionSelectionMediator>();
 	private UIContextImpl uiContext = new UIContextImpl(this);
 
+	private JFrame mainFrame = new JFrame("GitDirStat");
+	private JToolBar jToolBar = new JToolBar();
 	private JMenuBar menuBar = new JMenuBar();
 	private JMenu fileMenu = new JMenu("File");
 	private JMenu viewMenu = new JMenu("View");
 	private JPanel actionPanel = new JPanel();
+	private Component mainComponent;
 	private ProgressDialogMonitor progressDialogMonitor = new ProgressDialogMonitor(
 			mainFrame);
 
-	private Map<String, SingleActionSelectionMediator> actionGroupMediator = new HashMap<String, SingleActionSelectionMediator>();
-
-	private Component mainComponent;
-	private JToolBar jToolBar = new JToolBar();
-
 	private UpdateRepositoryAction updateRepositoryAction;
-
+	private OpenAction openRepoAction;
 	private Action startupAction;
 
-	private OpenAction openRepoAction;
-
 	private GitRepositoryModel repoModel;
-
 	private ListModelSelectionMediator<TreeObject> listSelectionMediator;
 
 	public MainFrame(GitDirStatUIArguments arguments,
@@ -197,7 +192,6 @@ public class MainFrame implements Serializable {
 		updateRepositoryAction.putValue(Action.NAME, "Update repository");
 		updateRepositoryAction.putValue(Action.SHORT_DESCRIPTION,
 				"Update repository");
-		updateRepositoryAction.setProgressMonitor(progressDialogMonitor);
 
 		PathModel pathListModel = repoModel.getPathModel();
 		listSelectionMediator = new ListModelSelectionMediator<TreeObject>();

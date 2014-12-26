@@ -32,6 +32,7 @@ public class UpdateRepositoryAction extends
 		UpdateRepositoryActionInput updateRepositoryDialog = new UpdateRepositoryActionInput(
 				gitRepositoryModel, uiContext, gitRepositoryAccess);
 		setActionInputSource(updateRepositoryDialog);
+		setProgressMonitor(uiContext.getProgressMonitor());
 	}
 
 	@Override
