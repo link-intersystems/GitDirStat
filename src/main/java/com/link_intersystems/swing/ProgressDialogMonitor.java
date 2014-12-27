@@ -32,7 +32,7 @@ public class ProgressDialogMonitor implements ProgressMonitor {
 					dialogParent, taskName, "", 0, totalWork);
 			progressMonitor.setMillisToDecideToPopup(millisToDecideToPopup);
 			progressMonitor.setMillisToPopup(millisToPopup);
-			progressMonitor.setETAEnabled(etaEnabled);
+			progressMonitor.setRemainingTimeEnabled(etaEnabled);
 		} else {
 			this.progressMonitor.setMessage(taskName);
 			this.progressMonitor.setMaximum(totalWork);
@@ -43,7 +43,7 @@ public class ProgressDialogMonitor implements ProgressMonitor {
 	public void setETAEnabled(boolean etaEnabled){
 		this.etaEnabled = etaEnabled;
 		if(progressMonitor != null){
-			progressMonitor.setETAEnabled(etaEnabled);
+			progressMonitor.setRemainingTimeEnabled(etaEnabled);
 		}
 	}
 

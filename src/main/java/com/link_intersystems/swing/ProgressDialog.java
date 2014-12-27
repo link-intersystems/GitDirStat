@@ -44,7 +44,7 @@ public class ProgressDialog {
 	private int millisToPopup = 2000;
 	private int min;
 	private int max;
-	private boolean etaEnabled;
+	private boolean remainingTimeEnabled;
 	private IncrementalAverage workAverage;
 	private long last;
 
@@ -218,7 +218,7 @@ public class ProgressDialog {
 
 	private void showProgressDialog(int nv) {
 		myBar = new JProgressBar();
-		if (etaEnabled) {
+		if (remainingTimeEnabled) {
 			myBar.setStringPainted(true);
 		}
 		setProgressBarProgress(nv);
@@ -235,9 +235,15 @@ public class ProgressDialog {
 		if (nv >= 0) {
 			int oldValue = myBar.getValue();
 			String paintedString = "";
-			if (etaEnabled) {
-				String eta = calculateETA(oldValue, nv);
-				paintedString = nv + " / " + getMaximum() + "   " + eta;
+			if (remainingTimeEnabled) {
+				long remainingTime = calculateRemainingTime(oldValue, nv);
+				String remainingTimeFormatted = "--:--:--";
+				if (remainingTime >= 0) {
+					remainingTimeFormatted = DurationFormatUtils
+							.formatDuration(remainingTime, "HH:mm:ss");
+				}
+				paintedString = String.format("%s/%s   ETA: %s", nv,
+						getMaximum(), remainingTimeFormatted);
 
 			}
 			myBar.setString(paintedString);
@@ -250,7 +256,7 @@ public class ProgressDialog {
 		}
 	}
 
-	private String calculateETA(int oldValue, int newValue) {
+	private long calculateRemainingTime(int oldValue, int newValue) {
 		long actual = System.currentTimeMillis();
 		if (last == Long.MIN_VALUE) {
 			last = actual;
@@ -263,18 +269,15 @@ public class ProgressDialog {
 			workAverage.addValue(averagePerWork);
 		}
 		last = actual;
+		long etaTimeMs = -1;
 
 		Double value = workAverage.getValue();
-		String eta = "ETA: --:--:--";
 		if (value != 0.0) {
 			int maximum = getMaximum();
 			int remaining = maximum - newValue;
-
-			long etaTimeMs = (long) (value * remaining);
-			eta = DurationFormatUtils
-					.formatDuration(etaTimeMs, "ETA: HH:mm:ss");
+			etaTimeMs = (long) (value * remaining);
 		}
-		return eta;
+		return etaTimeMs;
 	}
 
 	/**
@@ -430,10 +433,10 @@ public class ProgressDialog {
 		return note;
 	}
 
-	public void setETAEnabled(boolean etaEnabled) {
-		this.etaEnabled = etaEnabled;
+	public void setRemainingTimeEnabled(boolean remainingTimeEnabled) {
+		this.remainingTimeEnabled = remainingTimeEnabled;
 		if (myBar != null) {
-			myBar.setStringPainted(etaEnabled);
+			myBar.setStringPainted(remainingTimeEnabled);
 		}
 	}
 }

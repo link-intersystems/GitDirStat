@@ -188,6 +188,20 @@ public class MainFrame implements Serializable {
 	}
 
 	private void addToolbarActions(GitRepositoryAccess repoAccess) {
+		addUpdateRepositoryAction();
+		addRemovePathAction(repoAccess);
+	}
+
+	private void addUpdateRepositoryAction() {
+		openRepositoryAction.putValue(Action.NAME, "Update repository");
+		openRepositoryAction.putValue(Action.SHORT_DESCRIPTION,
+				"Update repository");
+
+		openRepositoryAction.addDisabledActionWhileRunning(openRepoAction);
+		addToolbarAction(openRepositoryAction);
+	}
+
+	private void addRemovePathAction(GitRepositoryAccess repoAccess) {
 		RemovePathAction removePathAction = new RemovePathAction(repoModel,
 				repoAccess, uiContext);
 		removePathAction.putValue(Action.SMALL_ICON,
@@ -199,17 +213,12 @@ public class MainFrame implements Serializable {
 				"Remove selected paths from repository");
 		addToolbarAction(removePathAction);
 
-		openRepositoryAction.putValue(Action.NAME, "Update repository");
-		openRepositoryAction.putValue(Action.SHORT_DESCRIPTION,
-				"Update repository");
-
 		PathModel pathListModel = repoModel.getPathModel();
 		listSelectionMediator = new ListModelSelectionMediator<TreeObject>();
 		listSelectionMediator.setSelectionModel(pathListModel
 				.getSelectionModel());
 		listSelectionMediator
 				.addDisabledActionOnEmptySelection(removePathAction);
-		addToolbarAction(openRepositoryAction);
 	}
 
 	private void configureMainFrame() {
