@@ -41,6 +41,7 @@ import org.apache.commons.io.IOUtils;
 import com.link_intersystems.gitdirstat.domain.GitRepositoryAccess;
 import com.link_intersystems.gitdirstat.domain.TreeObject;
 import com.link_intersystems.gitdirstat.ui.UIContext.IconType;
+import com.link_intersystems.gitdirstat.ui.help.OpenAboutAction;
 import com.link_intersystems.swing.ListModelSelectionMediator;
 import com.link_intersystems.swing.ProgressDialogMonitor;
 import com.link_intersystems.swing.ProgressMonitor;
@@ -54,7 +55,8 @@ public class MainFrame implements Serializable {
 	private static final long serialVersionUID = 3532566379033471650L;
 
 	public static final String MB_PATH_FILE = "file";
-	public static final String MENU_PATH_VIEW = "view";
+	public static final String MB_PATH_VIEW = "view";
+	public static final String MB_PATH_HELP = "help";
 
 	private static class ButtonGroupActionSelectionSync implements
 			PropertyChangeListener {
@@ -95,8 +97,12 @@ public class MainFrame implements Serializable {
 		@Override
 		public ImageIcon getIcon(IconType iconType) {
 			String iconFromClasspath = getIconFromClasspath(iconType.getName());
+			return getIcon(iconFromClasspath);
+		}
+
+		public ImageIcon getIcon(String classpath) {
 			InputStream resourceAsStream = getClass().getClassLoader()
-					.getResourceAsStream(iconFromClasspath);
+					.getResourceAsStream(classpath);
 			try {
 				byte[] imageData = IOUtils.toByteArray(resourceAsStream);
 				ImageIcon imageIcon = new ImageIcon(imageData);
@@ -126,12 +132,13 @@ public class MainFrame implements Serializable {
 	private JMenuBar menuBar = new JMenuBar();
 	private JMenu fileMenu = new JMenu("File");
 	private JMenu viewMenu = new JMenu("View");
+	private JMenu helpMenu = new JMenu("Help");
 	private JPanel actionPanel = new JPanel();
 	private Component mainComponent;
 	private ProgressDialogMonitor progressDialogMonitor = new ProgressDialogMonitor(
 			mainFrame);
 
-	private UpdateRepositoryAction updateRepositoryAction;
+	private OpenRepositoryAction openRepositoryAction;
 	private OpenAction openRepoAction;
 	private Action startupAction;
 
@@ -144,7 +151,7 @@ public class MainFrame implements Serializable {
 		File gitRepositoryDir = arguments.getGitRepositoryDir();
 		if (gitRepositoryDir != null) {
 			repoModel.setGitDir(gitRepositoryDir);
-			startupAction = new UpdateRepositoryAction(uiContext, repoModel,
+			startupAction = new OpenRepositoryAction(uiContext, repoModel,
 					repoAccess);
 		}
 
@@ -157,22 +164,25 @@ public class MainFrame implements Serializable {
 		gitRepositoryView.setModel(repoModel);
 		setMainComponent(gitRepositoryView);
 
-		updateRepositoryAction = new UpdateRepositoryAction(uiContext,
-				repoModel, repoAccess);
-		updateRepositoryAction.setDisableWhileRunning(true);
+		openRepositoryAction = new OpenRepositoryAction(uiContext, repoModel,
+				repoAccess);
+		openRepositoryAction.setDisableWhileRunning(true);
 
 		openRepoAction = new OpenAction(repoModel, repoAccess, uiContext);
 
-		addMenuBarAction(MainFrame.MB_PATH_FILE, openRepoAction);
-		addMenuBarAction(MainFrame.MB_PATH_FILE, updateRepositoryAction);
+		addMenuBarAction(MB_PATH_FILE, openRepoAction);
+		addMenuBarAction(MB_PATH_FILE, openRepositoryAction);
+
+		OpenAboutAction openAboutAction = new OpenAboutAction(uiContext);
+		openAboutAction.putValue(Action.NAME, "About");
+		addMenuBarAction(MB_PATH_HELP, openAboutAction);
 
 		Action showTableAction = gitRepositoryView.getSetTableAction();
 		showTableAction.putValue(Action.NAME, "Show table");
 		Action showTreeAction = gitRepositoryView.getSetTreeAction();
 		showTreeAction.putValue(Action.NAME, "Show tree");
 
-		addMenuBarActionGroup(MainFrame.MENU_PATH_VIEW, showTableAction,
-				showTreeAction);
+		addMenuBarActionGroup(MB_PATH_VIEW, showTableAction, showTreeAction);
 
 		addToolbarActions(repoAccess);
 	}
@@ -189,8 +199,8 @@ public class MainFrame implements Serializable {
 				"Remove selected paths from repository");
 		addToolbarAction(removePathAction);
 
-		updateRepositoryAction.putValue(Action.NAME, "Update repository");
-		updateRepositoryAction.putValue(Action.SHORT_DESCRIPTION,
+		openRepositoryAction.putValue(Action.NAME, "Update repository");
+		openRepositoryAction.putValue(Action.SHORT_DESCRIPTION,
 				"Update repository");
 
 		PathModel pathListModel = repoModel.getPathModel();
@@ -199,7 +209,7 @@ public class MainFrame implements Serializable {
 				.getSelectionModel());
 		listSelectionMediator
 				.addDisabledActionOnEmptySelection(removePathAction);
-		addToolbarAction(updateRepositoryAction);
+		addToolbarAction(openRepositoryAction);
 	}
 
 	private void configureMainFrame() {
@@ -208,11 +218,12 @@ public class MainFrame implements Serializable {
 		mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		mainFrame.setLocationRelativeTo(null);
 
-		ImageIcon gitIcon = uiContext.getIcon(IconType.GIT_LOGO);
+		ImageIcon gitIcon = uiContext.getIcon("icons/Git-Icon-1788C.png");
 		mainFrame.setIconImage(gitIcon.getImage());
 
 		menuBar.add(fileMenu);
 		menuBar.add(viewMenu);
+		menuBar.add(helpMenu);
 
 		actionPanel.setLayout(new BorderLayout());
 		actionPanel.add(menuBar, BorderLayout.NORTH);
@@ -238,10 +249,9 @@ public class MainFrame implements Serializable {
 	}
 
 	public void addMenuBarAction(String menubarPath, Action action) {
-		if (menubarPath.startsWith(MB_PATH_FILE)) {
-			JMenuItem actionItem = new JMenuItem(action);
-			fileMenu.add(actionItem);
-		}
+		JMenuItem actionItem = new JMenuItem(action);
+		JMenu menu = getMenu(menubarPath);
+		menu.add(actionItem);
 	}
 
 	public void setMainComponent(JComponent component) {
@@ -264,28 +274,41 @@ public class MainFrame implements Serializable {
 	}
 
 	public void addMenuBarActionGroup(String menubarPath, Action... actions) {
-		if (menubarPath.startsWith(MENU_PATH_VIEW)) {
-			final ButtonGroup group = new ButtonGroup();
-			SingleActionSelectionMediator actionGroupMediator = getActionGroupMediator(menubarPath);
-			actionGroupMediator.setActionGroup(actions);
-			ButtonGroupActionSelectionSync buttonGroupActionSelectionSync = new ButtonGroupActionSelectionSync(
-					group);
-			actionGroupMediator.addPropertyChangeListener(
-					SingleActionSelectionMediator.PROP_SELECTED_ACTION,
-					buttonGroupActionSelectionSync);
+		JMenu menu = getMenu(menubarPath);
+		final ButtonGroup group = new ButtonGroup();
+		SingleActionSelectionMediator actionGroupMediator = getActionGroupMediator(menubarPath);
+		actionGroupMediator.setActionGroup(actions);
+		ButtonGroupActionSelectionSync buttonGroupActionSelectionSync = new ButtonGroupActionSelectionSync(
+				group);
+		actionGroupMediator.addPropertyChangeListener(
+				SingleActionSelectionMediator.PROP_SELECTED_ACTION,
+				buttonGroupActionSelectionSync);
 
-			JRadioButtonMenuItem radioButton = null;
-			for (int i = 0; i < actions.length; i++) {
-				Action action = actions[i];
-				radioButton = new JRadioButtonMenuItem(action);
-				group.add(radioButton);
-				viewMenu.add(radioButton);
-				Boolean selected = (Boolean) action
-						.getValue(Action.SELECTED_KEY);
-				boolean isSelected = selected != null && selected;
-				group.setSelected(radioButton.getModel(), isSelected);
-			}
+		JRadioButtonMenuItem radioButton = null;
+		for (int i = 0; i < actions.length; i++) {
+			Action action = actions[i];
+			radioButton = new JRadioButtonMenuItem(action);
+			group.add(radioButton);
+			menu.add(radioButton);
+			Boolean selected = (Boolean) action.getValue(Action.SELECTED_KEY);
+			boolean isSelected = selected != null && selected;
+			group.setSelected(radioButton.getModel(), isSelected);
 		}
+	}
+
+	private JMenu getMenu(String menubarPath) {
+		JMenu menu = null;
+		if (menubarPath.startsWith(MB_PATH_FILE)) {
+			menu = fileMenu;
+		} else if (menubarPath.startsWith(MB_PATH_VIEW)) {
+			menu = viewMenu;
+		} else if (menubarPath.startsWith(MB_PATH_HELP)) {
+			menu = helpMenu;
+		} else {
+			throw new IllegalArgumentException("Menubar path " + menubarPath
+					+ " is not supported");
+		}
+		return menu;
 	}
 
 	private SingleActionSelectionMediator getActionGroupMediator(

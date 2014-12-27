@@ -10,7 +10,7 @@ public interface UIContext {
 
 	public enum IconType {
 		OPEN("document-open.png"), UPDATE("view-refresh.png"), CLEAN(
-				"edit-clear.png"), GIT_LOGO("logo-git.png");
+				"edit-clear.png");
 
 		private String name;
 
@@ -29,4 +29,6 @@ public interface UIContext {
 	public ImageIcon getIcon(IconType iconType);
 
 	ProgressMonitor getProgressMonitor();
+
+	ImageIcon getIcon(String classpath);
 }

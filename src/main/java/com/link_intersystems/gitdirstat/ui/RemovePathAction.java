@@ -18,7 +18,7 @@ public class RemovePathAction extends
 	private static final long serialVersionUID = -2409080673565317180L;
 	private GitRepositoryModel gitRepositoryModel;
 	private GitRepositoryAccess gitRepositoryAccess;
-	private UpdateRepositoryAction updateRepositoryAction;
+	private OpenRepositoryAction openRepositoryAction;
 	private UIContext uiContext;
 
 	public RemovePathAction(final GitRepositoryModel gitRepositoryModel,
@@ -28,9 +28,9 @@ public class RemovePathAction extends
 		this.uiContext = uiContext;
 		setActionInputSource(new RemovePathsActionInput(gitRepositoryModel,
 				uiContext, gitRepositoryAccess));
-		updateRepositoryAction = new UpdateRepositoryAction(uiContext,
+		openRepositoryAction = new OpenRepositoryAction(uiContext,
 				gitRepositoryModel, gitRepositoryAccess);
-		updateRepositoryAction
+		openRepositoryAction
 				.setActionInputSource(new ActionInputSource<List<? extends Ref>>() {
 
 					@Override
@@ -61,7 +61,7 @@ public class RemovePathAction extends
 	@Override
 	protected void done(Void result) {
 		ProgressMonitor progressMonitor = uiContext.getProgressMonitor();
-		updateRepositoryAction.setProgressMonitor(progressMonitor);
-		updateRepositoryAction.actionPerformed(null);
+		openRepositoryAction.setProgressMonitor(progressMonitor);
+		openRepositoryAction.actionPerformed(null);
 	}
 }

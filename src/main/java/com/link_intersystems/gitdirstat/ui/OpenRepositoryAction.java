@@ -15,20 +15,20 @@ import com.link_intersystems.io.FileUtils;
 import com.link_intersystems.swing.AsyncProgressAction;
 import com.link_intersystems.swing.ProgressMonitor;
 
-public class UpdateRepositoryAction extends
+public class OpenRepositoryAction extends
 		AsyncProgressAction<List<? extends Ref>, Void, TreeObject> {
 
 	private static final long serialVersionUID = -6024006313949630749L;
 	private GitRepositoryModel gitRepositoryModel;
 	private GitRepositoryAccess gitRepositoryAccess;
 
-	public UpdateRepositoryAction(UIContext uiContext,
+	public OpenRepositoryAction(UIContext uiContext,
 			GitRepositoryModel gitRepositoryModel,
 			GitRepositoryAccess gitRepositoryAccess) {
 		this.gitRepositoryModel = gitRepositoryModel;
 		this.gitRepositoryAccess = gitRepositoryAccess;
 		putValue(Action.SMALL_ICON, uiContext.getIcon(IconType.UPDATE));
-		putValue(Action.SHORT_DESCRIPTION, "Update repository");
+		putValue(Action.SHORT_DESCRIPTION, "Open repository");
 		UpdateRepositoryActionInput updateRepositoryDialog = new UpdateRepositoryActionInput(
 				gitRepositoryModel, uiContext, gitRepositoryAccess);
 		setActionInputSource(updateRepositoryDialog);
