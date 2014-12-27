@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.link_intersystems.tools.git</groupId>
 	<artifactId>GitDirStat</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 
 	<inceptionYear>2014</inceptionYear>
 
@@ -190,4 +190,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<description>GitDirStat is a GIT maintenance application written in java and based on the [JGIT](https://eclipse.org/jgit/) library provided by [eclipse.org](https://eclipse.org).</description>
+	<name>GitDirStat</name>
+	<url>https://github.com/link-intersystems/GitDirStat</url>
 </project>
