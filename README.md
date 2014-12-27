@@ -20,4 +20,6 @@ Features
 Usage
 -----
 
-    java -jar GitDirStat-0.0.1-SNAPSHOT-gui.jar
+    java -jar GitDirStat-0.0.1-SNAPSHOT-gui.jar [GIT_REPOSITORY_PATH]
+
+
