@@ -12,14 +12,23 @@ Features
 
 
 -----------
-
-
-![GitDirStat Screenshot](src/site/res/GitDirStat_RemovePaths.PNG?raw=true)
-
-
 Usage
 -----
 
-    java -jar GitDirStat-0.0.1-SNAPSHOT-gui.jar [GIT_REPOSITORY_PATH]
+    java -jar GitDirStat-1.0.0-gui.jar [GIT_REPOSITORY_PATH]
+
+Screenshots
+-----
+### Analysing repository
+![GitDirStat Screenshot](src/site/res/GitDirStat_AnalyseRepository.PNG?raw=true)
+
+### Table result
+![GitDirStat Screenshot](src/site/res/GitDirStat_Tableview.PNG?raw=true)
+
+### Tree result
+![GitDirStat Screenshot](src/site/res/GitDirStat_Treeview.PNG?raw=true)
+
+### Remove paths from repository
+![GitDirStat Screenshot](src/site/res/GitDirStat_RemovePaths.PNG?raw=true)
 
 
