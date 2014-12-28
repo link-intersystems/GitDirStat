@@ -19,7 +19,7 @@ Usage
 
 Screenshots
 -----
-### Analysing repository
+### Analyzing repository
 ![GitDirStat Screenshot](src/site/res/GitDirStat_AnalyseRepository.PNG?raw=true)
 
 ### Table result
