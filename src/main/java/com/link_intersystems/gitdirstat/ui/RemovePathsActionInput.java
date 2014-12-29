@@ -103,7 +103,10 @@ public class RemovePathsActionInput implements ActionInputSource<IndexFilter> {
 				.getPathModel().getSelectionModel().getSelection();
 		final List<String> selectedPaths = new ArrayList<String>();
 		for (TreeObject treeObject : selectedTreeObjects) {
-			selectedPaths.add(treeObject.getRootRelativePath().getPathname());
+			List<TreeObject> fileList = treeObject.toFileList();
+			for (TreeObject file : fileList) {
+				selectedPaths.add(file.getRootRelativePath().getPathname());
+			}
 		}
 		IndexFilter pathFilter = new IndexFilter() {
 
