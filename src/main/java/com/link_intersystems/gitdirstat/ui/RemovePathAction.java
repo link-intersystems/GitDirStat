@@ -8,6 +8,7 @@ import com.link_intersystems.gitdirstat.domain.GitRepository;
 import com.link_intersystems.gitdirstat.domain.GitRepositoryAccess;
 import com.link_intersystems.gitdirstat.domain.IndexFilter;
 import com.link_intersystems.gitdirstat.domain.Ref;
+import com.link_intersystems.gitdirstat.domain.RewriteBranchExistsException;
 import com.link_intersystems.swing.ActionInputSource;
 import com.link_intersystems.swing.AsyncProgressAction;
 import com.link_intersystems.swing.ProgressMonitor;
@@ -53,7 +54,13 @@ public class RemovePathAction extends
 		File gitDir = gitRepositoryModel.getGitDir();
 		GitRepository gitRepository = gitRepositoryAccess
 				.getGitRepository(gitDir);
-		gitRepository.applyFilter(actionInput, progressListenerMonitorAdapter);
+		try {
+
+			gitRepository.applyFilter(actionInput,
+					progressListenerMonitorAdapter);
+		} catch (RewriteBranchExistsException rewriteBranchExistsException) {
+
+		}
 
 		return null;
 	}

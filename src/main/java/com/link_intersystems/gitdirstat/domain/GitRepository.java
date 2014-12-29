@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.jgit.api.GarbageCollectCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -221,30 +220,31 @@ public class GitRepository {
 
 	public void applyFilter(Collection<CommitRange> commitRanges,
 			IndexFilter indexFilter, ProgressListener progressListener)
-			throws IOException, CheckoutConflictException, GitAPIException {
+			throws IOException, GitAPIException, RewriteBranchExistsException {
 		Git git = getGit();
+
+		HistoryUpdate historyUpdate = new HistoryUpdate(this);
+		RewriteBranch rewriteBranch = historyUpdate.begin();
+
 		BranchMemento currentBranchMemento = new BranchMemento(git);
 		currentBranchMemento.save();
 
 		int totalWork = getTotalWork(commitRanges);
 		CommitWalker commitWalk = createCommitWalker(commitRanges);
 		RewriteIndexCommitWalkIterator rewriteIterator = new RewriteIndexCommitWalkIterator(
-				git, commitWalk);
+				commitWalk);
 
-		HistoryUpdate historyUpdate = new HistoryUpdate(this);
 		try {
 			progressListener.start(totalWork);
 			while (rewriteIterator.hasNext()) {
 				Commit commit = rewriteIterator.next();
 
-				CacheCommitUpdate commitUpdate = new CacheCommitUpdate(this,
-						commit, historyUpdate);
-				commitUpdate.beginUpdate();
+				CacheCommitUpdate commitUpdate = rewriteBranch
+						.beginUpdate(commit);
 
 				indexFilter.apply(commitUpdate);
-				commitUpdate.execute();
-
-				commitUpdate.endUpdate();
+				commitUpdate.writeCommit();
+				commitUpdate.end();
 
 				progressListener.update(1);
 				if (progressListener.isCanceled()) {
@@ -254,27 +254,17 @@ public class GitRepository {
 
 			if (!progressListener.isCanceled()) {
 				historyUpdate.updateRefs();
-				pruneObjectsNow();
+				historyUpdate.cleanupRepository();
 			}
 		} finally {
 			try {
-				rewriteIterator.close();
+				historyUpdate.close();
 				currentBranchMemento.restore();
 			} catch (GitAPIException e) {
 			}
 			progressListener.end();
 		}
 
-	}
-
-	private void pruneObjectsNow() throws GitAPIException {
-		ExpireReflogCommand expireReflogCommand = new ExpireReflogCommand(this);
-		expireReflogCommand.call();
-
-		Git git = getGit();
-		GarbageCollectCommand gc = git.gc();
-		gc.setExpire(null);
-		gc.call();
 	}
 
 	private int getTotalWork(Collection<CommitRange> commitRanges)
@@ -297,32 +287,33 @@ public class GitRepository {
 
 	public void applyFilter(Collection<CommitRange> commitRanges,
 			IndexFilter indexFilter) throws IOException,
-			CheckoutConflictException, GitAPIException {
+			CheckoutConflictException, GitAPIException,
+			RewriteBranchExistsException {
 		applyFilter(commitRanges, indexFilter, NullProgressListener.INSTANCE);
 	}
 
 	public void applyFilter(IndexFilter indexFilter) throws IOException,
-			GitAPIException {
+			GitAPIException, RewriteBranchExistsException {
 		List<Ref> refs = getRefs(Ref.class);
 		applyFilter(refs, indexFilter, NullProgressListener.INSTANCE);
 	}
 
 	public void applyFilter(IndexFilter indexFilter,
 			ProgressListener progressListener) throws IOException,
-			GitAPIException {
+			GitAPIException, RewriteBranchExistsException {
 		List<Ref> refs = getRefs(Ref.class);
 		applyFilter(refs, indexFilter, progressListener);
 	}
 
 	public void applyFilter(List<? extends Ref> refs, IndexFilter indexFilter)
-			throws IOException, GitAPIException {
+			throws IOException, GitAPIException, RewriteBranchExistsException {
 		Collection<CommitRange> commitRanges = getCommitRanges(refs);
 		applyFilter(commitRanges, indexFilter, NullProgressListener.INSTANCE);
 	}
 
 	public void applyFilter(List<? extends Ref> refs, IndexFilter indexFilter,
 			ProgressListener progressListener) throws IOException,
-			GitAPIException {
+			GitAPIException, RewriteBranchExistsException {
 		Collection<CommitRange> commitRanges = getCommitRanges(refs);
 		applyFilter(commitRanges, indexFilter, progressListener);
 	}

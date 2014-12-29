@@ -25,22 +25,18 @@ public class CacheCommitUpdate implements CommitUpdate {
 	private String messageUpdate;
 	private HistoryUpdate historyUpdate;
 	private CacheTreeUpdate treeUpdate;
-	private DirCache index;
+	private DirCache dirCache;
 
 	CacheCommitUpdate(GitRepository gitRepository, Commit commit,
-			HistoryUpdate historyUpdate) {
+			HistoryUpdate historyUpdate, DirCache dirCache) {
 		this.gitRepository = gitRepository;
 		this.commit = commit;
 		this.historyUpdate = historyUpdate;
+		this.dirCache = dirCache;
 	}
 
-	public void beginUpdate() throws IOException {
-		Repository repo = gitRepository.getRepository();
-		index = repo.lockDirCache();
-	}
-
-	public void endUpdate() {
-		index.unlock();
+	public void end() {
+		dirCache.unlock();
 	}
 
 	/*
@@ -53,7 +49,7 @@ public class CacheCommitUpdate implements CommitUpdate {
 	@Override
 	public TreeUpdate getTreeUpdate() throws IOException {
 		if (treeUpdate == null) {
-			treeUpdate = new CacheTreeUpdate(index);
+			treeUpdate = new CacheTreeUpdate(dirCache);
 		}
 		return treeUpdate;
 	}
@@ -62,7 +58,7 @@ public class CacheCommitUpdate implements CommitUpdate {
 		return commit;
 	}
 
-	Commit execute() throws IOException {
+	Commit writeCommit() throws IOException {
 		if (!mustUpdate()) {
 			return null;
 		}
@@ -71,13 +67,13 @@ public class CacheCommitUpdate implements CommitUpdate {
 		ObjectInserter odi = repo.newObjectInserter();
 		try {
 			if (treeUpdate != null) {
-				treeUpdate.apply(index);
+				treeUpdate.apply(dirCache);
 			}
 
 			// Write the index as tree to the object database. This may
 			// fail for example when the index contains unmerged paths
 			// (unresolved conflicts)
-			ObjectId indexTreeId = index.writeTree(odi);
+			ObjectId indexTreeId = dirCache.writeTree(odi);
 
 			// Create a Commit object, populate it and write it
 			CommitBuilder commit = new CommitBuilder();

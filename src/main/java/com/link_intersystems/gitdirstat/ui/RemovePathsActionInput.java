@@ -11,6 +11,7 @@ import java.util.List;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 
@@ -50,7 +51,7 @@ public class RemovePathsActionInput implements ActionInputSource<IndexFilter> {
 		selectedPathList.setCellRenderer(new TreeObjectPathnameListRenderer());
 		JScrollPane selectedPathScrollPane = new JScrollPane(selectedPathList);
 		selectedPathScrollPane.setPreferredSize(calculatePreferredSize(
-				selectedPathList, selectionModel));
+				selectedPathList, selectionModel, selectedPathScrollPane));
 		dialogContent.add("You have selected the following paths for removal");
 		dialogContent.add(selectedPathScrollPane);
 
@@ -71,13 +72,17 @@ public class RemovePathsActionInput implements ActionInputSource<IndexFilter> {
 	}
 
 	private Dimension calculatePreferredSize(JList list,
-			SelectionModel<TreeObject> selectionModel) {
+			SelectionModel<TreeObject> selectionModel,
+			JScrollPane selectedPathScrollPane) {
 		ListCellRenderer cellRenderer = list.getCellRenderer();
+
+		JScrollBar horizontalScrollBar = selectedPathScrollPane.getHorizontalScrollBar();
+		Dimension hScrollBarPreferredSize = horizontalScrollBar.getPreferredSize();
 
 		int maxWidth = 480;
 		int maxHeight = 160;
 		int preferredWidth = 0;
-		int preferredHeight = 0;
+		int preferredHeight = hScrollBarPreferredSize.height;
 
 		List<TreeObject> selection = selectionModel.getSelection();
 		for (int i = 0; i < selection.size(); i++) {
@@ -95,6 +100,9 @@ public class RemovePathsActionInput implements ActionInputSource<IndexFilter> {
 					+ (int) preferredSize.getHeight());
 			preferredHeight = Math.min(preferredHeight, maxHeight);
 		}
+
+
+
 		return new Dimension(preferredWidth, preferredHeight);
 	}
 
