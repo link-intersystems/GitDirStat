@@ -223,11 +223,12 @@ public class GitRepository {
 			throws IOException, GitAPIException, RewriteBranchExistsException {
 		Git git = getGit();
 
+		BranchMemento currentBranchMemento = new BranchMemento(git);
+		currentBranchMemento.save();
+
 		HistoryUpdate historyUpdate = new HistoryUpdate(this);
 		RewriteBranch rewriteBranch = historyUpdate.begin();
 
-		BranchMemento currentBranchMemento = new BranchMemento(git);
-		currentBranchMemento.save();
 
 		int totalWork = getTotalWork(commitRanges);
 		CommitWalker commitWalk = createCommitWalker(commitRanges);
@@ -258,8 +259,8 @@ public class GitRepository {
 			}
 		} finally {
 			try {
-				historyUpdate.close();
 				currentBranchMemento.restore();
+				historyUpdate.close();
 			} catch (GitAPIException e) {
 			}
 			progressListener.end();

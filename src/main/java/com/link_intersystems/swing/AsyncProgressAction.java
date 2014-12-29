@@ -72,7 +72,7 @@ public abstract class AsyncProgressAction<I, V, O> extends ProgressAction {
 		}
 	}
 
-	private void processException(Throwable cause,
+	protected void processException(Throwable cause,
 			ExecutionContext<I> executionContext) {
 		String msg = String
 				.format("Unexpected exception: %s", cause.toString());

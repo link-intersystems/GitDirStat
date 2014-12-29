@@ -109,11 +109,10 @@ public class HistoryUpdate {
 			rewriteBranch = new RewriteBranch(rewriteRef, gitRepository, this);
 			return rewriteBranch;
 		} else {
-			throw new GitAPIException("Can not begin history rewrite. Branch "
-					+ rewriteBranchName + " already exists") {
-
-				private static final long serialVersionUID = 1360669072675878212L;
-			};
+			throw new RewriteBranchExistsException(
+					"Can not begin history rewrite. Branch "
+							+ rewriteBranchName + " already exists",
+					ref.getName());
 		}
 	}
 
