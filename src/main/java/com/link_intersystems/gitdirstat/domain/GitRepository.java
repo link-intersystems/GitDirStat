@@ -232,34 +232,39 @@ public class GitRepository {
 				git, commitWalk);
 
 		HistoryUpdate historyUpdate = new HistoryUpdate(this);
+		try {
+			progressListener.start(totalWork);
+			while (rewriteIterator.hasNext()) {
+				Commit commit = rewriteIterator.next();
 
-		progressListener.start(totalWork);
-		while (rewriteIterator.hasNext()) {
-			Commit commit = rewriteIterator.next();
+				CacheCommitUpdate commitUpdate = new CacheCommitUpdate(this,
+						commit, historyUpdate);
+				commitUpdate.beginUpdate();
 
-			CacheCommitUpdate commitUpdate = new CacheCommitUpdate(this,
-					commit, historyUpdate);
-			commitUpdate.beginUpdate();
+				indexFilter.apply(commitUpdate);
+				commitUpdate.execute();
 
-			indexFilter.apply(commitUpdate);
-			commitUpdate.execute();
+				commitUpdate.endUpdate();
 
-			commitUpdate.endUpdate();
-
-			progressListener.update(1);
-			if (progressListener.isCanceled()) {
-				break;
+				progressListener.update(1);
+				if (progressListener.isCanceled()) {
+					break;
+				}
 			}
+
+			if (!progressListener.isCanceled()) {
+				historyUpdate.updateRefs();
+				pruneObjectsNow();
+			}
+		} finally {
+			try {
+				rewriteIterator.close();
+				currentBranchMemento.restore();
+			} catch (GitAPIException e) {
+			}
+			progressListener.end();
 		}
 
-		if (!progressListener.isCanceled()) {
-			historyUpdate.updateRefs();
-			pruneObjectsNow();
-		}
-		currentBranchMemento.restore();
-
-		rewriteIterator.close();
-		progressListener.end();
 	}
 
 	private void pruneObjectsNow() throws GitAPIException {

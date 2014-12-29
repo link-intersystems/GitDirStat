@@ -6,4 +6,6 @@ public interface TreeFileUpdate {
 
 	public abstract String getPath();
 
+	void move(String newpath);
+
 }
