@@ -14,7 +14,6 @@ import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
 public class CacheCommitUpdate implements CommitUpdate {
 
@@ -52,7 +51,7 @@ public class CacheCommitUpdate implements CommitUpdate {
 	 * .eclipse.jgit.treewalk.filter.TreeFilter)
 	 */
 	@Override
-	public TreeUpdate getTreeUpdate(TreeFilter treeFilter) throws IOException {
+	public TreeUpdate getTreeUpdate() throws IOException {
 		if (treeUpdate == null) {
 			treeUpdate = new CacheTreeUpdate(index);
 		}
@@ -197,16 +196,6 @@ public class CacheCommitUpdate implements CommitUpdate {
 		Date origWhen = committer.getWhen();
 		TimeZone origTZ = committer.getTimeZone();
 		this.committerUpdate = new PersonIdent(name, email, origWhen, origTZ);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see com.link_intersystems.tools.git.domain.CommitUpdate#getTreeUpdate()
-	 */
-	@Override
-	public TreeUpdate getTreeUpdate() throws IOException {
-		return getTreeUpdate(TreeFilter.ALL);
 	}
 
 	@Override

@@ -3,12 +3,8 @@ package com.link_intersystems.gitdirstat.domain;
 import java.io.IOException;
 
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
 public interface CommitUpdate {
-
-	public abstract TreeUpdate getTreeUpdate(TreeFilter treeFilter)
-			throws IOException;
 
 	public abstract String getMessage();
 
