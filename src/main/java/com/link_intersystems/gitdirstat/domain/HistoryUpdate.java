@@ -2,19 +2,47 @@ package com.link_intersystems.gitdirstat.domain;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jgit.api.CheckoutCommand;
 import org.eclipse.jgit.api.GarbageCollectCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ReflogEntry;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import com.link_intersystems.gitdirstat.domain.ExpireReflogCommand.ReflogEntryFilter;
+
 public class HistoryUpdate {
-	Map<String, Commit> replacedCommits = new HashMap<String, Commit>();
+
+	private class SkipReflogEntryFilter implements ReflogEntryFilter {
+
+		private Set<String> expireCommits;
+
+		public SkipReflogEntryFilter(Set<String> expireCommits) {
+			this.expireCommits = expireCommits;
+		}
+
+		@Override
+		public boolean accept(ReflogEntry reflogEntry) {
+			ObjectId newId = reflogEntry.getNewId();
+			String newCommitId = newId.getName();
+
+			ObjectId oldId = reflogEntry.getOldId();
+			String oldCommitId = oldId.getName();
+			boolean oldIdExpired = !expireCommits.contains(oldCommitId);
+			boolean newIdExpired = !expireCommits.contains(newCommitId);
+			boolean noIdExpired = !oldIdExpired || !newIdExpired;
+			return noIdExpired;
+		}
+	}
+
+	Map<String, RevCommit> replacedCommits = new HashMap<String, RevCommit>();
 	private GitRepository gitRepository;
 	String rewriteBranchName = "rewrite_branch";
 	private RewriteBranch rewriteBranch;
@@ -33,8 +61,18 @@ public class HistoryUpdate {
 	}
 
 	public void cleanupRepository() throws GitAPIException {
+		Set<String> expireCommits = new HashSet<String>();
+		expireCommits.addAll(replacedCommits.keySet());
+
+		if (rewriteBranch != null) {
+			expireCommits = rewriteBranch.getTouchedCommits();
+		}
+
 		ExpireReflogCommand expireReflogCommand = new ExpireReflogCommand(
 				gitRepository);
+		expireReflogCommand.setReflogEntryFilter(new SkipReflogEntryFilter(
+				expireCommits));
+		expireReflogCommand.setExpire(null);
 		expireReflogCommand.call();
 
 		gc();
@@ -52,7 +90,7 @@ public class HistoryUpdate {
 		if (objectId != null) {
 			String objectName = objectId.name();
 			if (replacedCommits.containsKey(objectName)) {
-				Commit rewrittenCommit = replacedCommits.get(objectName);
+				RevCommit rewrittenCommit = replacedCommits.get(objectName);
 				ref.update(rewrittenCommit.getId());
 			}
 		}
@@ -70,12 +108,9 @@ public class HistoryUpdate {
 		return false;
 	}
 
-	public Commit replaceCommit(Commit commit, RevCommit revCommit) {
-		CommitDatabase commitAccess = gitRepository.getCommitAccess();
-		Commit replacement = commitAccess.getCommit(revCommit);
+	public void replaceCommit(Commit commit, RevCommit revCommit) {
 		String commitName = commit.getId().name();
-		replacedCommits.put(commitName, replacement);
-		return replacement;
+		replacedCommits.put(commitName, revCommit);
 	}
 
 	public ObjectId[] getParentIds(Commit commit) {
@@ -84,7 +119,7 @@ public class HistoryUpdate {
 		for (int i = 0; i < parentIds.length; i++) {
 			ObjectId parentId = parentIds[i];
 			String parentName = parentId.name();
-			Commit replacedCommit = replacedCommits.get(parentName);
+			RevCommit replacedCommit = replacedCommits.get(parentName);
 			if (replacedCommit != null) {
 				parentId = replacedCommit.getId();
 			}

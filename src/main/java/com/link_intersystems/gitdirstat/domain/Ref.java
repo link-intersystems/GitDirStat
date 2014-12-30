@@ -104,11 +104,11 @@ public abstract class Ref {
 		return reflogWriter;
 	}
 
-	public void addReflogEntries(List<ReflogEntry> nonExpiredEntries)
+	public void addReflogEntries(List<ReflogEntry> reflogEntries)
 			throws IOException {
 		String refName = getName();
 		ReflogWriter reflogWriter = getReflogWriter();
-		for (ReflogEntry nonExpiredEntry : nonExpiredEntries) {
+		for (ReflogEntry nonExpiredEntry : reflogEntries) {
 			ObjectId oldId = nonExpiredEntry.getOldId();
 			ObjectId newId = nonExpiredEntry.getNewId();
 			PersonIdent ident = nonExpiredEntry.getWho();

@@ -1,6 +1,8 @@
 package com.link_intersystems.gitdirstat.domain;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
@@ -19,6 +21,8 @@ public class RewriteBranch {
 	private GitRepository gitRepository;
 	private CacheCommitUpdate latestCommitUpdate;
 
+	private Set<String> touchedCommits = new HashSet<String>();
+
 	RewriteBranch(org.eclipse.jgit.lib.Ref rewriteBranch,
 			GitRepository gitRepository, HistoryUpdate historyUpdate) {
 		Assert.notNull("rewriteBranch", rewriteBranch);
@@ -34,12 +38,13 @@ public class RewriteBranch {
 			throw new IllegalStateException("RewriteBranch already closed");
 		}
 
-		String resetObjectId = commit.getId().getName();
+		String resetCommitId = commit.getId().getName();
 		ResetCommand reset = git.reset();
-		reset.setRef(rewriteBranch.getName());
 		reset.setMode(ResetType.MIXED);
-		reset.setRef(resetObjectId);
+		reset.setRef(resetCommitId);
 		reset.call();
+
+		touchedCommits.add(resetCommitId);
 
 		if (latestCommitUpdate != null) {
 			latestCommitUpdate.end();
@@ -61,5 +66,9 @@ public class RewriteBranch {
 		git.branchDelete().setBranchNames(rewriteBranch.getName())
 				.setForce(true).call();
 		rewriteBranch = null;
+	}
+
+	Set<String> getTouchedCommits() {
+		return touchedCommits;
 	}
 }

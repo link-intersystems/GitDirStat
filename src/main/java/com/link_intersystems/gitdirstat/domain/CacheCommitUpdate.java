@@ -58,9 +58,9 @@ public class CacheCommitUpdate implements CommitUpdate {
 		return commit;
 	}
 
-	Commit writeCommit() throws IOException {
+	void writeCommit() throws IOException {
 		if (!mustUpdate()) {
-			return null;
+			return;
 		}
 		Repository repo = gitRepository.getRepository();
 		RevWalk rw = new RevWalk(repo);
@@ -94,9 +94,7 @@ public class CacheCommitUpdate implements CommitUpdate {
 			ru.setForceUpdate(true);
 			ru.update(rw);
 
-			Commit replacedCommit = historyUpdate.replaceCommit(this.commit,
-					revCommit);
-			return replacedCommit;
+			historyUpdate.replaceCommit(this.commit, revCommit);
 		} finally {
 			odi.release();
 		}
