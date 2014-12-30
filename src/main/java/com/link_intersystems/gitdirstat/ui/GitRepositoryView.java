@@ -15,10 +15,10 @@ import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JTextField;
 
-import com.link_intersystems.gitdirstat.treeobjects.GitRepositoryComponent;
-import com.link_intersystems.gitdirstat.treeobjects.TreeObjectsTableComponent;
-import com.link_intersystems.gitdirstat.treeobjects.TreeObjectsTreeComponent;
 import com.link_intersystems.gitdirstat.ui.PathModel.SelectionSource;
+import com.link_intersystems.gitdirstat.ui.treeobjects.GitRepositoryComponent;
+import com.link_intersystems.gitdirstat.ui.treeobjects.TreeObjectsTableComponent;
+import com.link_intersystems.gitdirstat.ui.treeobjects.TreeObjectsTreeComponent;
 import com.link_intersystems.swing.RelativeLayout;
 import com.link_intersystems.swing.RelativeLayout.RelativeConstraints;
 import com.link_intersystems.swing.SimpleDocument;

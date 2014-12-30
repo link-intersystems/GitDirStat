@@ -1,4 +1,4 @@
-package com.link_intersystems.gitdirstat.treeobjects;
+package com.link_intersystems.gitdirstat.ui.treeobjects;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
