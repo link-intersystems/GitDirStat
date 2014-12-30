@@ -11,6 +11,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.HeadlessException;
 import java.awt.Window;
@@ -18,11 +19,15 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.SpringLayout;
 import javax.swing.UIManager;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -30,13 +35,49 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 import com.link_intersystems.math.IncrementalAverage;
 
 public class ProgressDialog {
+
+	private static class ProgressTextPanel extends JPanel {
+
+		private static final long serialVersionUID = 3905254906266079708L;
+
+		private JLabel progressLabel = new JLabel();
+		private JLabelDocumentAdapter progressLabelDocumentAdapter = new JLabelDocumentAdapter(
+				progressLabel);
+		private PlainSimpleDocument progressDocument = new PlainSimpleDocument();
+
+		private JLabel etaLabel = new JLabel();
+		private JLabelDocumentAdapter etaLabelDocumentAdapter = new JLabelDocumentAdapter(
+				etaLabel);
+		private PlainSimpleDocument etaDocument = new PlainSimpleDocument();
+
+		public ProgressTextPanel() {
+			setLayout(new SpringLayout());
+			progressLabelDocumentAdapter.setDocument(progressDocument);
+			etaLabelDocumentAdapter.setDocument(etaDocument);
+			Font oldFont = etaLabel.getFont();
+			Font newFont = new Font("monospaced", Font.PLAIN, oldFont.getSize());
+			etaLabel.setFont(newFont);
+			progressLabel.setFont(newFont);
+			add(etaLabel);
+			add(progressLabel);
+
+			SpringUtilities.makeCompactGrid(this, 1, 2, 0, 0, 15, 3);
+		}
+
+		public PlainSimpleDocument getProgressDocument() {
+			return progressDocument;
+		}
+
+		public PlainSimpleDocument getEtaDocument() {
+			return etaDocument;
+		}
+	}
+
 	private ProgressDialog root;
 	private JDialog dialog;
 	private JOptionPane pane;
 	private JProgressBar myBar;
-	private JLabel noteLabel;
 	private Component parentComponent;
-	private String note;
 	private Object[] cancelOption = null;
 	private Object message;
 	private long T0;
@@ -47,6 +88,8 @@ public class ProgressDialog {
 	private boolean remainingTimeEnabled;
 	private IncrementalAverage workAverage;
 	private long last;
+
+	private ProgressTextPanel progressTextPanel = new ProgressTextPanel();
 
 	/**
 	 * Constructs a graphic object that shows progress, typically by filling in
@@ -74,13 +117,13 @@ public class ProgressDialog {
 	 * @see JDialog
 	 * @see JOptionPane
 	 */
-	public ProgressDialog(Component parentComponent, Object message,
-			String note, int min, int max) {
-		this(parentComponent, message, note, min, max, null);
+	public ProgressDialog(Component parentComponent, Object message, int min,
+			int max) {
+		this(parentComponent, message, min, max, null);
 	}
 
-	private ProgressDialog(Component parentComponent, Object message,
-			String note, int min, int max, ProgressDialog group) {
+	private ProgressDialog(Component parentComponent, Object message, int min,
+			int max, ProgressDialog group) {
 		this.min = min;
 		this.max = max;
 		this.parentComponent = parentComponent;
@@ -89,7 +132,6 @@ public class ProgressDialog {
 		cancelOption[0] = UIManager.getString("OptionPane.cancelButtonText");
 
 		this.message = message;
-		this.note = note;
 		if (group != null) {
 			root = (group.root != null) ? group.root : group;
 			T0 = root.T0;
@@ -118,7 +160,7 @@ public class ProgressDialog {
 		private static final long serialVersionUID = 6465617362433967869L;
 
 		ProgressOptionPane(Object messageList) {
-			super(messageList, JOptionPane.INFORMATION_MESSAGE,
+			super(messageList, JOptionPane.PLAIN_MESSAGE,
 					JOptionPane.DEFAULT_OPTION, null,
 					ProgressDialog.this.cancelOption, null);
 		}
@@ -218,14 +260,8 @@ public class ProgressDialog {
 
 	private void showProgressDialog(int nv) {
 		myBar = new JProgressBar();
-		if (remainingTimeEnabled) {
-			myBar.setStringPainted(true);
-		}
 		setProgressBarProgress(nv);
-		if (note != null)
-			noteLabel = new JLabel(note);
-		pane = new ProgressOptionPane(
-				new Object[] { message, noteLabel, myBar });
+		pane = new ProgressOptionPane(getOptionPaneMessage());
 		dialog = pane.createDialog(parentComponent,
 				UIManager.getString("ProgressMonitor.progressText"));
 		dialog.setVisible(true);
@@ -237,16 +273,18 @@ public class ProgressDialog {
 			String paintedString = "";
 			if (remainingTimeEnabled) {
 				long remainingTime = calculateRemainingTime(oldValue, nv);
-				String remainingTimeFormatted = "--:--:--";
+				String remainingTimeFormatted = "ETA --:--:--";
 				if (remainingTime >= 0) {
 					remainingTimeFormatted = DurationFormatUtils
-							.formatDuration(remainingTime, "HH:mm:ss");
+							.formatDuration(remainingTime, "ETA HH:mm:ss");
 				}
-				paintedString = String.format("%s/%s   ETA: %s", nv,
-						getMaximum(), remainingTimeFormatted);
+				paintedString = String.format("%s/%s", nv, getMaximum(),
+						remainingTimeFormatted);
 
+				progressTextPanel.getEtaDocument().setText(
+						remainingTimeFormatted);
+				progressTextPanel.getProgressDocument().setText(paintedString);
 			}
-			myBar.setString(paintedString);
 			myBar.setIndeterminate(false);
 			myBar.setMinimum(min);
 			myBar.setMaximum(max);
@@ -398,45 +436,25 @@ public class ProgressDialog {
 		return millisToPopup;
 	}
 
-	/**
-	 * Specifies the additional note that is displayed along with the progress
-	 * message. Used, for example, to show which file the is currently being
-	 * copied during a multiple-file copy.
-	 *
-	 * @param note
-	 *            a String specifying the note to display
-	 * @see #getNote
-	 */
-	public void setNote(String note) {
-		this.note = note;
-		if (noteLabel != null) {
-			noteLabel.setText(note);
-		}
-	}
-
 	public void setMessage(Object message) {
+		this.message = message;
 		if (pane != null) {
-			pane.setMessage(new Object[] { message, noteLabel, myBar });
-		} else {
-			this.message = message;
+			pane.setMessage(getOptionPaneMessage());
 		}
 	}
 
-	/**
-	 * Specifies the additional note that is displayed along with the progress
-	 * message.
-	 *
-	 * @return a String specifying the note to display
-	 * @see #setNote
-	 */
-	public String getNote() {
-		return note;
+	private Object[] getOptionPaneMessage() {
+		List<Object> messageElements = new ArrayList<Object>();
+
+		messageElements.add(message);
+		messageElements.add(myBar);
+		messageElements.add(progressTextPanel);
+
+		return (Object[]) messageElements.toArray(new Object[messageElements
+				.size()]);
 	}
 
 	public void setRemainingTimeEnabled(boolean remainingTimeEnabled) {
 		this.remainingTimeEnabled = remainingTimeEnabled;
-		if (myBar != null) {
-			myBar.setStringPainted(remainingTimeEnabled);
-		}
 	}
 }

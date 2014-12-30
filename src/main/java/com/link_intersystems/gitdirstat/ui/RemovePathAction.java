@@ -87,7 +87,7 @@ public class RemovePathAction extends
 	protected Void doInBackground(IndexFilter actionInput,
 			ProgressMonitor progressMonitor) throws Exception {
 		ProgressListenerMonitorAdapter progressListenerMonitorAdapter = new ProgressListenerMonitorAdapter(
-				progressMonitor, "Removing paths from history");
+				progressMonitor, "Removing paths from repository");
 		progressListenerMonitorAdapter.setUpdateInterval(1000);
 
 		File gitDir = gitRepositoryModel.getGitDir();

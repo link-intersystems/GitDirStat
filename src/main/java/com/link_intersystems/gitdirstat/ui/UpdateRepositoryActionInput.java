@@ -87,9 +87,8 @@ public class UpdateRepositoryActionInput implements
 
 		Window mainFrame = this.uiContext.getMainFrame();
 		int showOptionDialog = JOptionPane.showOptionDialog(mainFrame,
-				selectRefsPanel, "Update Repository",
-				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null,
-				null, null);
+				selectRefsPanel, "Update", JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE, null, null, null);
 
 		if (showOptionDialog == JOptionPane.OK_OPTION) {
 			listSelectionModelMemento.save(defaultListSelectionModel);

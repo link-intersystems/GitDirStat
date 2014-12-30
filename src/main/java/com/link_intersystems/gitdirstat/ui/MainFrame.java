@@ -193,7 +193,7 @@ public class MainFrame implements Serializable {
 	}
 
 	private void addUpdateRepositoryAction() {
-		openRepositoryAction.putValue(Action.NAME, "Update repository");
+		openRepositoryAction.putValue(Action.NAME, "Update");
 		openRepositoryAction.putValue(Action.SHORT_DESCRIPTION,
 				"Update repository");
 

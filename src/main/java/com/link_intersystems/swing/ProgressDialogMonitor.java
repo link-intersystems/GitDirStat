@@ -29,7 +29,7 @@ public class ProgressDialogMonitor implements ProgressMonitor {
 		this.worked = 0;
 		if (this.progressMonitor == null) {
 			this.progressMonitor = new com.link_intersystems.swing.ProgressDialog(
-					dialogParent, taskName, "", 0, totalWork);
+					dialogParent, taskName, 0, totalWork);
 			progressMonitor.setMillisToDecideToPopup(millisToDecideToPopup);
 			progressMonitor.setMillisToPopup(millisToPopup);
 			progressMonitor.setRemainingTimeEnabled(etaEnabled);
@@ -40,9 +40,9 @@ public class ProgressDialogMonitor implements ProgressMonitor {
 
 	}
 
-	public void setETAEnabled(boolean etaEnabled){
+	public void setETAEnabled(boolean etaEnabled) {
 		this.etaEnabled = etaEnabled;
-		if(progressMonitor != null){
+		if (progressMonitor != null) {
 			progressMonitor.setRemainingTimeEnabled(etaEnabled);
 		}
 	}
