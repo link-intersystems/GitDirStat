@@ -14,8 +14,14 @@ Features
 -----------
 Usage
 -----
+You need a Java 1.6. or higher to execute GitDirStat. Open a command line and execute `java -version` to see which version you have installed.
 
-    java -jar GitDirStat-1.0.0-gui.jar [GIT_REPOSITORY_PATH]
+Download the [latest release](https://github.com/link-intersystems/GitDirStat/releases/latest), open a command line and execute GitDirStat using:
+
+    java -jar GitDirStat-<VERSION>-gui.jar [GIT_REPOSITORY_PATH]
+
+The parameter `GIT_REPOSITORY_PATH` is optional and can be omitted. If you provide this parameter the UI will start and open this repository. You can
+open a repository in the UI using `File -> Open Git Repository`.
 
 Screenshots
 -----
