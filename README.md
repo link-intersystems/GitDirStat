@@ -8,7 +8,7 @@ Features
 
 * List file paths in a git repository and the total size that they allocate in the repository's history.
 * Remove paths from the history. Like [`git filter-branch --index-filter`](http://git-scm.com/docs/git-filter-branch).
-* Table and tree view.
+* Table and tree view for path selection.
 
 
 -----------
