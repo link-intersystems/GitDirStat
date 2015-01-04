@@ -6,12 +6,23 @@ import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jgit.internal.storage.file.ReflogWriter;
+import org.eclipse.jgit.lib.ObjectId;
 
-public class SymbolicRef extends Ref {
+public class NamedRef extends Ref {
 
-	public SymbolicRef(GitRepository gitRepository,
+	public NamedRef(GitRepository gitRepository,
 			org.eclipse.jgit.lib.Ref jgitRef) {
 		super(gitRepository, jgitRef);
+	}
+
+	@Override
+	public void update(ObjectId newId) throws IOException {
+		org.eclipse.jgit.lib.Ref jgitRef = getJgitRef();
+		if (jgitRef.isSymbolic()) {
+			// TODO should we delegate to the ref this ref points to?
+		} else {
+			super.update(newId);
+		}
 	}
 
 	@Override

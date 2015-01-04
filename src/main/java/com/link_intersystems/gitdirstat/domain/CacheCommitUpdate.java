@@ -6,14 +6,10 @@ import java.util.TimeZone;
 
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.lib.CommitBuilder;
-import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectInserter;
 import org.eclipse.jgit.lib.PersonIdent;
-import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
 
 public class CacheCommitUpdate implements CommitUpdate {
 
@@ -63,7 +59,6 @@ public class CacheCommitUpdate implements CommitUpdate {
 			return;
 		}
 		Repository repo = gitRepository.getRepository();
-		RevWalk rw = new RevWalk(repo);
 		ObjectInserter odi = repo.newObjectInserter();
 		try {
 			if (treeUpdate != null) {
@@ -87,14 +82,7 @@ public class CacheCommitUpdate implements CommitUpdate {
 			ObjectId commitId = odi.insert(commit);
 			odi.flush();
 
-			RevCommit revCommit = rw.parseCommit(commitId);
-			odi.flush();
-			RefUpdate ru = repo.updateRef(Constants.HEAD);
-			ru.setNewObjectId(commitId);
-			ru.setForceUpdate(true);
-			ru.update(rw);
-
-			historyUpdate.replaceCommit(this.commit, revCommit);
+			historyUpdate.replaceCommit(this.commit, commitId);
 		} finally {
 			odi.release();
 		}

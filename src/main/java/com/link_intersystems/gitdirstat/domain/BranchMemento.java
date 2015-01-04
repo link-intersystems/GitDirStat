@@ -24,8 +24,6 @@ public class BranchMemento {
 	public void restore() throws GitAPIException {
 		if (branchName != null) {
 			git.reset().setMode(ResetType.HARD).call();
-			git.clean().setCleanDirectories(true).setIgnore(true).call();
-			git.checkout().setName(branchName).call();
 		}
 	}
 

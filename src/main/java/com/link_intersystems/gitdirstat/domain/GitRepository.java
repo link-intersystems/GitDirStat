@@ -220,15 +220,9 @@ public class GitRepository {
 
 	public void applyFilter(Collection<CommitRange> commitRanges,
 			IndexFilter indexFilter, ProgressListener progressListener)
-			throws IOException, GitAPIException, RewriteBranchExistsException {
-		Git git = getGit();
-
-		BranchMemento currentBranchMemento = new BranchMemento(git);
-		currentBranchMemento.save();
-
+			throws IOException, GitAPIException {
 		HistoryUpdate historyUpdate = new HistoryUpdate(this);
-		RewriteBranch rewriteBranch = historyUpdate.begin();
-
+		IndexUpdate indexUpdate = historyUpdate.begin();
 
 		int totalWork = getTotalWork(commitRanges);
 		CommitWalker commitWalk = createCommitWalker(commitRanges);
@@ -240,7 +234,7 @@ public class GitRepository {
 			while (rewriteIterator.hasNext()) {
 				Commit commit = rewriteIterator.next();
 
-				CacheCommitUpdate commitUpdate = rewriteBranch
+				CacheCommitUpdate commitUpdate = indexUpdate
 						.beginUpdate(commit);
 
 				indexFilter.apply(commitUpdate);
@@ -259,7 +253,6 @@ public class GitRepository {
 			}
 		} finally {
 			try {
-				currentBranchMemento.restore();
 				historyUpdate.close();
 			} catch (GitAPIException e) {
 			}
@@ -288,33 +281,32 @@ public class GitRepository {
 
 	public void applyFilter(Collection<CommitRange> commitRanges,
 			IndexFilter indexFilter) throws IOException,
-			CheckoutConflictException, GitAPIException,
-			RewriteBranchExistsException {
+			CheckoutConflictException, GitAPIException {
 		applyFilter(commitRanges, indexFilter, NullProgressListener.INSTANCE);
 	}
 
 	public void applyFilter(IndexFilter indexFilter) throws IOException,
-			GitAPIException, RewriteBranchExistsException {
+			GitAPIException {
 		List<Ref> refs = getRefs(Ref.class);
 		applyFilter(refs, indexFilter, NullProgressListener.INSTANCE);
 	}
 
 	public void applyFilter(IndexFilter indexFilter,
 			ProgressListener progressListener) throws IOException,
-			GitAPIException, RewriteBranchExistsException {
+			GitAPIException {
 		List<Ref> refs = getRefs(Ref.class);
 		applyFilter(refs, indexFilter, progressListener);
 	}
 
 	public void applyFilter(List<? extends Ref> refs, IndexFilter indexFilter)
-			throws IOException, GitAPIException, RewriteBranchExistsException {
+			throws IOException, GitAPIException {
 		Collection<CommitRange> commitRanges = getCommitRanges(refs);
 		applyFilter(commitRanges, indexFilter, NullProgressListener.INSTANCE);
 	}
 
 	public void applyFilter(List<? extends Ref> refs, IndexFilter indexFilter,
 			ProgressListener progressListener) throws IOException,
-			GitAPIException, RewriteBranchExistsException {
+			GitAPIException {
 		Collection<CommitRange> commitRanges = getCommitRanges(refs);
 		applyFilter(commitRanges, indexFilter, progressListener);
 	}
@@ -346,6 +338,11 @@ public class GitRepository {
 			objectReader.release();
 		}
 		repository.close();
+	}
+
+	public void getRefs(org.eclipse.jgit.lib.Ref jgitRef) {
+		// TODO Auto-generated method stub
+
 	}
 
 }
