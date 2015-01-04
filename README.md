@@ -14,7 +14,7 @@ Features
 -----------
 Usage
 -----
-You need a Java 1.6. or higher to execute GitDirStat. Open a command line and execute `java -version` to see which version you have installed.
+You need Java 1.6. or higher to execute GitDirStat. Open a command line and execute `java -version` to see which version you have installed.
 
 Download the [latest release](https://github.com/link-intersystems/GitDirStat/releases/latest), open a command line and execute GitDirStat using:
 
