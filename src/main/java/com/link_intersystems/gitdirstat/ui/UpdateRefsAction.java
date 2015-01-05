@@ -1,5 +1,6 @@
 package com.link_intersystems.gitdirstat.ui;
 
+import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.List;
 
@@ -8,11 +9,10 @@ import javax.swing.Action;
 import com.link_intersystems.gitdirstat.domain.GitRepository;
 import com.link_intersystems.gitdirstat.domain.GitRepositoryAccess;
 import com.link_intersystems.gitdirstat.domain.Ref;
-import com.link_intersystems.swing.AsyncProgressAction;
+import com.link_intersystems.swing.ProgressAction;
 import com.link_intersystems.swing.ProgressMonitor;
 
-public class UpdateRefsAction extends
-		AsyncProgressAction<Void, Void, List<? extends Ref>> {
+public class UpdateRefsAction extends ProgressAction {
 
 	private static final long serialVersionUID = 6082672924263782869L;
 
@@ -27,20 +27,15 @@ public class UpdateRefsAction extends
 	}
 
 	@Override
-	protected void done(List<? extends Ref> result) {
-		RefsListModel refsListModel = gitRepositoryModel.getRefsListModel();
-		refsListModel.setList(result);
-	}
-
-	@Override
-	protected List<? extends Ref> doInBackground(Void actionInput,
-			ProgressMonitor progressMonitor) throws Exception {
+	protected void doActionPerformed(ActionEvent e,
+			ProgressMonitor progressMonitor) {
 		GitRepository gitRepository = null;
 
 		File gitDir = gitRepositoryModel.getGitDir();
 		gitRepository = gitRepositoryAccess.getGitRepository(gitDir);
 
 		List<Ref> refs = gitRepository.getRefs(Ref.class);
-		return refs;
+		RefsListModel refsListModel = gitRepositoryModel.getRefsListModel();
+		refsListModel.setList(refs);
 	}
 }

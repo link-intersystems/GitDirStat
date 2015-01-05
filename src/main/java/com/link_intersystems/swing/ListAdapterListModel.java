@@ -25,9 +25,12 @@ public class ListAdapterListModel<E> extends AbstractListModel {
 	private List<E> list = new ArrayList<E>();
 
 	public void setList(List<? extends E> list) {
+		List<E> oldList = new ArrayList<E>(this.list);
 		this.list.clear();
 		this.list.addAll(list);
-		fireListDataChanged();
+		if (!oldList.equals(list)) {
+			fireListDataChanged();
+		}
 	}
 
 	public void clear() {
