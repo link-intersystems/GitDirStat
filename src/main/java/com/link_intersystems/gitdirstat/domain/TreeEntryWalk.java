@@ -19,7 +19,14 @@ public interface TreeEntryWalk {
 
 		byte[] getRawPath();
 
+		TreeEntryEquality getEqualityObject();
+
+		public interface TreeEntryEquality {
+
+		}
 	}
+
+
 
 	void walk(TreeEntry treeEntry) throws IOException;
 

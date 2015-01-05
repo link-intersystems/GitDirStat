@@ -59,7 +59,7 @@ public class CommitWalker implements Iterable<Commit> {
 		@Override
 		public Commit next() {
 			RevCommit revCommit = revCommitIterator.next();
-			if (!uniquePredicate.evaluate(revCommit.name())) {
+			if (!uniquePredicate.evaluate(revCommit)) {
 				System.out.println(revCommit);
 			}
 			Commit commit = gitRepository.getCommit(revCommit);

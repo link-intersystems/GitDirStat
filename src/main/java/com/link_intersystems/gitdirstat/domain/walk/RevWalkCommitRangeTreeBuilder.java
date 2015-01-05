@@ -1,19 +1,20 @@
 package com.link_intersystems.gitdirstat.domain.walk;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.collections4.Predicate;
-import org.apache.commons.collections4.functors.UniquePredicate;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 
 import com.link_intersystems.gitdirstat.domain.CommitRange;
 import com.link_intersystems.gitdirstat.domain.CommitRangeTree;
 import com.link_intersystems.gitdirstat.domain.GitRepository;
 import com.link_intersystems.gitdirstat.domain.ProgressListener;
+import com.link_intersystems.gitdirstat.domain.TreeEntryWalk.TreeEntry;
+import com.link_intersystems.gitdirstat.domain.TreeEntryWalk.TreeEntry.TreeEntryEquality;
 import com.link_intersystems.gitdirstat.domain.TreeObject;
 import com.link_intersystems.gitdirstat.domain.TreeObjectBuilderTreeEntryWalk;
-import com.link_intersystems.gitdirstat.domain.TreeEntryWalk.TreeEntry;
 
 public class RevWalkCommitRangeTreeBuilder implements CommitRangeTreeBuilder {
 
@@ -32,7 +33,7 @@ public class RevWalkCommitRangeTreeBuilder implements CommitRangeTreeBuilder {
 			return root;
 		}
 
-		RevWalkTemplate revWalkTemplate = new ProgressAwareRevWalkTemplate(
+		ProgressAwareRevWalkTemplate revWalkTemplate = new ProgressAwareRevWalkTemplate(
 				gitRepository, progressListener);
 
 		RevWalkConfigurer walkConfigurer = new CommitRangesRevWalkConfigurer(
@@ -43,20 +44,8 @@ public class RevWalkCommitRangeTreeBuilder implements CommitRangeTreeBuilder {
 				root);
 		TreeWalkTreeEntryWalkAdapter commitWalk = new TreeWalkTreeEntryWalkAdapter(
 				objectReader, treeObjectBuilder);
-		class TreeWalkFilter implements Predicate<TreeEntry> {
 
-			Predicate<ObjectId> uniqueIds = UniquePredicate.uniquePredicate();
-			Predicate<String> uniquePaths = UniquePredicate.uniquePredicate();
-
-			@Override
-			public boolean evaluate(TreeEntry treeEntry) {
-				return !(uniqueIds.evaluate(treeEntry.getObjectId()) || uniquePaths
-						.evaluate(treeEntry.getPathString()));
-			}
-
-		}
-
-		commitWalk.setTreeWalkFilter(new TreeWalkFilter());
+		commitWalk.setTreeWalkFilter(new UniqueTreeEntryFilter());
 
 		try {
 			revWalkTemplate.walk(commitWalk);
@@ -64,5 +53,19 @@ public class RevWalkCommitRangeTreeBuilder implements CommitRangeTreeBuilder {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private static class UniqueTreeEntryFilter implements Predicate<TreeEntry> {
+
+		private static final int _32K = 32768;
+
+		Set<TreeEntryEquality> uniqueTreeEntries = new HashSet<TreeEntryEquality>(
+				_32K, 0.5f);
+
+		@Override
+		public boolean evaluate(TreeEntry treeEntry) {
+			return !uniqueTreeEntries.add(treeEntry.getEqualityObject());
+		}
+
 	}
 }

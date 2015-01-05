@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.jgit.dircache.DirCache;
-import org.eclipse.jgit.dircache.DirCacheBuilder;
+import org.eclipse.jgit.dircache.DirCacheEditor;
 import org.eclipse.jgit.dircache.DirCacheEntry;
 
 public class CacheTreeUpdate implements TreeUpdate {
@@ -31,13 +31,13 @@ public class CacheTreeUpdate implements TreeUpdate {
 	boolean apply(DirCache dirCache) {
 		if (hasTreeFileUpdates) {
 			try {
-				DirCacheBuilder builder = dirCache.builder();
+				DirCacheEditor editor = dirCache.editor();
 
 				for (CacheTreeFileUpdate treeFile : treeFiles) {
-					treeFile.apply(builder);
+					treeFile.apply(editor);
 				}
 
-				builder.commit();
+				editor.commit();
 			} catch (IOException e) {
 				throw new GitRepositoryException(e);
 			}

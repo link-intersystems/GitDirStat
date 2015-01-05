@@ -1,6 +1,5 @@
 package com.link_intersystems.swing;
 
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,19 +26,6 @@ public class ListModelSelection<E> extends AbstractPropertyChangeSupport
 
 		listModel.addListDataListener(listChangeAdapter);
 		listSelectionModel.addListSelectionListener(selectionChangeAdapter);
-	}
-
-	@Override
-	public void addPropertyChangeListener(PropertyChangeListener listener) {
-		// TODO Auto-generated method stub
-		super.addPropertyChangeListener(listener);
-	}
-
-	@Override
-	public void addPropertyChangeListener(String propertyName,
-			PropertyChangeListener listener) {
-		// TODO Auto-generated method stub
-		super.addPropertyChangeListener(propertyName, listener);
 	}
 
 	public boolean isEmpty() {

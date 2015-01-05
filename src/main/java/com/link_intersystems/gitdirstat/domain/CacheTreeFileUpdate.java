@@ -1,13 +1,14 @@
 package com.link_intersystems.gitdirstat.domain;
 
-import org.eclipse.jgit.dircache.DirCacheBuilder;
+import org.eclipse.jgit.dircache.DirCacheEditor;
+import org.eclipse.jgit.dircache.DirCacheEditor.PathEdit;
 import org.eclipse.jgit.dircache.DirCacheEntry;
 
 public class CacheTreeFileUpdate implements TreeFileUpdate {
 
 	private DirCacheEntry dirCacheEntry;
-	private boolean delete;
 	private CacheTreeUpdate cacheTreeUpdate;
+	private PathEdit pathEdit;
 
 	public CacheTreeFileUpdate(DirCacheEntry dirCacheEntry,
 			CacheTreeUpdate cacheTreeUpdate) {
@@ -22,25 +23,16 @@ public class CacheTreeFileUpdate implements TreeFileUpdate {
 	 */
 	@Override
 	public void delete() {
-		this.delete = true;
-		cacheTreeUpdate.treeFileUpdated(this);
-	}
-
-	void apply(DirCacheBuilder builder) {
-		if (delete) {
-			return;
+		if (pathEdit == null) {
+			pathEdit = new DirCacheEditor.DeletePath(dirCacheEntry);
+			cacheTreeUpdate.treeFileUpdated(this);
 		}
-		builder.add(dirCacheEntry);
 	}
 
-	public void move(String newpath) {
-		DirCacheEntry oldCacheEntry = this.dirCacheEntry;
-		dirCacheEntry = new DirCacheEntry(newpath);
-		dirCacheEntry.setObjectId(oldCacheEntry.getObjectId());
-		dirCacheEntry.setFileMode(oldCacheEntry.getFileMode());
-		dirCacheEntry.setUpdateNeeded(true);
-
-		cacheTreeUpdate.treeFileUpdated(this);
+	void apply(DirCacheEditor editor) {
+		if (pathEdit != null) {
+			editor.add(pathEdit);
+		}
 	}
 
 	/*

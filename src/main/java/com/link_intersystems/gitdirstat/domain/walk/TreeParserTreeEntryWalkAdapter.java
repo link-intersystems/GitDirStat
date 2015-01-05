@@ -112,5 +112,10 @@ public class TreeParserTreeEntryWalkAdapter implements RevCommitWalk {
 			return abstractTreeIterator.getEntryPathBuffer();
 		}
 
+		@Override
+		public TreeEntryEquality getEqualityObject() {
+			return new DefaultTreeEntryEquality(getObjectId(), getRawPath());
+		}
+
 	}
 }
