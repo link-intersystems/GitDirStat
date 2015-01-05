@@ -11,6 +11,8 @@ public class TreeObjectPath {
 
 	private static final char PATH_SEPARATOR = '/';
 	private List<TreeObject> path = new ArrayList<TreeObject>();
+	private String pathname;
+	private String rootRelativePathname;
 
 	TreeObjectPath(TreeObject treeObject) {
 		path.add(treeObject);
@@ -26,34 +28,40 @@ public class TreeObjectPath {
 	}
 
 	public String getPathname() {
-		StringBuilder pathname = new StringBuilder();
-		Iterator<TreeObject> pathIterator = this.path.iterator();
-		while (pathIterator.hasNext()) {
-			TreeObject treeObject = pathIterator.next();
-			pathname.append(treeObject.getName());
-			if (pathIterator.hasNext()) {
-				pathname.append(PATH_SEPARATOR);
+		if (pathname == null) {
+			StringBuilder pathname = new StringBuilder();
+			Iterator<TreeObject> pathIterator = this.path.iterator();
+			while (pathIterator.hasNext()) {
+				TreeObject treeObject = pathIterator.next();
+				pathname.append(treeObject.getName());
+				if (pathIterator.hasNext()) {
+					pathname.append(PATH_SEPARATOR);
+				}
 			}
+			this.pathname = pathname.toString();
 		}
-		return pathname.toString();
+		return pathname;
 	}
 
 	public String getRootRelativePathname() {
-		StringBuilder pathname = new StringBuilder();
-		Iterator<TreeObject> pathIterator = this.path.iterator();
-		if(pathIterator.hasNext()){
-			pathIterator.next();
-		}
-
-		while (pathIterator.hasNext()) {
-			TreeObject treeObject = pathIterator.next();
-
-			pathname.append(treeObject.getName());
+		if (rootRelativePathname == null) {
+			StringBuilder pathname = new StringBuilder();
+			Iterator<TreeObject> pathIterator = this.path.iterator();
 			if (pathIterator.hasNext()) {
-				pathname.append(PATH_SEPARATOR);
+				pathIterator.next();
 			}
+
+			while (pathIterator.hasNext()) {
+				TreeObject treeObject = pathIterator.next();
+
+				pathname.append(treeObject.getName());
+				if (pathIterator.hasNext()) {
+					pathname.append(PATH_SEPARATOR);
+				}
+			}
+			this.rootRelativePathname = pathname.toString();
 		}
-		return pathname.toString();
+		return rootRelativePathname;
 	}
 
 	public Enumeration<TreeObject> enumerate() {

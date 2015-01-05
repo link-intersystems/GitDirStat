@@ -110,7 +110,9 @@ public class HistoryUpdate {
 		for (int i = 0; i < parentIds.length; i++) {
 			ObjectId parentId = parentIds[i];
 			ObjectId replacedCommit = replacedCommits.get(parentId);
-			if (replacedCommit != null) {
+			if (replacedCommit == null) {
+				replacedParentIds[i] = parentId;
+			} else {
 				replacedParentIds[i] = replacedCommit;
 			}
 		}

@@ -14,23 +14,36 @@ public class CacheTreeUpdate implements TreeUpdate {
 	private CacheTreeFileUpdate actualTreeFile;
 	private DirCache index;
 	private int dirCacheEntryIndex = 0;
-
+	private boolean hasTreeFileUpdates;
 
 	public CacheTreeUpdate(DirCache index) {
 		this.index = index;
 	}
 
-	void apply(DirCache dirCache) throws IOException {
-		try {
-			DirCacheBuilder builder = dirCache.builder();
+	/**
+	 * Apply the changes that this {@link TreeUpdate} represents to the given
+	 * {@link DirCache}. The {@link DirCache} will be unlocked if was modified.
+	 *
+	 * @param dirCache
+	 * @return true if updates are applied to the {@link DirCache}, false if the
+	 *         {@link DirCache} has not been modified.
+	 */
+	boolean apply(DirCache dirCache) {
+		if (hasTreeFileUpdates) {
+			try {
+				DirCacheBuilder builder = dirCache.builder();
 
-			for (CacheTreeFileUpdate treeFile : treeFiles) {
-				treeFile.apply(builder);
+				for (CacheTreeFileUpdate treeFile : treeFiles) {
+					treeFile.apply(builder);
+				}
+
+				builder.commit();
+			} catch (IOException e) {
+				throw new GitRepositoryException(e);
 			}
-
-			builder.commit();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -52,7 +65,7 @@ public class CacheTreeUpdate implements TreeUpdate {
 	@Override
 	public TreeFileUpdate next() {
 		DirCacheEntry dirCacheEntry = index.getEntry(dirCacheEntryIndex++);
-		actualTreeFile = new CacheTreeFileUpdate(dirCacheEntry);
+		actualTreeFile = new CacheTreeFileUpdate(dirCacheEntry, this);
 		treeFiles.add(actualTreeFile);
 		return actualTreeFile;
 	}
@@ -67,6 +80,14 @@ public class CacheTreeUpdate implements TreeUpdate {
 		if (actualTreeFile != null) {
 			actualTreeFile.delete();
 		}
+	}
+
+	void treeFileUpdated(CacheTreeFileUpdate cacheTreeFileUpdate) {
+		hasTreeFileUpdates = true;
+	}
+
+	public boolean hasUpdates() {
+		return hasTreeFileUpdates;
 	}
 
 }

@@ -7,9 +7,12 @@ public class CacheTreeFileUpdate implements TreeFileUpdate {
 
 	private DirCacheEntry dirCacheEntry;
 	private boolean delete;
+	private CacheTreeUpdate cacheTreeUpdate;
 
-	public CacheTreeFileUpdate(DirCacheEntry dirCacheEntry) {
+	public CacheTreeFileUpdate(DirCacheEntry dirCacheEntry,
+			CacheTreeUpdate cacheTreeUpdate) {
 		this.dirCacheEntry = dirCacheEntry;
+		this.cacheTreeUpdate = cacheTreeUpdate;
 	}
 
 	/*
@@ -20,6 +23,7 @@ public class CacheTreeFileUpdate implements TreeFileUpdate {
 	@Override
 	public void delete() {
 		this.delete = true;
+		cacheTreeUpdate.treeFileUpdated(this);
 	}
 
 	void apply(DirCacheBuilder builder) {
@@ -29,12 +33,14 @@ public class CacheTreeFileUpdate implements TreeFileUpdate {
 		builder.add(dirCacheEntry);
 	}
 
-	public void move(String newpath){
+	public void move(String newpath) {
 		DirCacheEntry oldCacheEntry = this.dirCacheEntry;
 		dirCacheEntry = new DirCacheEntry(newpath);
 		dirCacheEntry.setObjectId(oldCacheEntry.getObjectId());
 		dirCacheEntry.setFileMode(oldCacheEntry.getFileMode());
 		dirCacheEntry.setUpdateNeeded(true);
+
+		cacheTreeUpdate.treeFileUpdated(this);
 	}
 
 	/*

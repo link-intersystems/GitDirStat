@@ -10,6 +10,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectInserter;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 public class CacheCommitUpdate implements CommitUpdate {
 
@@ -29,6 +30,7 @@ public class CacheCommitUpdate implements CommitUpdate {
 		this.commit = commit;
 		this.historyUpdate = historyUpdate;
 		this.dirCache = dirCache;
+		treeUpdate = new CacheTreeUpdate(dirCache);
 	}
 
 	public void end() {
@@ -44,9 +46,6 @@ public class CacheCommitUpdate implements CommitUpdate {
 	 */
 	@Override
 	public TreeUpdate getTreeUpdate() throws IOException {
-		if (treeUpdate == null) {
-			treeUpdate = new CacheTreeUpdate(dirCache);
-		}
 		return treeUpdate;
 	}
 
@@ -61,14 +60,16 @@ public class CacheCommitUpdate implements CommitUpdate {
 		Repository repo = gitRepository.getRepository();
 		ObjectInserter odi = repo.newObjectInserter();
 		try {
-			if (treeUpdate != null) {
-				treeUpdate.apply(dirCache);
+			ObjectId indexTreeId = null;
+			if (treeUpdate.apply(dirCache)) {
+				// Write the index as tree to the object database. This may
+				// fail for example when the index contains unmerged paths
+				// (unresolved conflicts)
+				indexTreeId = dirCache.writeTree(odi);
+			} else {
+				RevCommit revCommit = commit.getRevCommit();
+				indexTreeId = revCommit.getTree();
 			}
-
-			// Write the index as tree to the object database. This may
-			// fail for example when the index contains unmerged paths
-			// (unresolved conflicts)
-			ObjectId indexTreeId = dirCache.writeTree(odi);
 
 			// Create a Commit object, populate it and write it
 			CommitBuilder commit = new CommitBuilder();
@@ -131,7 +132,7 @@ public class CacheCommitUpdate implements CommitUpdate {
 		boolean attributesChanges = authorUpdate != null
 				|| committerUpdate != null || messageUpdate != null;
 		boolean rewrittenCommit = historyUpdate.hasReplacedParents(commit);
-		boolean isTreeUpdate = treeUpdate != null;
+		boolean isTreeUpdate = treeUpdate.hasUpdates();
 		return attributesChanges || rewrittenCommit || isTreeUpdate;
 
 	}

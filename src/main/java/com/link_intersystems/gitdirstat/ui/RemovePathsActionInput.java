@@ -6,6 +6,8 @@ import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.DefaultListCellRenderer;
@@ -109,7 +111,7 @@ public class RemovePathsActionInput implements ActionInputSource<IndexFilter> {
 	private IndexFilter createPathFilter() {
 		List<TreeObject> selectedTreeObjects = gitRepositoryModel
 				.getPathModel().getSelectionModel().getSelection();
-		final List<String> selectedPaths = new ArrayList<String>();
+		final Collection<String> selectedPaths = new HashSet<String>();
 		for (TreeObject treeObject : selectedTreeObjects) {
 			List<TreeObject> fileList = treeObject.toFileList();
 			for (TreeObject file : fileList) {

@@ -12,7 +12,6 @@ import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
 import javax.swing.JTextField;
 
 import com.link_intersystems.gitdirstat.ui.PathModel.SelectionSource;
@@ -94,7 +93,7 @@ public class GitRepositoryView extends JPanel {
 	private TreeObjectsTableComponent treeObjectsTableComponent = new TreeObjectsTableComponent();
 	private TreeObjectsTreeComponent treeObjectsTreeComponent = new TreeObjectsTreeComponent();
 
-	private JRootPane rootPane = new JRootPane();
+	private JPanel rootPane = new JPanel();
 
 	SetViewComponentAction setTableAction = new SetViewComponentAction(
 			treeObjectsTableComponent, SelectionSource.LIST_SELECTION);
