@@ -21,6 +21,7 @@ import com.link_intersystems.swing.ComponentResize;
 import com.link_intersystems.swing.HumanReadableFileSizeTableCellRenderer;
 import com.link_intersystems.swing.RelativeWidthResizer;
 import com.link_intersystems.swing.RowSorterAwareListSelectionModelUpdater;
+import com.link_intersystems.swing.SynchronizedTableColumnModel;
 import com.link_intersystems.swing.TableColumnResize;
 
 public class TreeObjectsTableComponent extends GitRepositoryComponent {
@@ -96,7 +97,10 @@ public class TreeObjectsTableComponent extends GitRepositoryComponent {
 		summaryTable.setModel(summaryTableModel);
 		summaryTable.setDefaultRenderer(BigInteger.class,
 				new HumanReadableFileSizeTableCellRenderer());
-		summaryTable.setColumnModel(treeObjectsTable.getColumnModel());
+		SynchronizedTableColumnModel synchronizedTableColumnModel = new SynchronizedTableColumnModel();
+		synchronizedTableColumnModel.setSourceModel(treeObjectsTable
+				.getColumnModel());
+		summaryTable.setColumnModel(synchronizedTableColumnModel);
 		add(summaryTable, BorderLayout.SOUTH);
 	}
 
