@@ -23,7 +23,9 @@ public class SelectAllAction extends AbstractAction {
 		int size = listModel.getSize();
 		listSelectionModel.setValueIsAdjusting(true);
 		listSelectionModel.clearSelection();
-		listSelectionModel.addSelectionInterval(0, size);
+		if (size > 0) {
+			listSelectionModel.addSelectionInterval(0, size - 1);
+		}
 		listSelectionModel.setValueIsAdjusting(false);
 	}
 }
