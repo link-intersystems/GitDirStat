@@ -134,6 +134,43 @@
 						<target>1.6</target>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-release-plugin</artifactId>
+					<version>2.5</version>
+					<executions>
+						<execution>
+							<id>prepare</id>
+							<goals>
+								<goal>prepare</goal>
+							</goals>
+							<configuration>
+								<pushChanges>false</pushChanges>
+							</configuration>
+						</execution>
+						<execution>
+							<id>perform</id>
+							<goals>
+								<goal>perform</goal>
+							</goals>
+							<configuration>
+								<pushChanges>false</pushChanges>
+							</configuration>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>org.apache.maven.scm</groupId>
+							<artifactId>maven-scm-provider-gitexe</artifactId>
+							<version>1.9.2</version>
+						</dependency>
+						<dependency>
+							<groupId>org.apache.maven.scm</groupId>
+							<artifactId>maven-scm-api</artifactId>
+							<version>1.9.1</version>
+						</dependency>
+					</dependencies>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>
