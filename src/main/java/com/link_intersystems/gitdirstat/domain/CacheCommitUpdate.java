@@ -186,4 +186,9 @@ public class CacheCommitUpdate implements CommitUpdate {
 		return commit.getId().name();
 	}
 
+	@Override
+	public String getAbbreviatedId() {
+		return commit.getId().abbreviate(7).name();
+	}
+
 }

@@ -1,4 +1,4 @@
-package com.link_intersystems.gitdirstat.test;
+package com.link_intersystems.junit.maven;
 
 import java.io.File;
 import java.io.IOException;

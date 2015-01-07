@@ -22,4 +22,6 @@ public interface CommitUpdate {
 
 	public abstract String getId();
 
+	public abstract String getAbbreviatedId();
+
 }
