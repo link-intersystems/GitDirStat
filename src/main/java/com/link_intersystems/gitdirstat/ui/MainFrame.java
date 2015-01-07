@@ -33,6 +33,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JRootPane;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
 
@@ -222,7 +223,9 @@ public class MainFrame implements Serializable {
 	}
 
 	private void configureMainFrame() {
+
 		Dimension size = getInitialSize();
+
 		mainFrame.setSize(size);
 		mainFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		mainFrame.setLocationRelativeTo(null);
@@ -230,13 +233,16 @@ public class MainFrame implements Serializable {
 		ImageIcon gitIcon = uiContext.getIcon("icons/Git-Icon-1788C.png");
 		mainFrame.setIconImage(gitIcon.getImage());
 
+		JRootPane rootPane = mainFrame.getRootPane();
+		rootPane.setJMenuBar(menuBar);
+
 		menuBar.add(fileMenu);
 		menuBar.add(viewMenu);
 		menuBar.add(helpMenu);
 
 		actionPanel.setLayout(new BorderLayout());
-		actionPanel.add(menuBar, BorderLayout.NORTH);
-		actionPanel.add(jToolBar, BorderLayout.SOUTH);
+
+		actionPanel.add(jToolBar, BorderLayout.CENTER);
 
 		mainFrame.add(actionPanel, BorderLayout.NORTH);
 	}
@@ -352,6 +358,10 @@ public class MainFrame implements Serializable {
 			}
 		}
 		return new MainComponentSetterAction(actionName, component);
+	}
+
+	public JFrame getMainFrame() {
+		return mainFrame;
 	}
 
 }

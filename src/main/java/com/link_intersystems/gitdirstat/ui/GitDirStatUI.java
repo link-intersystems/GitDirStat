@@ -9,7 +9,7 @@ public class GitDirStatUI {
 	public static void main(String[] args) throws Exception {
 		try {
 			Locale.setDefault(Locale.US);
-			GitDirStatUIArguments dirStatUIArguments = GitDirStatUIArguments
+			CommandLineGitDirStatUIArguments dirStatUIArguments = CommandLineGitDirStatUIArguments
 					.parse(args);
 			GUIApplication guiApplication = new GUIApplication();
 			guiApplication.run(dirStatUIArguments);

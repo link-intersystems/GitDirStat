@@ -7,7 +7,7 @@ import com.link_intersystems.gitdirstat.domain.GitRepositoryAccess;
 
 public class GUIApplication {
 
-	public void run(GitDirStatUIArguments dirStatUIArguments) throws Exception {
+	public void run(CommandLineGitDirStatUIArguments dirStatUIArguments) throws Exception {
 		setLookAndFeel();
 		GitRepositoryAccess repoAccess = new GitRepositoryAccess();
 		MainFrame mainFrame = new MainFrame(dirStatUIArguments, repoAccess);
