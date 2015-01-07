@@ -4,7 +4,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -17,12 +16,10 @@ import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 
-import com.link_intersystems.gitdirstat.domain.CommitUpdate;
 import com.link_intersystems.gitdirstat.domain.GitRepositoryAccess;
 import com.link_intersystems.gitdirstat.domain.IndexFilter;
-import com.link_intersystems.gitdirstat.domain.TreeFileUpdate;
+import com.link_intersystems.gitdirstat.domain.PathDeletionIndexFilter;
 import com.link_intersystems.gitdirstat.domain.TreeObject;
-import com.link_intersystems.gitdirstat.domain.TreeUpdate;
 import com.link_intersystems.swing.ActionInputSource;
 import com.link_intersystems.swing.SelectionModel;
 import com.link_intersystems.swing.SelectionModelBasedListModel;
@@ -78,8 +75,10 @@ public class RemovePathsActionInput implements ActionInputSource<IndexFilter> {
 			JScrollPane selectedPathScrollPane) {
 		ListCellRenderer cellRenderer = list.getCellRenderer();
 
-		JScrollBar horizontalScrollBar = selectedPathScrollPane.getHorizontalScrollBar();
-		Dimension hScrollBarPreferredSize = horizontalScrollBar.getPreferredSize();
+		JScrollBar horizontalScrollBar = selectedPathScrollPane
+				.getHorizontalScrollBar();
+		Dimension hScrollBarPreferredSize = horizontalScrollBar
+				.getPreferredSize();
 
 		int maxWidth = 480;
 		int maxHeight = 160;
@@ -103,8 +102,6 @@ public class RemovePathsActionInput implements ActionInputSource<IndexFilter> {
 			preferredHeight = Math.min(preferredHeight, maxHeight);
 		}
 
-
-
 		return new Dimension(preferredWidth, preferredHeight);
 	}
 
@@ -118,20 +115,7 @@ public class RemovePathsActionInput implements ActionInputSource<IndexFilter> {
 				selectedPaths.add(file.getRootRelativePath().getPathname());
 			}
 		}
-		IndexFilter pathFilter = new IndexFilter() {
-
-			@Override
-			public void apply(CommitUpdate commitUpdate) throws IOException {
-				TreeUpdate treeUpdate = commitUpdate.getTreeUpdate();
-				while (treeUpdate.hasNext()) {
-					TreeFileUpdate fileUpdate = treeUpdate.next();
-					String path = fileUpdate.getPath();
-					if (selectedPaths.contains(path)) {
-						fileUpdate.delete();
-					}
-				}
-			}
-		};
+		IndexFilter pathFilter = new PathDeletionIndexFilter(selectedPaths);
 		return pathFilter;
 	}
 
