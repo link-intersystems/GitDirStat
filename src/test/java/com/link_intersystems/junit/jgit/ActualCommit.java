@@ -25,4 +25,8 @@ public class ActualCommit {
 		return personAssertion;
 	}
 
+	@Override
+	public String toString() {
+		return revCommit.getId().getName();
+	}
 }

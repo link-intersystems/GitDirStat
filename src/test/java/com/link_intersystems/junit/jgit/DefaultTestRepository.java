@@ -36,8 +36,7 @@ public class DefaultTestRepository implements TestRepository {
 	}
 
 	private void openRepository() {
-		File outputDir = testEnvironmentProperties.getOutputDirectory();
-		File gitRepositoryDir = new File(outputDir, "gitRepositories");
+		File testRepositoryBaseDir = getTestRepositoryBaseDir();
 
 		try {
 			FileSystemManager manager = VFS.getManager();
@@ -53,11 +52,11 @@ public class DefaultTestRepository implements TestRepository {
 					try {
 
 						FileObject targetDir = manager
-								.toFileObject(gitRepositoryDir);
+								.toFileObject(testRepositoryBaseDir);
 						targetDir.delete(Selectors.SELECT_ALL);
 						targetDir.copyFrom(zipFileSystem, Selectors.SELECT_ALL);
 
-						gitRepositoryDir = resolveRepositoryDirectory(gitRepositoryDir);
+						testRepositoryBaseDir = resolveRepositoryDirectory(testRepositoryBaseDir);
 					} finally {
 						zipFileSystem.close();
 					}
@@ -71,12 +70,18 @@ public class DefaultTestRepository implements TestRepository {
 			}
 			RepositoryBuilder repositoryBuilder = new RepositoryBuilder();
 			repositoryBuilder.readEnvironment();
-			repositoryBuilder.findGitDir(gitRepositoryDir);
+			repositoryBuilder.findGitDir(testRepositoryBaseDir);
 			Repository repository = repositoryBuilder.build();
 			git = new Git(repository);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	private File getTestRepositoryBaseDir() {
+		File outputDir = testEnvironmentProperties.getOutputDirectory();
+		File gitRepositoryDir = new File(outputDir, "gitRepositories");
+		return gitRepositoryDir;
 	}
 
 	private File resolveRepositoryDirectory(File unzipDir) {
@@ -100,8 +105,10 @@ public class DefaultTestRepository implements TestRepository {
 	@Override
 	public void close() {
 		if (git != null) {
+			File testRepositoryBaseDir = getTestRepositoryBaseDir();
 			git.close();
 			gitRepository = null;
+			testRepositoryBaseDir.delete();
 		}
 	}
 

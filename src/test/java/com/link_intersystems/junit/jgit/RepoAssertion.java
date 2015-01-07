@@ -1,17 +1,24 @@
 package com.link_intersystems.junit.jgit;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
-import org.eclipse.jgit.errors.StopWalkException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.RefDatabase;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.revwalk.RevSort;
+import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.revwalk.filter.RevFilter;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.junit.Assert;
+
+import com.link_intersystems.gitdirstat.CommitTreeAssertion;
 
 public class RepoAssertion {
 
@@ -33,10 +40,7 @@ public class RepoAssertion {
 	public void assertThatAllCommits(CommitSelection commitSelection,
 			CommitAssertion commitAssertion) throws Exception {
 
-		RevWalk revWalk = new RevWalk(repository);
-		revWalk.setRevFilter(new CommitSelectionRevFilter(commitSelection));
-		revWalk.sort(RevSort.REVERSE);
-		revWalk.sort(RevSort.TOPO, true);
+		RevWalk revWalk = createAllCommitsRevWalk(commitSelection);
 
 		for (RevCommit revCommit : revWalk) {
 			ActualCommit actualCommit = new ActualCommit(revCommit);
@@ -44,25 +48,38 @@ public class RepoAssertion {
 		}
 	}
 
-	private static class CommitSelectionRevFilter extends RevFilter {
+	public void assertCommitTrees(CommitSelection commitSelection,
+			CommitTreeAssertion commitTreeAssertion) throws Exception {
+		RevWalk revWalk = createAllCommitsRevWalk(commitSelection);
 
-		private CommitSelection commitSelection;
-
-		public CommitSelectionRevFilter(CommitSelection commitSelection) {
-			this.commitSelection = commitSelection;
+		for (RevCommit revCommit : revWalk) {
+			ActualCommit actualCommit = new ActualCommit(revCommit);
+			TreeWalk treeWalk = new TreeWalk(repository);
+			RevTree revTree = revCommit.getTree();
+			treeWalk.addTree(revTree);
+			ActualTree actualTree = new ActualTree(treeWalk);
+			while (treeWalk.next()) {
+				commitTreeAssertion.assertTree(actualCommit, actualTree);
+			}
 		}
+	}
 
-		@Override
-		public boolean include(RevWalk walker, RevCommit cmit)
-				throws StopWalkException, MissingObjectException,
-				IncorrectObjectTypeException, IOException {
-			return commitSelection.accept(cmit);
+	private RevWalk createAllCommitsRevWalk(CommitSelection commitSelection)
+			throws IOException, MissingObjectException,
+			IncorrectObjectTypeException {
+		RevWalk revWalk = new RevWalk(repository);
+		RefDatabase refDatabase = repository.getRefDatabase();
+		Map<String, org.eclipse.jgit.lib.Ref> refs = refDatabase.getRefs("");
+		for (Entry<String, Ref> entryRef : refs.entrySet()) {
+			ObjectId refObject = entryRef.getValue().getObjectId();
+			RevObject revObject = revWalk.parseAny(refObject);
+			if (revObject instanceof RevCommit) {
+				revWalk.markStart((RevCommit) revObject);
+			}
 		}
-
-		@Override
-		public RevFilter clone() {
-			return this;
-		}
-
+		revWalk.setRevFilter(new CommitSelectionRevFilter(commitSelection));
+		revWalk.sort(RevSort.REVERSE);
+		revWalk.sort(RevSort.TOPO, true);
+		return revWalk;
 	}
 }
