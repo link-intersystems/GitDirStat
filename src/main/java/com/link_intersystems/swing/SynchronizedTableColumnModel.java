@@ -66,7 +66,7 @@ public class SynchronizedTableColumnModel extends DefaultTableColumnModel {
 			copyProperties(sourceColumn, targetColumn);
 			BeanPropertySync<TableColumn> beanPropertySync = new BeanPropertySync<TableColumn>(
 					targetColumn);
-			sourceColumn.addPropertyChangeListener(beanPropertySync);
+			beanPropertySync.setSynchronization(sourceColumn);
 			propertySyncMap.put(targetColumn, new TableColumnSync(sourceColumn,
 					beanPropertySync));
 			DefaultTableColumnModel targetModel = SynchronizedTableColumnModel.this;

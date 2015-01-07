@@ -1,30 +1,33 @@
 package com.link_intersystems.beans;
 
-import java.beans.BeanInfo;
-import java.beans.EventSetDescriptor;
-import java.beans.Introspector;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 
+/**
+ *
+ * @author rene.link
+ *
+ * @param <T>
+ */
 public class BeanPropertySync<T> implements PropertyChangeListener {
 
-	private T beanSync;
-	private BeanInfo baseBeanInfo;
-	private T baseBean;
+	private T targetBean;
 	private boolean skipMissingPropertiesEnabled;
+	private ReflectivePropertyChangeListenerBinding sourceBeanPropertyChangeListenerBinding;
 
-	public BeanPropertySync(T beanSync) {
-		this.beanSync = beanSync;
+	public BeanPropertySync(T targetBean) {
+		this.targetBean = targetBean;
 	}
 
 	protected T getBeanSync() {
-		return beanSync;
+		return targetBean;
 	}
 
 	public void setSkipMissingPropertiesEnabled(
@@ -38,35 +41,51 @@ public class BeanPropertySync<T> implements PropertyChangeListener {
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
-		String propertyName = evt.getPropertyName();
-		PropertyDescriptor propertyDescriptor;
 		try {
-			propertyDescriptor = PropertyUtils.getPropertyDescriptor(beanSync,
-					propertyName);
-			if (propertyDescriptor == null) {
-				if (!skipMissingPropertiesEnabled) {
-					String msg = MessageFormat
-							.format("Can't find write method for property '{0}' of bean '{1}'",
-									propertyName, beanSync.getClass());
-					throw new RuntimeException(msg);
-				}
-			} else {
-				Method writeMethod = propertyDescriptor.getWriteMethod();
-				writeMethod.invoke(beanSync, evt.getNewValue());
-			}
+			trySetProperty(evt);
+		} catch (RuntimeException e) {
+			throw e;
 		} catch (Exception e) {
-			throw new RuntimeException("Unable to sync bean", e);
+			catchSetPropertyException(e);
 		}
 	}
 
-	public void setSynchronization(T baseBean) {
-		if (this.baseBean != null) {
-			removePropertyChangeListener(baseBean);
+	private void trySetProperty(PropertyChangeEvent evt)
+			throws IllegalAccessException, InvocationTargetException,
+			NoSuchMethodException {
+		String propertyName = evt.getPropertyName();
+		PropertyDescriptor propertyDescriptor = PropertyUtils
+				.getPropertyDescriptor(targetBean, propertyName);
+		if (propertyDescriptor == null) {
+			if (!skipMissingPropertiesEnabled) {
+				String msg = MessageFormat
+						.format("Can't find write method for property '{0}' of bean '{1}'",
+								propertyName, targetBean.getClass());
+				throw new RuntimeException(msg);
+			}
+		} else {
+			Method writeMethod = propertyDescriptor.getWriteMethod();
+			writeMethod.invoke(targetBean, evt.getNewValue());
 		}
-		this.baseBean = baseBean;
-		if (this.baseBean != null) {
-			applyBeanProperties(baseBean);
-			addPropertyChangeListener(baseBean);
+	}
+
+	private void catchSetPropertyException(Exception e) {
+		throw new RuntimeException("Unable to sync bean", e);
+	}
+
+	public void setSynchronization(T sourceBean) {
+		if (this.sourceBeanPropertyChangeListenerBinding != null) {
+			sourceBeanPropertyChangeListenerBinding
+					.removePropertyChangeListener(this);
+		}
+		if (sourceBean == null) {
+			sourceBeanPropertyChangeListenerBinding = null;
+		} else {
+			sourceBeanPropertyChangeListenerBinding = new ReflectivePropertyChangeListenerBinding(
+					sourceBean);
+			applyBeanProperties(sourceBean);
+			sourceBeanPropertyChangeListenerBinding
+					.addPropertyChangeListener(this);
 		}
 	}
 
@@ -74,40 +93,7 @@ public class BeanPropertySync<T> implements PropertyChangeListener {
 		try {
 			BeanUtils.copyProperties(this, baseBean);
 		} catch (Exception e) {
-			throw new RuntimeException("Unable to sync bean", e);
+			catchSetPropertyException(e);
 		}
 	}
-
-	private void addPropertyChangeListener(T baseBean) {
-		try {
-			baseBeanInfo = Introspector.getBeanInfo(baseBean.getClass());
-			EventSetDescriptor[] eventSetDescriptors = baseBeanInfo
-					.getEventSetDescriptors();
-			for (int i = 0; i < eventSetDescriptors.length; i++) {
-				Method addListenerMethod = eventSetDescriptors[i]
-						.getAddListenerMethod();
-				addListenerMethod.invoke(baseBean, this);
-			}
-		} catch (Exception e) {
-			new IllegalArgumentException(
-					"Unable to register PropertyChangeListener on bean", e);
-		}
-	}
-
-	private void removePropertyChangeListener(T baseBean) {
-		try {
-			baseBeanInfo = Introspector.getBeanInfo(baseBean.getClass());
-			EventSetDescriptor[] eventSetDescriptors = baseBeanInfo
-					.getEventSetDescriptors();
-			for (int i = 0; i < eventSetDescriptors.length; i++) {
-				Method removeListenerMethod = eventSetDescriptors[i]
-						.getRemoveListenerMethod();
-				removeListenerMethod.invoke(baseBean, this);
-			}
-		} catch (Exception e) {
-			new IllegalArgumentException(
-					"Unable to register PropertyChangeListener on bean", e);
-		}
-	}
-
 }
