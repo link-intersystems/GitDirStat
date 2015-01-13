@@ -6,6 +6,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -226,13 +227,12 @@ public class GitRepository {
 
 		int totalWork = getTotalWork(commitRanges);
 		CommitWalker commitWalk = createCommitWalker(commitRanges);
-		RewriteIndexCommitWalkIterator rewriteIterator = new RewriteIndexCommitWalkIterator(
-				commitWalk);
+		Iterator<Commit> commitIterator = commitWalk.iterator();
 
 		try {
 			progressListener.start(totalWork);
-			while (rewriteIterator.hasNext()) {
-				Commit commit = rewriteIterator.next();
+			while (commitIterator.hasNext()) {
+				Commit commit = commitIterator.next();
 
 				CacheCommitUpdate commitUpdate = indexUpdate
 						.beginUpdate(commit);
