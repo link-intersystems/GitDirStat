@@ -208,6 +208,7 @@ public class GitRepository {
 
 		try {
 			progressListener.start(totalWork);
+
 			while (commitIterator.hasNext()) {
 				Commit commit = commitIterator.next();
 
@@ -223,6 +224,7 @@ public class GitRepository {
 					break;
 				}
 			}
+			commitWalk.close();
 
 			if (!progressListener.isCanceled()) {
 				historyUpdate.updateRefs();
