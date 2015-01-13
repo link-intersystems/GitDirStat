@@ -14,8 +14,6 @@ import java.util.Map.Entry;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.CheckoutConflictException;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.errors.IncorrectObjectTypeException;
-import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectDatabase;
 import org.eclipse.jgit.lib.ObjectId;
@@ -174,34 +172,12 @@ public class GitRepository {
 		return commitRangeTreeBuilder.build(commitRanges, progressListener);
 	}
 
-	private void applyCommitRanges(RevWalk revWalk,
-			Collection<CommitRange> commitRanges)
-			throws MissingObjectException, IncorrectObjectTypeException,
-			IOException {
-		for (CommitRange commitRange : commitRanges) {
-			AnyObjectId fromInclusive = commitRange.getToInclusive();
-			RevCommit revCommit = revWalk.parseCommit(fromInclusive);
-			revWalk.markStart(revCommit);
-		}
-	}
-
 	private CommitWalker createCommitWalker(Collection<CommitRange> commitRanges)
 			throws IOException {
 		CommitWalker commitWalk = new CommitWalker(this);
 		commitWalk.setCommitRanges(commitRanges);
-
-		RevWalk revWalk = commitWalk.getRevWalk();
-		revWalk.sort(RevSort.TOPO);
-		revWalk.sort(RevSort.REVERSE, true);
-
+		commitWalk.sort(RevSort.TOPO, RevSort.REVERSE);
 		return commitWalk;
-	}
-
-	private RevWalk createRevWalk(Collection<CommitRange> commitRanges)
-			throws IOException {
-		RevWalk revWalk = new RevWalk(repository);
-		applyCommitRanges(revWalk, commitRanges);
-		return revWalk;
 	}
 
 	public TreeObject getCommitRangeTree(CommitRange commitRange) {
@@ -225,8 +201,9 @@ public class GitRepository {
 		HistoryUpdate historyUpdate = new HistoryUpdate(this);
 		IndexUpdate indexUpdate = historyUpdate.begin();
 
-		int totalWork = getTotalWork(commitRanges);
 		CommitWalker commitWalk = createCommitWalker(commitRanges);
+		int totalWork = commitWalk.getWalkCount();
+
 		Iterator<Commit> commitIterator = commitWalk.iterator();
 
 		try {
@@ -259,20 +236,6 @@ public class GitRepository {
 			progressListener.end();
 		}
 
-	}
-
-	private int getTotalWork(Collection<CommitRange> commitRanges)
-			throws IOException {
-		RevWalk revWalk = createRevWalk(commitRanges);
-
-		revWalk.sort(RevSort.TOPO);
-		revWalk.sort(RevSort.REVERSE, true);
-
-		int total = 0;
-		while (revWalk.next() != null) {
-			total++;
-		}
-		return total;
 	}
 
 	public Git getGit() {

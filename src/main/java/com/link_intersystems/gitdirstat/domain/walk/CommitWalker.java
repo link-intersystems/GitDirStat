@@ -9,6 +9,7 @@ import org.apache.commons.collections4.functors.UniquePredicate;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevSort;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import com.link_intersystems.gitdirstat.domain.Commit;
@@ -81,6 +82,27 @@ public class CommitWalker implements Iterable<Commit> {
 			RevCommit revCommit = revWalk.parseCommit(fromInclusive);
 			revWalk.markStart(revCommit);
 		}
+	}
+
+	public void sort(RevSort... revSorts) {
+		for (int i = 0; i < revSorts.length; i++) {
+			RevSort revSort = revSorts[i];
+			if (i == 0) {
+				revWalk.sort(revSort);
+			} else {
+				revWalk.sort(revSort, true);
+			}
+		}
+	}
+
+	public int getWalkCount() {
+		Iterator<Commit> iterator = iterator();
+		int total = 0;
+		while (iterator.hasNext()) {
+			total++;
+			iterator.next();
+		}
+		return total;
 	}
 
 }
