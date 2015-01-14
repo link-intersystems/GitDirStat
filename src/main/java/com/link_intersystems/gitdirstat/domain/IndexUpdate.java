@@ -52,10 +52,6 @@ public class IndexUpdate {
 		RevCommit revCommit = commit.getRevCommit();
 		touchedCommits.add(revCommit);
 		resetIndex(revCommit, dirCache);
-		if (!dirCache.lock()) {
-			throw new GitRepositoryException("Unable to lock dir cache "
-					+ dirCache);
-		}
 		return dirCache;
 	}
 
@@ -96,7 +92,7 @@ public class IndexUpdate {
 			builder.add(entry);
 		}
 
-		builder.commit();
+		builder.finish();
 	}
 
 	public void close() throws GitAPIException {
