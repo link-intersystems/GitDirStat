@@ -1,6 +1,7 @@
 package com.link_intersystems.gitdirstat.domain;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,8 +12,11 @@ import org.eclipse.jgit.api.GarbageCollectCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand.ResetType;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.internal.storage.file.RefDirectory;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.RefDatabase;
 import org.eclipse.jgit.lib.ReflogEntry;
+import org.eclipse.jgit.lib.Repository;
 
 import com.link_intersystems.gitdirstat.domain.ExpireReflogCommand.ReflogEntryFilter;
 
@@ -49,10 +53,20 @@ public class HistoryUpdate {
 
 	public void updateRefs() throws IOException, GitAPIException {
 		List<Ref> allRefs = gitRepository.getRefs(Ref.class);
+		List<String> refsToBePacked = new ArrayList<String>(allRefs.size());
 		for (Ref ref : allRefs) {
 			if (ref.isUpdateable()) {
-				nullSafeCommitUpdate(ref);
+				if (nullSafeCommitUpdate(ref)) {
+					refsToBePacked.add(ref.getName());
+				}
 			}
+		}
+
+		if (!refsToBePacked.isEmpty()) {
+			Repository repo = gitRepository.getRepository();
+			RefDatabase refDatabase = repo.getRefDatabase();
+			((RefDirectory) refDatabase).pack(refsToBePacked);
+			refDatabase.refresh();
 		}
 	}
 
@@ -81,12 +95,18 @@ public class HistoryUpdate {
 		gc.call();
 	}
 
-	private void nullSafeCommitUpdate(Ref ref) throws IOException {
+	private boolean nullSafeCommitUpdate(Ref ref) throws IOException {
 		ObjectId objectId = ref.getCommitId();
 		ObjectId rewrittenCommit = replacedCommits.get(objectId);
+
+		boolean refUpdate = false;
+
 		if (rewrittenCommit != null) {
 			ref.update(rewrittenCommit);
+			refUpdate = true;
 		}
+
+		return refUpdate;
 	}
 
 	public boolean hasReplacedParents(Commit commit) {

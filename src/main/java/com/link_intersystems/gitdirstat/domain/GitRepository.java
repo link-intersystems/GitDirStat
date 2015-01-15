@@ -227,8 +227,7 @@ public class GitRepository {
 			commitWalk.close();
 
 			if (!progressListener.isCanceled()) {
-				historyUpdate.updateRefs();
-				historyUpdate.cleanupRepository();
+				applyHistoryUpdate(historyUpdate);
 			}
 		} finally {
 			try {
@@ -238,6 +237,12 @@ public class GitRepository {
 			progressListener.end();
 		}
 
+	}
+
+	private void applyHistoryUpdate(HistoryUpdate historyUpdate) throws IOException,
+			GitAPIException {
+		historyUpdate.updateRefs();
+		historyUpdate.cleanupRepository();
 	}
 
 	public Git getGit() {
