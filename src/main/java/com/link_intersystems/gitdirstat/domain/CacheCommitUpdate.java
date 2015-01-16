@@ -127,7 +127,7 @@ public class CacheCommitUpdate implements CommitUpdate {
 		boolean attributesChanges = authorUpdate != null
 				|| committerUpdate != null || messageUpdate != null;
 		boolean rewrittenCommit = historyUpdate.hasReplacedParents(commit);
-		boolean isTreeUpdate = treeUpdate.hasUpdates();
+		boolean isTreeUpdate = treeUpdate != null && treeUpdate.hasUpdates();
 		return attributesChanges || rewrittenCommit || isTreeUpdate;
 
 	}

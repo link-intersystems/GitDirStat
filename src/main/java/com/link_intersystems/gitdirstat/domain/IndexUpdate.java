@@ -52,7 +52,9 @@ public class IndexUpdate {
 
 	public void close() throws GitAPIException {
 		cachingObjectReader.release();
-		dirCache.unlock();
+		if (dirCache != null) {
+			dirCache.unlock();
+		}
 	}
 
 	Set<ObjectId> getTouchedCommits() {
