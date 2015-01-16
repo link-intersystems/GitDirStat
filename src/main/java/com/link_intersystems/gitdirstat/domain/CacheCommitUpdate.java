@@ -4,21 +4,12 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.eclipse.jgit.dircache.DirCache;
-import org.eclipse.jgit.dircache.DirCacheBuilder;
-import org.eclipse.jgit.dircache.DirCacheEntry;
-import org.eclipse.jgit.dircache.DirCacheIterator;
-import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectInserter;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.treewalk.AbstractTreeIterator;
-import org.eclipse.jgit.treewalk.EmptyTreeIterator;
-import org.eclipse.jgit.treewalk.TreeWalk;
 
 public class CacheCommitUpdate implements CommitUpdate {
 
@@ -29,8 +20,7 @@ public class CacheCommitUpdate implements CommitUpdate {
 	private PersonIdent committerUpdate;
 	private String messageUpdate;
 	private HistoryUpdate historyUpdate;
-	private CacheTreeUpdate treeUpdate;
-	private DirCache dirCache;
+	private TreeUpdate treeUpdate;
 	private IndexUpdate indexUpdate;
 
 	CacheCommitUpdate(GitRepository gitRepository, Commit commit,
@@ -39,67 +29,12 @@ public class CacheCommitUpdate implements CommitUpdate {
 		this.commit = commit;
 		this.historyUpdate = historyUpdate;
 		this.indexUpdate = indexUpdate;
-		try {
-			this.dirCache = resetRewriteRefDirCache(commit);
-			treeUpdate = new CacheTreeUpdate(dirCache);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private DirCache resetRewriteRefDirCache(Commit commit)
-			throws CorruptObjectException, IOException {
-		Repository repo = gitRepository.getRepository();
-		DirCache dirCache = repo.lockDirCache();
-
-		RevCommit revCommit = commit.getRevCommit();
-		indexUpdate.getTouchedCommits().add(revCommit);
-		resetIndex(revCommit, dirCache);
-		return dirCache;
-	}
-
-	private void resetIndex(RevCommit revCommit, DirCache dirCache)
-			throws IOException {
-		TreeWalk walk = null;
-		DirCacheBuilder builder = dirCache.builder();
-		Repository repo = gitRepository.getRepository();
-		walk = new TreeWalk(repo);
-		if (revCommit != null) {
-			RevTree revTree = revCommit.getTree();
-			walk.addTree(revTree);
-		} else {
-			walk.addTree(new EmptyTreeIterator());
-		}
-		walk.addTree(new DirCacheIterator(dirCache));
-		walk.setRecursive(true);
-
-		while (walk.next()) {
-			AbstractTreeIterator cIter = walk.getTree(0,
-					AbstractTreeIterator.class);
-			if (cIter == null) {
-				// Not in commit, don't add to new index
-				continue;
-			}
-
-			final DirCacheEntry entry = new DirCacheEntry(walk.getRawPath());
-			entry.setFileMode(cIter.getEntryFileMode());
-			entry.setObjectIdFromRaw(cIter.idBuffer(), cIter.idOffset());
-
-			DirCacheIterator dcIter = walk.getTree(1, DirCacheIterator.class);
-			if (dcIter != null && dcIter.idEqual(cIter)) {
-				DirCacheEntry indexEntry = dcIter.getDirCacheEntry();
-				entry.setLastModified(indexEntry.getLastModified());
-				entry.setLength(indexEntry.getLength());
-			}
-
-			builder.add(entry);
-		}
-
-		builder.finish();
 	}
 
 	public void end() {
-		dirCache.unlock();
+		if (treeUpdate != null) {
+			treeUpdate.release();
+		}
 	}
 
 	/*
@@ -111,6 +46,9 @@ public class CacheCommitUpdate implements CommitUpdate {
 	 */
 	@Override
 	public TreeUpdate getTreeUpdate() throws IOException {
+		if (treeUpdate == null) {
+			treeUpdate = new CacheTreeUpdate(commit, gitRepository, indexUpdate);
+		}
 		return treeUpdate;
 	}
 
@@ -126,12 +64,10 @@ public class CacheCommitUpdate implements CommitUpdate {
 		ObjectInserter odi = repo.newObjectInserter();
 		try {
 			ObjectId indexTreeId = null;
-			if (treeUpdate.apply(dirCache)) {
-				// Write the index as tree to the object database. This may
-				// fail for example when the index contains unmerged paths
-				// (unresolved conflicts)
-				indexTreeId = dirCache.writeTree(odi);
-			} else {
+			if (treeUpdate != null) {
+				indexTreeId = treeUpdate.apply(odi);
+			}
+			if (indexTreeId == null) {
 				RevCommit revCommit = commit.getRevCommit();
 				indexTreeId = revCommit.getTree();
 			}
