@@ -15,11 +15,11 @@ import org.eclipse.jgit.dircache.DirCacheIterator;
 import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectInserter;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
-import org.eclipse.jgit.treewalk.EmptyTreeIterator;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FS;
 
@@ -59,18 +59,15 @@ public class CacheTreeUpdate implements TreeUpdate {
 
 	private void resetIndex(RevCommit revCommit, DirCache dirCache)
 			throws IOException {
-		TreeWalk walk = null;
-		DirCacheBuilder builder = dirCache.builder();
-		Repository repo = gitRepository.getRepository();
-		walk = new TreeWalk(repo);
-		if (revCommit != null) {
-			RevTree revTree = revCommit.getTree();
-			walk.addTree(revTree);
-		} else {
-			walk.addTree(new EmptyTreeIterator());
-		}
-		walk.addTree(new DirCacheIterator(dirCache));
+		ObjectReader objectReader = gitRepository.getObjectReader();
+		TreeWalk walk = new TreeWalk(objectReader);
 		walk.setRecursive(true);
+
+		RevTree revTree = revCommit.getTree();
+		walk.addTree(revTree);
+
+		DirCacheBuilder builder = dirCache.builder();
+		walk.addTree(new DirCacheIterator(dirCache));
 
 		while (walk.next()) {
 			AbstractTreeIterator cIter = walk.getTree(0,
