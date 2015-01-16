@@ -2,6 +2,7 @@ package com.link_intersystems.gitdirstat.domain;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 
 public class PathDeletionIndexFilter implements IndexFilter {
 
@@ -14,11 +15,16 @@ public class PathDeletionIndexFilter implements IndexFilter {
 	@Override
 	public void apply(CommitUpdate commitUpdate) throws IOException {
 		TreeUpdate treeUpdate = commitUpdate.getTreeUpdate();
+		Collection<String> actualPathsToDelete = new HashSet<String>(
+				pathsToDelete);
 		while (treeUpdate.hasNext()) {
 			TreeFileUpdate fileUpdate = treeUpdate.next();
 			String path = fileUpdate.getPath();
-			if (pathsToDelete.contains(path)) {
+			if (actualPathsToDelete.remove(path)) {
 				fileUpdate.delete();
+			}
+			if (actualPathsToDelete.isEmpty()) {
+				break;
 			}
 		}
 	}
