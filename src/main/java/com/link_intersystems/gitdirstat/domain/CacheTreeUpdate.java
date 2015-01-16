@@ -1,27 +1,16 @@
 package com.link_intersystems.gitdirstat.domain;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.eclipse.jgit.dircache.DirCache;
-import org.eclipse.jgit.dircache.DirCacheBuilder;
 import org.eclipse.jgit.dircache.DirCacheEditor;
 import org.eclipse.jgit.dircache.DirCacheEditor.DeletePath;
 import org.eclipse.jgit.dircache.DirCacheEditor.PathEdit;
 import org.eclipse.jgit.dircache.DirCacheEntry;
-import org.eclipse.jgit.dircache.DirCacheIterator;
-import org.eclipse.jgit.errors.CorruptObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectInserter;
-import org.eclipse.jgit.lib.ObjectReader;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.treewalk.AbstractTreeIterator;
-import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.util.FS;
 
 public class CacheTreeUpdate implements TreeUpdate {
 
@@ -30,68 +19,13 @@ public class CacheTreeUpdate implements TreeUpdate {
 	private DirCache index;
 	private int dirCacheEntryIndex = 0;
 	private Collection<PathEdit> pathEdits = new ArrayList<PathEdit>();
-	private GitRepository gitRepository;
-	private IndexUpdate indexUpdate;
 
-	public CacheTreeUpdate(Commit commit, GitRepository gitRepository,
-			IndexUpdate indexUpdate) {
-		this.gitRepository = gitRepository;
-		this.indexUpdate = indexUpdate;
+	public CacheTreeUpdate(IndexUpdate indexUpdate, Commit commit) {
 		try {
-			index = resetRewriteRefDirCache(commit);
+			index = indexUpdate.resetDirCache(commit);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	private DirCache resetRewriteRefDirCache(Commit commit)
-			throws CorruptObjectException, IOException {
-		Repository repo = gitRepository.getRepository();
-		FS fs = repo.getFS();
-		File indexLocation = repo.getIndexFile();
-		DirCache dirCache = DirCache.lock(indexLocation, fs);
-
-		RevCommit revCommit = commit.getRevCommit();
-		indexUpdate.getTouchedCommits().add(revCommit);
-		resetIndex(revCommit, dirCache);
-		return dirCache;
-	}
-
-	private void resetIndex(RevCommit revCommit, DirCache dirCache)
-			throws IOException {
-		ObjectReader objectReader = gitRepository.getObjectReader();
-		TreeWalk walk = new TreeWalk(objectReader);
-		walk.setRecursive(true);
-
-		RevTree revTree = revCommit.getTree();
-		walk.addTree(revTree);
-
-		DirCacheBuilder builder = dirCache.builder();
-		walk.addTree(new DirCacheIterator(dirCache));
-
-		while (walk.next()) {
-			AbstractTreeIterator cIter = walk.getTree(0,
-					AbstractTreeIterator.class);
-			if (cIter == null) {
-				// Not in commit, don't add to new index
-				continue;
-			}
-
-			final DirCacheEntry entry = new DirCacheEntry(walk.getRawPath());
-			entry.setFileMode(cIter.getEntryFileMode());
-			entry.setObjectIdFromRaw(cIter.idBuffer(), cIter.idOffset());
-
-			DirCacheIterator dcIter = walk.getTree(1, DirCacheIterator.class);
-			if (dcIter != null && dcIter.idEqual(cIter)) {
-				DirCacheEntry indexEntry = dcIter.getDirCacheEntry();
-				entry.setLastModified(indexEntry.getLastModified());
-				entry.setLength(indexEntry.getLength());
-			}
-
-			builder.add(entry);
-		}
-
-		builder.finish();
 	}
 
 	/**
@@ -162,10 +96,6 @@ public class CacheTreeUpdate implements TreeUpdate {
 
 	public boolean hasUpdates() {
 		return !pathEdits.isEmpty();
-	}
-
-	public void release() {
-		index.unlock();
 	}
 
 	void registerPathEdit(DeletePath pathEdit) {

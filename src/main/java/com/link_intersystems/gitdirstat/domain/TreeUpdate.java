@@ -7,8 +7,6 @@ import org.eclipse.jgit.lib.ObjectInserter;
 
 public interface TreeUpdate extends Iterator<TreeFileUpdate> {
 
-	void release();
-
 	ObjectId apply(ObjectInserter objectInserter);
 
 	boolean hasUpdates();

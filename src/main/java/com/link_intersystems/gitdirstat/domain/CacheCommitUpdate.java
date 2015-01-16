@@ -31,12 +31,6 @@ public class CacheCommitUpdate implements CommitUpdate {
 		this.indexUpdate = indexUpdate;
 	}
 
-	public void end() {
-		if (treeUpdate != null) {
-			treeUpdate.release();
-		}
-	}
-
 	/*
 	 * (non-Javadoc)
 	 *
@@ -47,7 +41,7 @@ public class CacheCommitUpdate implements CommitUpdate {
 	@Override
 	public TreeUpdate getTreeUpdate() throws IOException {
 		if (treeUpdate == null) {
-			treeUpdate = new CacheTreeUpdate(commit, gitRepository, indexUpdate);
+			treeUpdate = new CacheTreeUpdate(indexUpdate, commit);
 		}
 		return treeUpdate;
 	}

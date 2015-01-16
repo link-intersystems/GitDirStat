@@ -217,7 +217,6 @@ public class GitRepository {
 
 				indexFilter.apply(commitUpdate);
 				commitUpdate.writeCommit();
-				commitUpdate.end();
 
 				progressListener.update(1);
 				if (progressListener.isCanceled()) {
