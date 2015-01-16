@@ -8,6 +8,8 @@ import java.util.Collection;
 import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.dircache.DirCacheBuilder;
 import org.eclipse.jgit.dircache.DirCacheEditor;
+import org.eclipse.jgit.dircache.DirCacheEditor.DeletePath;
+import org.eclipse.jgit.dircache.DirCacheEditor.PathEdit;
 import org.eclipse.jgit.dircache.DirCacheEntry;
 import org.eclipse.jgit.dircache.DirCacheIterator;
 import org.eclipse.jgit.errors.CorruptObjectException;
@@ -27,7 +29,7 @@ public class CacheTreeUpdate implements TreeUpdate {
 	private CacheTreeFileUpdate actualTreeFile;
 	private DirCache index;
 	private int dirCacheEntryIndex = 0;
-	private boolean hasTreeFileUpdates;
+	private Collection<PathEdit> pathEdits = new ArrayList<PathEdit>();
 	private GitRepository gitRepository;
 	private IndexUpdate indexUpdate;
 
@@ -105,11 +107,11 @@ public class CacheTreeUpdate implements TreeUpdate {
 	 */
 	public ObjectId apply(ObjectInserter objectInserter) {
 		ObjectId newTreeId = null;
-		if (hasTreeFileUpdates) {
+		if (hasUpdates()) {
 			DirCacheEditor editor = index.editor();
 
-			for (CacheTreeFileUpdate treeFile : treeFiles) {
-				treeFile.apply(editor);
+			for (PathEdit pathEdit : pathEdits) {
+				editor.add(pathEdit);
 			}
 
 			editor.finish();
@@ -161,16 +163,16 @@ public class CacheTreeUpdate implements TreeUpdate {
 		}
 	}
 
-	void treeFileUpdated(CacheTreeFileUpdate cacheTreeFileUpdate) {
-		hasTreeFileUpdates = true;
-	}
-
 	public boolean hasUpdates() {
-		return hasTreeFileUpdates;
+		return !pathEdits.isEmpty();
 	}
 
 	public void release() {
 		index.unlock();
+	}
+
+	void registerPathEdit(DeletePath pathEdit) {
+		pathEdits.add(pathEdit);
 	}
 
 }
