@@ -203,7 +203,6 @@ public class GitRepository {
 
 		CommitWalker commitWalk = createCommitWalker(commitRanges);
 		int totalWork = commitWalk.getWalkCount();
-
 		Iterator<Commit> commitIterator = commitWalk.iterator();
 
 		try {
@@ -226,7 +225,7 @@ public class GitRepository {
 			commitWalk.close();
 
 			if (!progressListener.isCanceled()) {
-				applyHistoryUpdate(historyUpdate);
+				applyHistoryUpdate(historyUpdate, progressListener);
 			}
 		} finally {
 			try {
@@ -235,11 +234,12 @@ public class GitRepository {
 			}
 			progressListener.end();
 		}
-
 	}
 
-	private void applyHistoryUpdate(HistoryUpdate historyUpdate) throws IOException,
+	private void applyHistoryUpdate(HistoryUpdate historyUpdate,
+			ProgressListener progressListener) throws IOException,
 			GitAPIException {
+		progressListener.start(ProgressListener.UNKNOWN);
 		historyUpdate.updateRefs();
 		historyUpdate.cleanupRepository();
 	}
