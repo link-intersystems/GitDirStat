@@ -1,0 +1,13 @@
+# jpackage
+--dest ${project.build.directory}/jpackage
+--type exe
+--app-version "1.2.1"
+--name "${project.artifactId}"
+--icon ${project.basedir}/src/main/resources/icons/Git-Icon-1788C.ico
+--main-jar "${project.artifactId}-${project.version}-gui.jar"
+--main-class com.link_intersystems.gitdirstat.ui.GitDirStatUI
+--input ${project.build.directory}
+--win-menu
+--win-per-user-install
+--win-shortcut
+--win-shortcut-prompt

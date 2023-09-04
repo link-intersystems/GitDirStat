@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.collections.comparators.TransformingComparator;
@@ -37,24 +38,24 @@ public class GitRepositoryTreeNode extends DefaultMutableTreeNode {
 	@SuppressWarnings("unchecked")
 	private void deepSort(DefaultMutableTreeNode parent,
 			TreeObjectSortBy sortBy, SortOrder order) {
-		Enumeration<DefaultMutableTreeNode> treeObjectNodes = parent.children();
-		List<DefaultMutableTreeNode> treeNodes = EnumerationUtils
+		Enumeration<TreeNode> treeObjectNodes = parent.children();
+		List<TreeNode> treeNodes = EnumerationUtils
 				.toList(treeObjectNodes);
 
 		BeanToPropertyValueTransformer sortProperty = getSortByTransformer(sortBy);
 
-		Comparator<DefaultMutableTreeNode> comparator = new TransformingComparator(
+		Comparator<TreeNode> comparator = new TransformingComparator(
 				sortProperty);
 
 		if (SortOrder.DESC.equals(order)) {
-			comparator = new ReverseComparator<DefaultMutableTreeNode>(
+			comparator = new ReverseComparator<TreeNode>(
 					comparator);
 		}
 
 		Collections.sort(treeNodes, comparator);
 
 		parent.removeAllChildren();
-		for (DefaultMutableTreeNode childNode : treeNodes) {
+		for (DefaultMutableTreeNode childNode : treeNodes.stream().map(DefaultMutableTreeNode.class::cast).toList()) {
 			parent.add(childNode);
 			deepSort(childNode, sortBy, order);
 		}
